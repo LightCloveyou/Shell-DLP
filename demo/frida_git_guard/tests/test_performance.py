@@ -32,7 +32,7 @@ def main():
   records.append({'argv':args,'cwd':str(repo),**result,'wall_ms':elapsed});assert result['exit_code']==0,result
   return elapsed
  def measure(name):
-  tests={'git-status':['git','status','--porcelain'],'git-rev-parse':['git','rev-parse','--short','HEAD'],'python-version':[sys.executable,'--version']}
+  tests={'git-add':['git','add','--','file-0.txt'],'git-status':['git','status','--porcelain'],'git-rev-parse':['git','rev-parse','--short','HEAD'],'python-version':[sys.executable,'--version']}
   metrics[name]={}
   for test,args in tests.items():
    command(args);values=[command(args) for _ in range(7)]
@@ -74,12 +74,12 @@ print(json.dumps({'wall_ms':elapsed,'result':result,'git_subprocess_count':len(c
    print(f'[{name}] history scan: {result["wall_ms"]:.1f} ms, {result["git_subprocess_count"]} Git subprocesses',flush=True)
   assert hashlib.sha256((repo/'.git'/'config').read_bytes()).hexdigest()==config_hash
   assert hashlib.sha256(Path(binary).read_bytes()).hexdigest()==original_hash
-  for test in ['git-status','git-rev-parse','history-scan']:
+  for test in ['git-add','git-status','git-rev-parse','history-scan']:
    key='wall_ms' if test=='history-scan' else 'median_ms'
    assert metrics['modified'][test][key]<metrics['baseline'][test][key],(test,metrics)
   report={'passed':True,'metrics':metrics,'records':records,'backend_logs':[p.read_text() for b,f,p in backends],
           'repo_config_sha256_unchanged':config_hash,'git_binary_sha256_unchanged':original_hash,
-          'source_sha256':{name:hashlib.sha256((ROOT/name).read_bytes()).hexdigest() for name in ['backend.py','guard.py','watch_agent.js','launcher_agent.js','config.json']}}
+          'source_sha256':{name:hashlib.sha256((ROOT/name).read_bytes()).hexdigest() for name in ['backend.py','guard.py','watch_agent.js','launcher_agent.js']}}
   (ROOT/'tests'/'performance-verification.json').write_text(json.dumps(report,ensure_ascii=False,indent=2),encoding='utf-8')
   print('[VERIFIED] ordinary Git commands and history scan improved; stop restores normal commands.',flush=True)
  finally:

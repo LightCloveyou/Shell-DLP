@@ -36,16 +36,18 @@ for(const api of ['CreateProcessW','CreateProcessA']) {
         const first=app||((command.match(/^\s*(?:"([^"]+)"|([^\s]+))/)||[]).slice(1).find(Boolean)||'');
         if(/(?:^|[\\/])git(?:\.exe)?$/i.test(first)) {
           const words=argv(command||app);
-          if(directPush(words)) {
-            const id=String(++sequence), info={argv:words,cwd:text(args[7])||Process.getCurrentDir()};
-            const slot={deny:true};pending.set(id,slot);
-            const response=recv('decision-'+id,message=>{slot.deny=!!message.payload.deny;});
-            send({type:'launch-check',id,info,pid:Process.id});response.wait();
-            deny=slot.deny;pending.delete(id);
-          }
+          // Classify every Git command while still in its monitored parent.
+          // Builtins such as add/status receive an immediate allow; push and
+          // push aliases are scanned before the Git process is created.
+          const id=String(++sequence), info={argv:words,cwd:text(args[7])||Process.getCurrentDir()};
+          const slot={deny:true};pending.set(id,slot);
+          const response=recv('decision-'+id,message=>{slot.deny=!!message.payload.deny;});
+          send({type:'launch-check',id,info,pid:Process.id,directPush:directPush(words)});response.wait();
+          deny=slot.deny;pending.delete(id);
         }
       } catch(error) {
-        // A detected Git push that loses its decision must fail before creation.
+        // If Git classification loses its decision, fail before creation so a
+        // push alias cannot bypass policy while the backend is unhealthy.
         deny=true;send({type:'launcher-error',error:String(error),pid:Process.id});
       }
     }

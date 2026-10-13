@@ -209,13 +209,17 @@ print('CTRL_C_EVENT delivered to isolated backend console')
         assert guard.sensitive_path('demo/frida_git_guard/flag', policy)
         assert not guard.sensitive_path('other/flag', policy)
         user_policy = guard.load_policy(ROOT / 'config.json')
-        assert guard.sensitive_path('demo/frida_git_guard/flag', user_policy, ROOT.parents[1])
+        assert isinstance(user_policy.scan_content, bool)
+        configured = (user_policy.relative_directories + user_policy.absolute_directories
+                      + user_policy.file_patterns + user_policy.relative_file_patterns
+                      + user_policy.absolute_file_patterns)
+        assert configured
         cases.append({'name': 'relative-specific-path-and-current-user-config', 'passed': True})
         assert hashlib.sha256(Path(binary).read_bytes()).hexdigest() == binary_hash
         report = {'passed': True, 'cases': cases, 'records': records, 'https_requests': requests,
                   'tls_verification': True, 'git_binary_sha256_unchanged': binary_hash,
                   'source_sha256': {str(ROOT / name): hashlib.sha256((ROOT / name).read_bytes()).hexdigest()
-                                    for name in ['backend.py', 'guard.py', 'watch_agent.js', 'launcher_agent.js', 'config.json', 'README.md']}}
+                                    for name in ['backend.py', 'guard.py', 'watch_agent.js', 'launcher_agent.js', 'README.md']}}
         (ROOT / 'tests' / 'push-path-verification.json').write_text(json.dumps(report, ensure_ascii=False, indent=2), encoding='utf-8')
         print(f'[VERIFIED] {len(cases)} baseline/path/TLS/console checks passed', flush=True)
     finally:

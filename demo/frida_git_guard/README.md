@@ -39,6 +39,8 @@ git push origin main
 
 沿用现有 HTTPS/SSH 登录和代理配置。推送时应出现 `GIT_PUSH`，随后 `DENY`（拦截）或 `ALLOW`（放行）；`READY` 不代表所有终端均受保护；`UNPROTECTED_TERMINAL` 表示该终端尚未接入。仅保护已接入的终端及子进程；扫描所有本地引用的历史，可能保守拦截未推送分支。
 
+普通的 `git add`、`git status`、`git commit` 等非推送命令只做快速分类，不扫描历史，也不会因 Git 子进程接入超时而被终止。
+
 ## 停止
 
 按 `Ctrl+C` 或结束后台脚本即可解除拦截，不安装服务、不写 Git hook、不改 Git 配置。

@@ -187,7 +187,13 @@ class Backend:
     def child_added(self, child):
         self.pending.add(child.pid)
         name = Path(child.path or child.identifier or '').name.lower()
-        if name == 'git.exe' or name in self.names:
+        # Every Git launch from a monitored parent is classified synchronously
+        # by launcher_agent before CreateProcess returns.  Do not attach to the
+        # suspended Git child a second time: that duplicated every scan and an
+        # attach timeout could kill harmless commands such as `git add`.
+        if name == 'git.exe':
+            self.fast_resumes.put(child.pid)
+        elif name in self.names:
             self.events.put(('child', child))
         else:
             self.fast_resumes.put(child.pid)
@@ -311,13 +317,10 @@ class Backend:
     def handle_child(self, child):
         name = Path(child.path or child.identifier or '').name.lower()
         try:
-            if name == 'git.exe' or name in self.names:
+            if name in self.names:
                 self.attach(child.pid, name)
-        except Exception as exc:
-            # Fail closed for a Git child intercepted before it starts running.
-            if name == 'git.exe':
-                self.device.kill(child.pid)
-                self.log('BLOCKED_ATTACH_FAILURE', pid=child.pid, error=str(exc))
+        except Exception:
+            pass
         finally:
             self.resume_child(child.pid)
 
@@ -332,15 +335,18 @@ class Backend:
         if data['type'] in {'check', 'launch-check'}:
             started = time.perf_counter()
             try:
-                self.policy.refresh()
                 if data['type'] == 'launch-check':
                     info = data['info']
                     prefix, push_args = git_command(info)
                     if push_args is None:
-                        raise ValueError('Launcher push arguments changed')
+                        watched.script.post({'type': 'decision-' + data['id'],
+                                             'payload': {'deny': False}})
+                        return
+                    self.policy.refresh()
                     self.log('GIT_PUSH', pid=pid, cwd=info['cwd'], argv=info['argv'], stage='launcher-before-create')
                     policy = scan_push(info, prefix, push_args, self.policy)
                 else:
+                    self.policy.refresh()
                     policy = scan_push(watched.info, watched.prefix, watched.push_args, self.policy)
             except Exception as exc:
                 policy = {'deny': True, 'findings': [{'rule': 'scan-error'}], 'error': str(exc)}
