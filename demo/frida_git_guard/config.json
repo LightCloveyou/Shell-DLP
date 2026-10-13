@@ -1,0 +1,17 @@
+{
+  "sensitive_directories": [
+    "D:/ctf-ai/dlp/demo/frida_git_guard/tests",
+    "D:/ctf-ai/dlp/.git"
+  ],
+  "sensitive_files": [
+    ".env",
+    ".env.*",
+    "*.pem",
+    "*.key",
+    "id_rsa",
+    "id_ed25519",
+    "credentials.json",
+    "D:/ctf-ai/dlp/demo/frida_git_guard/flag"
+  ],
+  "scan_content": true
+}

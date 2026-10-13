@@ -1,0 +1,1809 @@
+--- a/backend.py
++++ b/backend.py
+@@ -1,305 +1,361 @@
+-"""Temporary Frida backend. Ordinary Git pushes from monitored terminals are gated."""
+-from __future__ import annotations
+-
+-import argparse
+-from dataclasses import dataclass
+-import json
+-import os
+-from pathlib import Path
+-import queue
+-import signal
+-import subprocess
+-import threading
+-import time
+-
+-import frida
+-import guard
+-
+-ROOT = Path(__file__).resolve().parent
+-DEFAULT_PROCESSES = {'powershell.exe', 'pwsh.exe', 'cmd.exe', 'bash.exe', 'sh.exe',
+-                     'windowsterminal.exe', 'explorer.exe', 'code.exe', 'devenv.exe',
+-                     'idea64.exe', 'sourcetree.exe', 'tortoisegitproc.exe'}
+-
+-
+-@dataclass
+-class Watched:
+-    session: object
+-    script: object | None
+-    info: dict | None
+-    prefix: list[str]
+-    push_args: list[str] | None
+-
+-
+-def git_command(info: dict) -> tuple[list[str], list[str] | None]:
+-    """Keep original global options, including -C, --git-dir and -c aliases."""
+-    args = info['argv'][1:]
+-    prefix, index = [], 0
+-    takes_value = {'-C', '-c', '--git-dir', '--work-tree', '--namespace', '--config-env', '--super-prefix'}
+-    while index < len(args) and args[index].startswith('-'):
+-        token = args[index]
+-        if token == '--':
+-            index += 1
+-            break
+-        prefix.append(token)
+-        index += 1
+-        if token in takes_value:
+-            if index == len(args):
+-                return prefix, None
+-            prefix.append(args[index])
+-            index += 1
+-    if index == len(args):
+-        return prefix, None
+-    command, rest = args[index], args[index + 1:]
+-    for _ in range(10):
+-        if command == 'push':
+-            return prefix, rest
+-        alias = subprocess.run([guard.git_executable(), *prefix, 'config', '--get', f'alias.{command}'],
+-                               cwd=info['cwd'], capture_output=True, timeout=15)
+-        if alias.returncode != 0:
+-            return prefix, None
+-        value = alias.stdout.decode().strip()
+-        if value.startswith('!'):
+-            return prefix, None  # child gating catches the shell's actual git push.
+-        import shlex
+-        expanded = shlex.split(value)
+-        if not expanded:
+-            return prefix, None
+-        command, rest = expanded[0], expanded[1:] + rest
+-    raise ValueError('Git alias expansion limit')
+-
+-
+-def scan_push(info: dict, prefix: list[str], push_args: list[str], policy: guard.Policy) -> dict:
+-    """Conservative policy covers all refs/tags/mirror and detached HEAD/source OIDs.
+-
+-    No network probes or config writes. Git performs its actual original push,
+-    unmodified, after the decision. Noncommit tag targets are examined as well.
+-    """
+-    def query(*args, check=True):
+-        proc = subprocess.run([guard.git_executable(), *prefix, *args], cwd=info['cwd'],
+-                              capture_output=True, timeout=30)
+-        if check and proc.returncode:
+-            raise RuntimeError(proc.stderr.decode('utf-8', 'replace'))
+-        return proc
+-
+-    repo = Path(query('rev-parse', '--absolute-git-dir').stdout.decode().strip())
+-    sources = query('for-each-ref', '--format=%(objectname)').stdout.decode().splitlines()
+-    head = query('rev-parse', '--verify', 'HEAD', check=False)
+-    if head.returncode == 0:
+-        sources.append(head.stdout.decode().strip())
+-    for arg in push_args:
+-        if arg.startswith('-') or '*' in arg:
+-            continue
+-        source = arg.lstrip('+').split(':', 1)[0]
+-        if not source:
+-            continue
+-        resolved = query('rev-parse', '--verify', '--end-of-options', source, check=False)
+-        if resolved.returncode == 0:
+-            sources.append(resolved.stdout.decode().strip())
+-    findings, objects = [], set()
+-    for oid in dict.fromkeys(sources):
+-        resolved = guard.git(repo, 'rev-parse', '--verify', oid + '^{}').stdout.decode().strip()
+-        if resolved in objects:
+-            continue
+-        objects.add(resolved)
+-        kind = guard.git(repo, 'cat-file', '-t', resolved).stdout.strip()
+-        if kind == b'commit':
+-            findings.extend(guard.scan_history(repo, resolved, policy)['findings'])
+-        elif kind == b'tree':
+-            tree = guard.git(repo, 'ls-tree', '-r', '-z', resolved).stdout
+-            for entry in tree.split(b'\0'):
+-                if not entry:
+-                    continue
+-                meta, path = entry.split(b'\t', 1)
+-                mode, objtype, blob = meta.split()
+-                label = path.decode('utf-8', 'replace')
+-                if guard.sensitive_path(label, policy):
+-                    findings.append({'path': label, 'rule': 'sensitive-path'})
+-                if objtype == b'blob':
+-                    findings.extend(scan_blob(repo, blob.decode(), label, policy))
+-        elif kind == b'blob':
+-            findings.extend(scan_blob(repo, resolved, '(tag/ref blob)', policy))
+-    return {'deny': bool(findings), 'repo': str(repo), 'findings': findings,
+-            'policy_scope': 'all local refs + HEAD + explicit push sources (conservative)'}
+-
+-
+-def scan_blob(repo, oid, label, policy):
+-    size = int(guard.git(repo, 'cat-file', '-s', oid).stdout)
+-    if size > guard.MAX_BLOB_BYTES:
+-        return [{'path': label, 'rule': 'blob-scan-limit'}]
+-    data = guard.git(repo, 'cat-file', 'blob', oid).stdout
+-    return [{'path': label, 'rule': name} for name in guard.content_findings(data, policy)]
+-
+-
+-class Backend:
+-    def __init__(self, pids=(), process_names=(), config_path=ROOT / 'config.json'):
+-        self.config_path = Path(config_path)
+-        self.policy = guard.load_policy(self.config_path)
+-        self.device = frida.get_local_device()
+-        self.pids = set(pids)
+-        self.names = set(process_names) or DEFAULT_PROCESSES
+-        self.events = queue.Queue()
+-        self.sessions: dict[int, Watched] = {}
+-        self.pending = set()
+-        self.stopping = threading.Event()
+-        self.excluded = {os.getpid()}
+-        self.failed = set()
+-        self.device.on('child-added', self.child_added)
+-
+-    def log(self, kind, **fields):
+-        print(json.dumps({'event': kind, **fields}, ensure_ascii=False), flush=True)
+-
+-    def child_added(self, child):
+-        self.pending.add(child.pid)
+-        self.events.put(('child', child))
+-
+-    def attach(self, pid, name):
+-        if pid in self.sessions or pid in self.excluded:
+-            return
+-        session = None
+-        try:
+-            session = self.device.attach(pid)
+-            session.on('detached', lambda *args: self.events.put(('detached', pid)))
+-            script, info, prefix, push_args = None, None, [], None
+-            if name.lower() == 'git.exe':
+-                script = session.create_script((ROOT / 'watch_agent.js').read_text(encoding='utf-8'))
+-                script.on('message', lambda message, data: self.events.put(('message', (pid, message))))
+-                script.load()
+-                info = script.exports_sync.info()
+-                prefix, push_args = git_command(info)
+-                script.exports_sync.configure(push_args is not None)
+-            session.enable_child_gating()
+-            self.sessions[pid] = Watched(session, script, info, prefix, push_args)
+-            self.log('MONITOR', pid=pid, process=name)
+-        except frida.ProcessNotFoundError:
+-            if session:
+-                session.detach()
+-        except Exception as exc:
+-            if session:
+-                try:
+-                    session.detach()
+-                except frida.InvalidOperationError:
+-                    pass
+-            if pid not in self.failed:
+-                self.failed.add(pid)
+-                self.log('ATTACH_ERROR', pid=pid, process=name, error=str(exc))
+-            raise
+-
+-    def discover(self):
+-        for proc in self.device.enumerate_processes():
+-            if (self.pids and proc.pid in self.pids) or (not self.pids and proc.name.lower() in self.names):
+-                try:
+-                    self.attach(proc.pid, proc.name)
+-                except Exception:
+-                    pass
+-
+-    def handle_child(self, child):
+-        try:
+-            name = Path(child.path or child.identifier or '').name.lower()
+-            if name == 'git.exe' or name in self.names:
+-                self.attach(child.pid, name)
+-        except Exception as exc:
+-            # Fail closed for a Git child intercepted before it starts running.
+-            if name == 'git.exe':
+-                self.device.kill(child.pid)
+-                self.log('BLOCKED_ATTACH_FAILURE', pid=child.pid, error=str(exc))
+-        finally:
+-            try:
+-                self.device.resume(child.pid)
+-            except (frida.ProcessNotFoundError, frida.InvalidOperationError):
+-                pass
+-            self.pending.discard(child.pid)
+-
+-    def handle_message(self, pid, message):
+-        watched = self.sessions.get(pid)
+-        if not watched or not watched.script:
+-            return
+-        if message['type'] != 'send':
+-            self.log('AGENT_ERROR', pid=pid, error=message.get('description', message['type']))
+-            return
+-        data = message['payload']
+-        if data['type'] == 'check':
+-            try:
+-                self.policy.refresh()
+-                policy = scan_push(watched.info, watched.prefix, watched.push_args, self.policy)
+-            except Exception as exc:
+-                policy = {'deny': True, 'findings': [{'rule': 'scan-error'}], 'error': str(exc)}
+-            watched.script.post({'type': 'decision', 'payload': {'deny': policy['deny']}})
+-            self.log('DENY' if policy['deny'] else 'ALLOW', pid=pid, **policy)
+-        elif data['type'] == 'blocked':
+-            self.log('NATIVE_BLOCK', **data)
+-
+-    def run(self):
+-        try:
+-            self.discover()
+-            if not self.sessions:
+-                raise RuntimeError('No terminal attached; run at the same/elevated privilege as the terminal')
+-            self.log('READY', monitors=len(self.sessions), config=str(self.config_path.absolute()))
+-            next_discovery = time.monotonic() + 1
+-            while not self.stopping.is_set():
+-                try:
+-                    kind, item = self.events.get(timeout=0.2)
+-                except queue.Empty:
+-                    kind = None
+-                if kind == 'child':
+-                    self.handle_child(item)
+-                elif kind == 'message':
+-                    self.handle_message(*item)
+-                elif kind == 'detached':
+-                    self.sessions.pop(item, None)
+-                if not self.pids and time.monotonic() >= next_discovery:
+-                    self.discover()
+-                    next_discovery = time.monotonic() + 1
+-        finally:
+-            self.stop()
+-
+-    def stop(self):
+-        self.stopping.set()
+-        for pid, watched in list(self.sessions.items()):
+-            try:
+-                if watched.script:
+-                    # Release an in-flight decision before unloading its script.
+-                    watched.script.post({'type': 'decision', 'payload': {'deny': True}})
+-                watched.session.disable_child_gating()
+-                if watched.script:
+-                    watched.script.unload()
+-                watched.session.detach()
+-            except (frida.ProcessNotFoundError, frida.InvalidOperationError):
+-                pass
+-        self.sessions.clear()
+-        for pid in list(self.pending):
+-            try:
+-                self.device.resume(pid)
+-            except (frida.ProcessNotFoundError, frida.InvalidOperationError):
+-                pass
+-        self.pending.clear()
+-        self.device.off('child-added', self.child_added)
+-        self.log('STOPPED')
+-
+-
+-def main():
+-    parser = argparse.ArgumentParser(description=__doc__)
+-    parser.add_argument('--pid', type=int, action='append', default=[], help='monitor a specific launcher PID (repeatable)')
+-    parser.add_argument('--process', action='append', default=[], help='extra launcher process name')
+-    parser.add_argument('--config', type=Path, default=ROOT / 'config.json', help='sensitive path policy JSON')
+-    args = parser.parse_args()
+-    try:
+-        backend = Backend(args.pid, DEFAULT_PROCESSES | {name.lower() for name in args.process}, args.config)
+-    except Exception as exc:
+-        print(f'[CONFIG_ERROR] {exc}', flush=True)
+-        return 2
+-    signal.signal(signal.SIGINT, lambda *args: backend.stopping.set())
+-    signal.signal(signal.SIGTERM, lambda *args: backend.stopping.set())
+-    if hasattr(signal, 'SIGBREAK'):
+-        signal.signal(signal.SIGBREAK, lambda *args: backend.stopping.set())
+-    try:
+-        backend.run()
+-    except KeyboardInterrupt:
+-        return 0
+-    except Exception as exc:
+-        print(f'[ERROR] {exc}', flush=True)
+-        return 2
+-    return 0
+-
+-
+-if __name__ == '__main__':
+-    raise SystemExit(main())
++"""Temporary Frida backend. Ordinary Git pushes from monitored terminals are gated."""
++from __future__ import annotations
++
++import argparse
++from dataclasses import dataclass
++import json
++import os
++from pathlib import Path
++import queue
++import signal
++import subprocess
++import threading
++import time
++
++import frida
++import guard
++
++ROOT = Path(__file__).resolve().parent
++DEFAULT_PROCESSES = {'powershell.exe', 'pwsh.exe', 'cmd.exe', 'bash.exe', 'sh.exe',
++                     'windowsterminal.exe', 'explorer.exe', 'code.exe', 'devenv.exe',
++                     'idea64.exe', 'sourcetree.exe', 'tortoisegitproc.exe'}
++
++
++@dataclass
++class Watched:
++    session: object
++    script: object | None
++    info: dict | None
++    prefix: list[str]
++    push_args: list[str] | None
++
++
++def git_command(info: dict) -> tuple[list[str], list[str] | None]:
++    """Keep original global options, including -C, --git-dir and -c aliases."""
++    args = info['argv'][1:]
++    prefix, index = [], 0
++    takes_value = {'-C', '-c', '--git-dir', '--work-tree', '--namespace', '--config-env', '--super-prefix'}
++    while index < len(args) and args[index].startswith('-'):
++        token = args[index]
++        if token == '--':
++            index += 1
++            break
++        prefix.append(token)
++        index += 1
++        if token in takes_value:
++            if index == len(args):
++                return prefix, None
++            prefix.append(args[index])
++            index += 1
++    if index == len(args):
++        return prefix, None
++    command, rest = args[index], args[index + 1:]
++    for _ in range(10):
++        if command == 'push':
++            return prefix, rest
++        alias = subprocess.run([guard.git_executable(), *prefix, 'config', '--get', f'alias.{command}'],
++                               cwd=info['cwd'], capture_output=True, timeout=15)
++        if alias.returncode != 0:
++            return prefix, None
++        value = alias.stdout.decode().strip()
++        if value.startswith('!'):
++            return prefix, None  # child gating catches the shell's actual git push.
++        import shlex
++        expanded = shlex.split(value)
++        if not expanded:
++            return prefix, None
++        command, rest = expanded[0], expanded[1:] + rest
++    raise ValueError('Git alias expansion limit')
++
++
++def scan_push(info: dict, prefix: list[str], push_args: list[str], policy: guard.Policy) -> dict:
++    """Conservative policy covers all refs/tags/mirror and detached HEAD/source OIDs.
++
++    No network probes or config writes. Git performs its actual original push,
++    unmodified, after the decision. Noncommit tag targets are examined as well.
++    """
++    def query(*args, check=True):
++        proc = subprocess.run([guard.git_executable(), *prefix, *args], cwd=info['cwd'],
++                              capture_output=True, timeout=30)
++        if check and proc.returncode:
++            raise RuntimeError(proc.stderr.decode('utf-8', 'replace'))
++        return proc
++
++    repo = Path(query('rev-parse', '--absolute-git-dir').stdout.decode().strip())
++    worktree_result = query('rev-parse', '--show-toplevel', check=False)
++    repo_root = (Path(worktree_result.stdout.decode().strip()) if worktree_result.returncode == 0
++                 else guard.repository_worktree(repo))
++    sources = query('for-each-ref', '--format=%(objectname)').stdout.decode().splitlines()
++    head = query('rev-parse', '--verify', 'HEAD', check=False)
++    if head.returncode == 0:
++        sources.append(head.stdout.decode().strip())
++    for arg in push_args:
++        if arg.startswith('-') or '*' in arg:
++            continue
++        source = arg.lstrip('+').split(':', 1)[0]
++        if not source:
++            continue
++        resolved = query('rev-parse', '--verify', '--end-of-options', source, check=False)
++        if resolved.returncode == 0:
++            sources.append(resolved.stdout.decode().strip())
++    findings, objects = [], set()
++    for oid in dict.fromkeys(sources):
++        resolved = guard.git(repo, 'rev-parse', '--verify', oid + '^{}').stdout.decode().strip()
++        if resolved in objects:
++            continue
++        objects.add(resolved)
++        kind = guard.git(repo, 'cat-file', '-t', resolved).stdout.strip()
++        if kind == b'commit':
++            findings.extend(guard.scan_history(repo, resolved, policy, repo_root)['findings'])
++        elif kind == b'tree':
++            tree = guard.git(repo, 'ls-tree', '-r', '-z', resolved).stdout
++            for entry in tree.split(b'\0'):
++                if not entry:
++                    continue
++                meta, path = entry.split(b'\t', 1)
++                mode, objtype, blob = meta.split()
++                label = path.decode('utf-8', 'replace')
++                if guard.sensitive_path(label, policy, repo_root):
++                    findings.append({'path': label, 'rule': 'sensitive-path'})
++                if objtype == b'blob':
++                    findings.extend(scan_blob(repo, blob.decode(), label, policy))
++        elif kind == b'blob':
++            findings.extend(scan_blob(repo, resolved, '(tag/ref blob)', policy))
++    return {'deny': bool(findings), 'repo': str(repo), 'findings': findings,
++            'policy_scope': 'all local refs + HEAD + explicit push sources (conservative)'}
++
++
++def scan_blob(repo, oid, label, policy):
++    size = int(guard.git(repo, 'cat-file', '-s', oid).stdout)
++    if size > guard.MAX_BLOB_BYTES:
++        return [{'path': label, 'rule': 'blob-scan-limit'}]
++    data = guard.git(repo, 'cat-file', 'blob', oid).stdout
++    return [{'path': label, 'rule': name} for name in guard.content_findings(data, policy)]
++
++
++class Backend:
++    def __init__(self, pids=(), process_names=(), config_path=ROOT / 'config.json'):
++        self.config_path = Path(config_path)
++        self.policy = guard.load_policy(self.config_path)
++        self.device = frida.get_local_device()
++        self.pids = set(pids)
++        self.names = set(process_names) or DEFAULT_PROCESSES
++        self.events = queue.Queue()
++        self.sessions: dict[int, Watched] = {}
++        self.pending = set()
++        self.stopping = threading.Event()
++        self.excluded = {os.getpid()}
++        self.failed = {}
++        self.active_cancel = None
++        self.device.on('child-added', self.child_added)
++
++    def log(self, kind, **fields):
++        print(json.dumps({'event': kind, **fields}, ensure_ascii=False), flush=True)
++
++    def child_added(self, child):
++        self.pending.add(child.pid)
++        self.events.put(('child', child))
++
++    def request_stop(self):
++        self.stopping.set()
++        cancel = self.active_cancel
++        if cancel is not None:
++            cancel.cancel()
++
++    def attach(self, pid, name):
++        if pid in self.sessions or pid in self.excluded or self.stopping.is_set():
++            return
++        if name.lower() != 'git.exe' and time.monotonic() < self.failed.get(pid, 0):
++            return
++        cancel = frida.Cancellable()
++        self.active_cancel = cancel
++        deadline = threading.Timer(5, cancel.cancel)
++        deadline.daemon = True
++        deadline.start()
++        try:
++            with cancel:
++                self._attach(pid, name)
++        finally:
++            deadline.cancel()
++            self.active_cancel = None
++
++    def _attach(self, pid, name):
++        if pid in self.sessions or pid in self.excluded:
++            return
++        session = None
++        try:
++            session = self.device.attach(pid)
++            session.on('detached', lambda *args: self.events.put(('detached', pid)))
++            script, info, prefix, push_args = None, None, [], None
++            if name.lower() == 'git.exe':
++                script = session.create_script((ROOT / 'watch_agent.js').read_text(encoding='utf-8'))
++                script.on('message', lambda message, data: self.events.put(('message', (pid, message))))
++                script.load()
++                info = script.exports_sync.info()
++                prefix, push_args = git_command(info)
++                script.exports_sync.configure(push_args is not None)
++            session.enable_child_gating()
++            self.sessions[pid] = Watched(session, script, info, prefix, push_args)
++            self.failed.pop(pid, None)
++            self.log('MONITOR', pid=pid, process=name)
++            if push_args is not None:
++                self.log('GIT_PUSH', pid=pid, cwd=info['cwd'], argv=info['argv'])
++        except frida.ProcessNotFoundError:
++            if session:
++                session.detach()
++        except Exception as exc:
++            if session:
++                try:
++                    with frida.Cancellable():
++                        session.detach()
++                except (frida.InvalidOperationError, frida.ProcessNotFoundError):
++                    pass
++            self.failed[pid] = time.monotonic() + 60
++            if not self.stopping.is_set():
++                self.log('ATTACH_ERROR', pid=pid, process=name, error=str(exc), retry_seconds=60)
++            raise
++
++    def discover(self):
++        for proc in self.device.enumerate_processes():
++            if self.stopping.is_set():
++                break
++            if (self.pids and proc.pid in self.pids) or (not self.pids and proc.name.lower() in self.names):
++                try:
++                    self.attach(proc.pid, proc.name)
++                except Exception:
++                    pass
++
++    def handle_child(self, child):
++        name = Path(child.path or child.identifier or '').name.lower()
++        self.log('CHILD', pid=child.pid, parent_pid=child.parent_pid, process=name)
++        try:
++            if name == 'git.exe' or name in self.names:
++                self.attach(child.pid, name)
++        except Exception as exc:
++            # Fail closed for a Git child intercepted before it starts running.
++            if name == 'git.exe':
++                self.device.kill(child.pid)
++                self.log('BLOCKED_ATTACH_FAILURE', pid=child.pid, error=str(exc))
++        finally:
++            try:
++                self.device.resume(child.pid)
++            except (frida.ProcessNotFoundError, frida.InvalidOperationError):
++                pass
++            self.pending.discard(child.pid)
++
++    def handle_message(self, pid, message):
++        watched = self.sessions.get(pid)
++        if not watched or not watched.script:
++            return
++        if message['type'] != 'send':
++            self.log('AGENT_ERROR', pid=pid, error=message.get('description', message['type']))
++            return
++        data = message['payload']
++        if data['type'] == 'check':
++            try:
++                self.policy.refresh()
++                policy = scan_push(watched.info, watched.prefix, watched.push_args, self.policy)
++            except Exception as exc:
++                policy = {'deny': True, 'findings': [{'rule': 'scan-error'}], 'error': str(exc)}
++            watched.script.post({'type': 'decision', 'payload': {'deny': policy['deny']}})
++            self.log('DENY' if policy['deny'] else 'ALLOW', pid=pid, **policy)
++        elif data['type'] == 'blocked':
++            self.log('NATIVE_BLOCK', **data)
++
++    def run(self):
++        try:
++            self.discover()
++            if self.stopping.is_set():
++                return
++            if not self.sessions:
++                raise RuntimeError('No terminal attached; run at the same/elevated privilege as the terminal')
++            self.log('READY', monitors=len(self.sessions), config=str(self.config_path.absolute()))
++            next_discovery = time.monotonic() + 1
++            while not self.stopping.is_set():
++                try:
++                    kind, item = self.events.get(timeout=0.2)
++                except queue.Empty:
++                    kind = None
++                if kind == 'child':
++                    self.handle_child(item)
++                elif kind == 'message':
++                    self.handle_message(*item)
++                elif kind == 'detached':
++                    self.sessions.pop(item, None)
++                if not self.pids and self.events.empty() and time.monotonic() >= next_discovery:
++                    self.discover()
++                    next_discovery = time.monotonic() + 1
++        finally:
++            self.stop()
++
++    def stop(self):
++        self.stopping.set()
++        for pid, watched in list(self.sessions.items()):
++            try:
++                if watched.script:
++                    # Release an in-flight decision before unloading its script.
++                    watched.script.post({'type': 'decision', 'payload': {'deny': True}})
++                watched.session.disable_child_gating()
++                if watched.script:
++                    watched.script.unload()
++                watched.session.detach()
++            except (frida.ProcessNotFoundError, frida.InvalidOperationError):
++                pass
++        self.sessions.clear()
++        for pid in list(self.pending):
++            try:
++                self.device.resume(pid)
++            except (frida.ProcessNotFoundError, frida.InvalidOperationError):
++                pass
++        self.pending.clear()
++        self.device.off('child-added', self.child_added)
++        self.log('STOPPED')
++
++
++def main():
++    parser = argparse.ArgumentParser(description=__doc__)
++    parser.add_argument('--pid', type=int, action='append', default=[], help='monitor a specific launcher PID (repeatable)')
++    parser.add_argument('--process', action='append', default=[], help='extra launcher process name')
++    parser.add_argument('--config', type=Path, default=ROOT / 'config.json', help='sensitive path policy JSON')
++    args = parser.parse_args()
++    try:
++        backend = Backend(args.pid, DEFAULT_PROCESSES | {name.lower() for name in args.process}, args.config)
++    except Exception as exc:
++        print(f'[CONFIG_ERROR] {exc}', flush=True)
++        return 2
++    signal.signal(signal.SIGINT, lambda *args: backend.request_stop())
++    signal.signal(signal.SIGTERM, lambda *args: backend.request_stop())
++    if hasattr(signal, 'SIGBREAK'):
++        signal.signal(signal.SIGBREAK, lambda *args: backend.request_stop())
++    # Win32 console callbacks run on a separate thread: cancel a blocked native
++    # attach immediately instead of waiting for Python's main-thread SIGINT.
++    console_handler = None
++    if os.name == 'nt':
++        import ctypes
++        callback_type = ctypes.WINFUNCTYPE(ctypes.c_int, ctypes.c_uint32)
++        def on_console_event(event):
++            if event in (0, 1):
++                backend.request_stop()
++                return 1
++            return 0
++        console_handler = callback_type(on_console_event)
++        console_api = ctypes.WinDLL('kernel32', use_last_error=True).SetConsoleCtrlHandler
++        console_api.argtypes = [callback_type, ctypes.c_int]
++        console_api.restype = ctypes.c_int
++        if not console_api(console_handler, 1):
++            raise ctypes.WinError(ctypes.get_last_error())
++    try:
++        backend.run()
++    except KeyboardInterrupt:
++        return 0
++    except Exception as exc:
++        print(f'[ERROR] {exc}', flush=True)
++        return 2
++    finally:
++        if console_handler is not None:
++            console_api(console_handler, 0)
++    return 0
++
++
++if __name__ == '__main__':
++    raise SystemExit(main())
+--- a/guard.py
++++ b/guard.py
+@@ -1,180 +1,239 @@
+-"""Git object scanning and JSON policy for the temporary Frida backend."""
+-from __future__ import annotations
+-
+-import json
+-import fnmatch
+-import hashlib
+-from pathlib import Path
+-import re
+-import shutil
+-import subprocess
+-
+-ROOT = Path(__file__).resolve().parent
+-MAX_COMMITS = 1000
+-MAX_BLOB_BYTES = 16 * 1024 * 1024
+-MAX_TOTAL_BYTES = 64 * 1024 * 1024
+-MAX_TREE_ENTRIES = 50000
+-CONTENT_RULES = [
+-    ('demo-secret-marker', re.compile(rb'DEMO_SECRET_[A-Z0-9_]{8,}')),
+-    ('private-key', re.compile(rb'-----BEGIN (?:RSA |EC |OPENSSH )?PRIVATE KEY-----')),
+-    ('credential-assignment', re.compile(
+-        rb'(?im)\b(?:api[_-]?key|access[_-]?token|password|secret)\s*[:=]\s*[\x22\x27]?[A-Za-z0-9_./+\-]{12,}')),
+-]
+-
+-
+-class Policy:
+-    def __init__(self, directories, files, scan_content):
+-        self.relative_directories = []
+-        self.absolute_directories = []
+-        self.file_patterns = [pattern.casefold() for pattern in files]
+-        self.scan_content = scan_content
+-        self.protected_hashes = set()
+-        for value in directories:
+-            path = Path(value)
+-            if path.is_absolute():
+-                if not path.is_dir():
+-                    raise ValueError(f'Sensitive directory does not exist: {value}')
+-                self.absolute_directories.append(path)
+-            else:
+-                normalized = value.replace('\\', '/').strip('/').casefold()
+-                if not normalized or any(part in {'', '..'} for part in normalized.split('/')):
+-                    raise ValueError(f'Invalid relative sensitive directory: {value}')
+-                self.relative_directories.append(normalized)
+-        self.refresh()
+-
+-    def refresh(self):
+-        # In-memory fingerprints detect copies/renames of absolute-directory files.
+-        # Keep fingerprints already observed until this backend instance exits.
+-        total = count = 0
+-        for directory in self.absolute_directories:
+-            if not directory.is_dir():
+-                raise ValueError(f'Sensitive directory disappeared: {directory}')
+-            for path in directory.rglob('*'):
+-                if path.is_symlink():
+-                    raise ValueError(f'Symlink in sensitive directory: {path}')
+-                if not path.is_file():
+-                    continue
+-                size = path.stat().st_size
+-                total += size
+-                count += 1
+-                if size > MAX_BLOB_BYTES or total > MAX_TOTAL_BYTES or count > MAX_TREE_ENTRIES:
+-                    raise ValueError('Sensitive directory exceeds indexing limits')
+-                self.protected_hashes.add(hashlib.sha256(path.read_bytes()).digest())
+-
+-
+-def load_policy(path: Path = ROOT / 'config.json') -> Policy:
+-    config = json.loads(path.read_text(encoding='utf-8-sig'))
+-    if not isinstance(config, dict):
+-        raise ValueError('Policy must be a JSON object')
+-    expected = {'sensitive_directories', 'sensitive_files', 'scan_content'}
+-    if set(config) != expected:
+-        raise ValueError('Policy keys: sensitive_directories, sensitive_files, scan_content')
+-    directories, files = config['sensitive_directories'], config['sensitive_files']
+-    for label, values in [('sensitive_directories', directories), ('sensitive_files', files)]:
+-        if not isinstance(values, list) or not all(isinstance(value, str) and value.strip() for value in values):
+-            raise ValueError(f'{label} must be an array of nonempty strings')
+-    if type(config['scan_content']) is not bool:
+-        raise ValueError('scan_content must be true or false')
+-    return Policy(directories, files, config['scan_content'])
+-
+-
+-def content_findings(data: bytes, policy: Policy) -> list[str]:
+-    rules = [name for name, regex in CONTENT_RULES if regex.search(data)] if policy.scan_content else []
+-    if policy.protected_hashes and hashlib.sha256(data).digest() in policy.protected_hashes:
+-        rules.append('protected-directory-content')
+-    return rules
+-
+-
+-def git_executable() -> str:
+-    """Avoid the small cmd/git.exe trampoline; instrument the actual Git binary."""
+-    found = shutil.which('git')
+-    if not found:
+-        raise RuntimeError('git.exe is required on PATH')
+-    result = subprocess.run([found, '--exec-path'], capture_output=True, check=True)
+-    exec_dir = Path(result.stdout.decode().strip())
+-    candidates = [exec_dir.parent.parent / 'bin' / 'git.exe', Path(found)]
+-    for candidate in candidates:
+-        if candidate.is_file() and candidate.stat().st_size > 100000:
+-            return str(candidate.resolve())
+-    raise RuntimeError('Specify a Git for Windows installation with its full git.exe')
+-
+-
+-def git(repo: Path, *args: str, check: bool = True) -> subprocess.CompletedProcess:
+-    result = subprocess.run(
+-        [git_executable(), '-C', str(repo), *args], capture_output=True, timeout=30)
+-    if check and result.returncode:
+-        raise RuntimeError(f'Git command failed ({result.returncode}): '
+-                           + result.stderr.decode('utf-8', 'replace'))
+-    return result
+-
+-
+-def sensitive_path(path: str, policy: Policy) -> bool:
+-    normalized = path.replace('\\', '/').strip('/').casefold()
+-    name = normalized.rsplit('/', 1)[-1]
+-    return (any(directory == '.' or normalized == directory or normalized.startswith(directory + '/')
+-                for directory in policy.relative_directories)
+-            or any(fnmatch.fnmatchcase(name, pattern) for pattern in policy.file_patterns))
+-
+-
+-def scan_history(repo: Path, commit: str, policy: Policy) -> dict:
+-    """Conservative: examine all ancestry of the exact commit, not just the worktree.
+-
+-    Enumerate every tree, so renames and deleted secrets remain visible. Cache
+-    content results by blob OID but check path rules for each path separately.
+-    No secret values enter the report. Resource limits result in a deny decision.
+-    """
+-    findings = []
+-    seen_findings = set()
+-    cache: dict[str, list[str]] = {}
+-    total_bytes = entries = 0
+-    # Replacement objects/grafts could otherwise hide the real outgoing ancestry.
+-    if git(repo, 'replace', '-l').stdout.strip():
+-        return {'deny': True, 'findings': [{'rule': 'replacement-objects-present'}]}
+-    graft_file = Path(git(repo, 'rev-parse', '--git-path', 'info/grafts').stdout.decode().strip())
+-    if not graft_file.is_absolute():
+-        graft_file = repo / graft_file
+-    if graft_file.is_file() and graft_file.stat().st_size:
+-        return {'deny': True, 'findings': [{'rule': 'legacy-grafts-present'}]}
+-    if git(repo, 'rev-parse', '--is-shallow-repository').stdout.strip() == b'true':
+-        return {'deny': True, 'findings': [{'rule': 'shallow-history'}]}
+-    commits = git(repo, 'rev-list', '--max-count', str(MAX_COMMITS + 1), commit).stdout.decode().splitlines()
+-    if len(commits) > MAX_COMMITS:
+-        return {'deny': True, 'findings': [{'rule': 'commit-limit'}]}
+-
+-    def record(path: str, oid: str, rule: str, tree_commit: str):
+-        key = (path, oid, rule)
+-        if key not in seen_findings:
+-            seen_findings.add(key)
+-            findings.append({'path': path, 'blob': oid, 'rule': rule, 'commit': tree_commit})
+-
+-    for tree_commit in commits:
+-        tree = git(repo, 'ls-tree', '-r', '-z', tree_commit).stdout
+-        for entry in tree.split(b'\0'):
+-            if not entry:
+-                continue
+-            entries += 1
+-            if entries > MAX_TREE_ENTRIES:
+-                record('', '', 'tree-entry-limit', tree_commit)
+-                return {'deny': True, 'findings': findings}
+-            meta, path_bytes = entry.split(b'\t', 1)
+-            mode, objtype, oid_bytes = meta.split()
+-            oid = oid_bytes.decode('ascii')
+-            path = path_bytes.decode('utf-8', 'replace')
+-            if objtype != b'blob':
+-                continue  # gitlinks contain commit IDs, not embedded submodule files.
+-            if sensitive_path(path, policy):
+-                record(path, oid, 'sensitive-path', tree_commit)
+-            if oid not in cache:
+-                size = int(git(repo, 'cat-file', '-s', oid).stdout)
+-                total_bytes += size
+-                if size > MAX_BLOB_BYTES or total_bytes > MAX_TOTAL_BYTES:
+-                    record(path, oid, 'blob-scan-limit', tree_commit)
+-                    return {'deny': True, 'findings': findings}
+-                content = git(repo, 'cat-file', 'blob', oid).stdout
+-                cache[oid] = content_findings(content, policy)
+-            for rule in cache[oid]:
+-                record(path, oid, rule, tree_commit)
+-    return {'deny': bool(findings), 'findings': findings,
+-            'commits_scanned': len(commits), 'blobs_scanned': len(cache),
+-            'bytes_scanned': total_bytes, 'tree_entries': entries}
+-
++"""Git object scanning and JSON policy for the temporary Frida backend."""
++from __future__ import annotations
++
++import json
++import posixpath
++import fnmatch
++import hashlib
++from pathlib import Path
++import re
++import shutil
++import subprocess
++
++ROOT = Path(__file__).resolve().parent
++MAX_COMMITS = 1000
++MAX_BLOB_BYTES = 16 * 1024 * 1024
++MAX_TOTAL_BYTES = 64 * 1024 * 1024
++MAX_TREE_ENTRIES = 50000
++CONTENT_RULES = [
++    ('demo-secret-marker', re.compile(rb'DEMO_SECRET_[A-Z0-9_]{8,}')),
++    ('private-key', re.compile(rb'-----BEGIN (?:RSA |EC |OPENSSH )?PRIVATE KEY-----')),
++    ('credential-assignment', re.compile(
++        rb'(?im)\b(?:api[_-]?key|access[_-]?token|password|secret)\s*[:=]\s*[\x22\x27]?[A-Za-z0-9_./+\-]{12,}')),
++]
++
++
++class Policy:
++    def __init__(self, directories, files, scan_content):
++        self.relative_directories = []
++        self.absolute_directories = []
++        self.file_patterns = []
++        self.relative_file_patterns = []
++        self.absolute_file_patterns = []
++        self.absolute_files = []
++        for value in files:
++            normalized = value.replace('\\', '/').casefold()
++            if Path(value).is_absolute():
++                normalized = posixpath.normpath(normalized)
++                self.absolute_file_patterns.append(normalized)
++                if not any(char in value for char in '*?['):
++                    self.absolute_files.append(Path(value))
++            elif '/' in normalized:
++                normalized = posixpath.normpath(normalized)
++                if normalized == '..' or normalized.startswith('../'):
++                    raise ValueError(f'Sensitive file must stay inside the repository: {value}')
++                self.relative_file_patterns.append(normalized)
++            else:
++                self.file_patterns.append(normalized)
++        self.scan_content = scan_content
++        self.protected_hashes = set()
++        for value in directories:
++            path = Path(value)
++            if path.is_absolute():
++                if not path.is_dir():
++                    raise ValueError(f'Sensitive directory does not exist: {value}')
++                self.absolute_directories.append(path)
++            else:
++                normalized = value.replace('\\', '/').strip('/').casefold()
++                if not normalized or any(part in {'', '..'} for part in normalized.split('/')):
++                    raise ValueError(f'Invalid relative sensitive directory: {value}')
++                self.relative_directories.append(normalized)
++        self.refresh()
++
++    def refresh(self):
++        # In-memory fingerprints detect copies/renames of absolute-directory files.
++        # Keep fingerprints already observed until this backend instance exits.
++        total = count = 0
++        for directory in self.absolute_directories:
++            if not directory.is_dir():
++                raise ValueError(f'Sensitive directory disappeared: {directory}')
++            for path in directory.rglob('*'):
++                if path.is_symlink():
++                    raise ValueError(f'Symlink in sensitive directory: {path}')
++                if not path.is_file():
++                    continue
++                size = path.stat().st_size
++                total += size
++                count += 1
++                if size > MAX_BLOB_BYTES or total > MAX_TOTAL_BYTES or count > MAX_TREE_ENTRIES:
++                    raise ValueError('Sensitive directory exceeds indexing limits')
++                self.protected_hashes.add(hashlib.sha256(path.read_bytes()).digest())
++
++        # Missing absolute files still match historical Git paths. Existing ones
++        # additionally protect exact-content copies under a different filename.
++        for path in self.absolute_files:
++            if path.is_symlink():
++                raise ValueError(f'Symlink sensitive file: {path}')
++            if not path.exists():
++                continue
++            if not path.is_file():
++                raise ValueError(f'Sensitive file is not a regular file: {path}')
++            size = path.stat().st_size
++            total += size
++            count += 1
++            if size > MAX_BLOB_BYTES or total > MAX_TOTAL_BYTES or count > MAX_TREE_ENTRIES:
++                raise ValueError('Sensitive files exceed indexing limits')
++            self.protected_hashes.add(hashlib.sha256(path.read_bytes()).digest())
++
++
++def load_policy(path: Path = ROOT / 'config.json') -> Policy:
++    config = json.loads(path.read_text(encoding='utf-8-sig'))
++    if not isinstance(config, dict):
++        raise ValueError('Policy must be a JSON object')
++    expected = {'sensitive_directories', 'sensitive_files', 'scan_content'}
++    if set(config) != expected:
++        raise ValueError('Policy keys: sensitive_directories, sensitive_files, scan_content')
++    directories, files = config['sensitive_directories'], config['sensitive_files']
++    for label, values in [('sensitive_directories', directories), ('sensitive_files', files)]:
++        if not isinstance(values, list) or not all(isinstance(value, str) and value.strip() for value in values):
++            raise ValueError(f'{label} must be an array of nonempty strings')
++    if type(config['scan_content']) is not bool:
++        raise ValueError('scan_content must be true or false')
++    return Policy(directories, files, config['scan_content'])
++
++
++def content_findings(data: bytes, policy: Policy) -> list[str]:
++    rules = [name for name, regex in CONTENT_RULES if regex.search(data)] if policy.scan_content else []
++    if policy.protected_hashes and hashlib.sha256(data).digest() in policy.protected_hashes:
++        rules.append('protected-directory-content')
++    return rules
++
++
++def git_executable() -> str:
++    """Avoid the small cmd/git.exe trampoline; instrument the actual Git binary."""
++    found = shutil.which('git')
++    if not found:
++        raise RuntimeError('git.exe is required on PATH')
++    result = subprocess.run([found, '--exec-path'], capture_output=True, check=True)
++    exec_dir = Path(result.stdout.decode().strip())
++    candidates = [exec_dir.parent.parent / 'bin' / 'git.exe', Path(found)]
++    for candidate in candidates:
++        if candidate.is_file() and candidate.stat().st_size > 100000:
++            return str(candidate.resolve())
++    raise RuntimeError('Specify a Git for Windows installation with its full git.exe')
++
++
++def git(repo: Path, *args: str, check: bool = True) -> subprocess.CompletedProcess:
++    result = subprocess.run(
++        [git_executable(), '-C', str(repo), *args], capture_output=True, timeout=30)
++    if check and result.returncode:
++        raise RuntimeError(f'Git command failed ({result.returncode}): '
++                           + result.stderr.decode('utf-8', 'replace'))
++    return result
++
++
++def sensitive_path(path: str, policy: Policy, repo_root: Path | None = None) -> bool:
++    normalized = posixpath.normpath(path.replace('\\', '/').strip('/')).casefold()
++    name = normalized.rsplit('/', 1)[-1]
++    if (any(directory == '.' or normalized == directory or normalized.startswith(directory + '/')
++            for directory in policy.relative_directories)
++            or any(fnmatch.fnmatchcase(name, pattern) for pattern in policy.file_patterns)
++            or any(fnmatch.fnmatchcase(normalized, pattern) for pattern in policy.relative_file_patterns)):
++        return True
++    if repo_root is None:
++        return False
++    absolute = posixpath.normpath(str(repo_root).replace('\\', '/') + '/' + normalized).casefold()
++    return (any(fnmatch.fnmatchcase(absolute, pattern) for pattern in policy.absolute_file_patterns)
++            or any(absolute == str(directory).replace('\\', '/').rstrip('/').casefold()
++                   or absolute.startswith(str(directory).replace('\\', '/').rstrip('/').casefold() + '/')
++                   for directory in policy.absolute_directories))
++
++
++def repository_worktree(repo: Path) -> Path | None:
++    result = git(repo, 'rev-parse', '--show-toplevel', check=False)
++    if result.returncode == 0:
++        return Path(result.stdout.decode('utf-8', 'replace').strip())
++    if git(repo, 'rev-parse', '--is-bare-repository', check=False).stdout.strip() == b'true':
++        return None
++    # Scanning commonly uses -C <repo>/.git, where --show-toplevel is unavailable.
++    gitdir = Path(git(repo, 'rev-parse', '--absolute-git-dir').stdout.decode().strip())
++    configured = git(repo, 'config', '--get', 'core.worktree', check=False)
++    if configured.returncode == 0:
++        worktree = Path(configured.stdout.decode().strip())
++        return worktree if worktree.is_absolute() else gitdir / worktree
++    return gitdir.parent if gitdir.name.casefold() == '.git' else None
++
++
++def scan_history(repo: Path, commit: str, policy: Policy, repo_root: Path | None = None) -> dict:
++    """Conservative: examine all ancestry of the exact commit, not just the worktree.
++
++    Enumerate every tree, so renames and deleted secrets remain visible. Cache
++    content results by blob OID but check path rules for each path separately.
++    No secret values enter the report. Resource limits result in a deny decision.
++    """
++    repo_root = repo_root or repository_worktree(repo)
++    findings = []
++    seen_findings = set()
++    cache: dict[str, list[str]] = {}
++    total_bytes = entries = 0
++    # Replacement objects/grafts could otherwise hide the real outgoing ancestry.
++    if git(repo, 'replace', '-l').stdout.strip():
++        return {'deny': True, 'findings': [{'rule': 'replacement-objects-present'}]}
++    graft_file = Path(git(repo, 'rev-parse', '--git-path', 'info/grafts').stdout.decode().strip())
++    if not graft_file.is_absolute():
++        graft_file = repo / graft_file
++    if graft_file.is_file() and graft_file.stat().st_size:
++        return {'deny': True, 'findings': [{'rule': 'legacy-grafts-present'}]}
++    if git(repo, 'rev-parse', '--is-shallow-repository').stdout.strip() == b'true':
++        return {'deny': True, 'findings': [{'rule': 'shallow-history'}]}
++    commits = git(repo, 'rev-list', '--max-count', str(MAX_COMMITS + 1), commit).stdout.decode().splitlines()
++    if len(commits) > MAX_COMMITS:
++        return {'deny': True, 'findings': [{'rule': 'commit-limit'}]}
++
++    def record(path: str, oid: str, rule: str, tree_commit: str):
++        key = (path, oid, rule)
++        if key not in seen_findings:
++            seen_findings.add(key)
++            findings.append({'path': path, 'blob': oid, 'rule': rule, 'commit': tree_commit})
++
++    for tree_commit in commits:
++        tree = git(repo, 'ls-tree', '-r', '-z', tree_commit).stdout
++        for entry in tree.split(b'\0'):
++            if not entry:
++                continue
++            entries += 1
++            if entries > MAX_TREE_ENTRIES:
++                record('', '', 'tree-entry-limit', tree_commit)
++                return {'deny': True, 'findings': findings}
++            meta, path_bytes = entry.split(b'\t', 1)
++            mode, objtype, oid_bytes = meta.split()
++            oid = oid_bytes.decode('ascii')
++            path = path_bytes.decode('utf-8', 'replace')
++            if objtype != b'blob':
++                continue  # gitlinks contain commit IDs, not embedded submodule files.
++            if sensitive_path(path, policy, repo_root):
++                record(path, oid, 'sensitive-path', tree_commit)
++            if oid not in cache:
++                size = int(git(repo, 'cat-file', '-s', oid).stdout)
++                total_bytes += size
++                if size > MAX_BLOB_BYTES or total_bytes > MAX_TOTAL_BYTES:
++                    record(path, oid, 'blob-scan-limit', tree_commit)
++                    return {'deny': True, 'findings': findings}
++                content = git(repo, 'cat-file', 'blob', oid).stdout
++                cache[oid] = content_findings(content, policy)
++            for rule in cache[oid]:
++                record(path, oid, rule, tree_commit)
++    return {'deny': bool(findings), 'findings': findings,
++            'commits_scanned': len(commits), 'blobs_scanned': len(cache),
++            'bytes_scanned': total_bytes, 'tree_entries': entries}
++
+--- a/README.md
++++ b/README.md
+@@ -18 +18 @@
+-  "sensitive_files": [".env", ".env.*", "*.pem", "*.key"],
++  "sensitive_files": [".env", "*.pem", "demo/frida_git_guard/flag"],
+@@ -24 +24,2 @@
+-- `sensitive_files` 是文件名通配符；`scan_content` 开关私钥和凭证内容检测。修改配置后重启后台。
++- `sensitive_files` 支持文件名通配符、仓库相对路径和绝对文件路径，已删除文件仍按提交历史检查。
++- `scan_content` 开关私钥和凭证内容检测。修改配置后重启后台。
+@@ -39 +40 @@
+-沿用现有 HTTPS/SSH 登录和代理配置。`DENY` 表示已拦截，`ALLOW` 表示放行。仅保护已接入的终端及子进程；扫描所有本地引用的历史，可能保守拦截未推送分支。
++沿用现有 HTTPS/SSH 登录和代理配置。推送时应出现 `GIT_PUSH`，随后 `DENY`（拦截）或 `ALLOW`（放行）；只有 `MONITOR` 不代表该次推送已检查。仅保护已接入的终端及子进程；扫描所有本地引用的历史，可能保守拦截未推送分支。
+--- a/tests/test_backend.py
++++ b/tests/test_backend.py
+@@ -1,197 +1,197 @@
+-"""Config and real ordinary-push checks; temporary repositories are cleaned up."""
+-import hashlib
+-import json
+-import os
+-from pathlib import Path
+-import shutil
+-import signal
+-import stat
+-import subprocess
+-import sys
+-import tempfile
+-import time
+-
+-ROOT = Path(__file__).resolve().parents[1]
+-sys.path.insert(0, str(ROOT))
+-import guard
+-
+-
+-def remove_fixture(path):
+-    target = Path(path).resolve()
+-    assert target.is_relative_to((ROOT / 'tests').resolve()) and target.name.startswith('.tmp-')
+-
+-    def writable(func, name, error):
+-        item = Path(name).resolve()
+-        assert item.is_relative_to(target) or item == target
+-        if not isinstance(error[1], PermissionError):
+-            raise error[1]
+-        os.chmod(item, stat.S_IREAD | stat.S_IWRITE)
+-        func(name)
+-
+-    shutil.rmtree(target, onerror=writable)
+-
+-
+-def main():
+-    work = Path(tempfile.mkdtemp(prefix='.tmp-', dir=ROOT / 'tests')).resolve()
+-    assert work.is_relative_to((ROOT / 'tests').resolve())
+-    records, cases, backends = [], [], []
+-    client = None
+-    binary = guard.git_executable()
+-    original_binary = hashlib.sha256(Path(binary).read_bytes()).hexdigest()
+-
+-    def run(argv, expected=0, cwd=None):
+-        result = subprocess.run([str(x) for x in argv], cwd=cwd, capture_output=True, timeout=60)
+-        record = {'argv': [str(x) for x in argv], 'cwd': str(cwd or ROOT), 'exit_code': result.returncode,
+-                  'stdout': result.stdout.decode('utf-8', 'replace'), 'stderr': result.stderr.decode('utf-8', 'replace')}
+-        records.append(record)
+-        if expected is not None:
+-            assert result.returncode == expected, record
+-        return result
+-
+-    def g(repo, *args, expected=0):
+-        return run([binary, '-C', repo, *args], expected)
+-
+-    def save_config(name, directories, files=(), content=False):
+-        path = work / name
+-        path.write_text(json.dumps({'sensitive_directories': [str(x) for x in directories],
+-                                    'sensitive_files': list(files), 'scan_content': content}), encoding='utf-8')
+-        return path
+-
+-    def commit(repo, message):
+-        g(repo, 'add', '-A')
+-        g(repo, 'commit', '-m', message)
+-        return g(repo, 'rev-parse', 'HEAD').stdout.decode().strip()
+-
+-    def start_backend(config):
+-        path = work / (config.stem + '-backend.log')
+-        log = path.open('w', encoding='utf-8')
+-        backend = subprocess.Popen([sys.executable, '-B', ROOT / 'backend.py', '--pid', str(client.pid), '--config', config],
+-                                   stdout=log, stderr=log, creationflags=subprocess.CREATE_NEW_PROCESS_GROUP)
+-        backends.append((backend, log))
+-        deadline = time.monotonic() + 30
+-        while '"event": "READY"' not in path.read_text(encoding='utf-8'):
+-            assert backend.poll() is None, path.read_text()
+-            assert time.monotonic() < deadline
+-            time.sleep(0.1)
+-        return backend, path
+-
+-    def stop_backend(backend):
+-        backend.send_signal(signal.CTRL_BREAK_EVENT)
+-        assert backend.wait(15) == 0
+-
+-    def push(name, repo, remote, expect_success, log=None):
+-        before = g(remote, 'rev-parse', '--verify', 'refs/heads/main', expected=None).stdout
+-        argv = [binary, '-C', str(repo), 'push', 'origin', 'main']
+-        offset = len(log.read_text()) if log else 0
+-        client.stdin.write(json.dumps(argv) + '\n')
+-        client.stdin.flush()
+-        response = json.loads(client.stdout.readline())
+-        records.append({'argv': argv, **response})
+-        after = g(remote, 'rev-parse', '--verify', 'refs/heads/main', expected=None).stdout
+-        if expect_success:
+-            assert response['exit_code'] == 0, response
+-        else:
+-            assert response['exit_code'] != 0 and before == after, response
+-            native = log.read_text()[offset:]
+-            assert '"event": "DENY"' in native and '"event": "NATIVE_BLOCK"' in native, native
+-            source = g(repo, 'rev-parse', 'HEAD').stdout.decode().strip()
+-            assert g(remote, 'cat-file', '-e', source, expected=None).returncode != 0
+-        cases.append({'name': name, 'passed': True, 'exit_code': response['exit_code'],
+-                      'before_tip': before.decode().strip(), 'after_tip': after.decode().strip(),
+-                      'backend_log': log.read_text()[offset:] if log else ''})
+-        print(f'[PASS] {name}: exit={response["exit_code"]}', flush=True)
+-
+-    try:
+-        relative_config = save_config('relative.json', ['vault'])
+-        relative = guard.load_policy(relative_config)
+-        assert guard.sensitive_path('vault/nested/data.txt', relative)
+-        assert not guard.sensitive_path('vault2/data.txt', relative)
+-        assert not guard.sensitive_path('.env', relative)
+-        assert not guard.content_findings(b'DEMO_SECRET_DISABLED_0123456789', relative)
+-        default = guard.load_policy(ROOT / 'config.json')
+-        assert guard.sensitive_path('.env', default)
+-        assert guard.sensitive_path('private/ordinary.txt', default)
+-        cases.append({'name': 'policy-relative-prefix-and-switches', 'passed': True})
+-
+-        repo, remote, protected = work / 'source', work / 'receiver.git', work / 'protected'
+-        for path in (repo, remote, protected):
+-            path.mkdir()
+-        g(repo, 'init', '-b', 'main')
+-        g(remote, 'init', '--bare')
+-        for key, value in [('user.name', 'Fixture'), ('user.email', 'fixture@example.invalid'), ('commit.gpgSign', 'false')]:
+-            g(repo, 'config', key, value)
+-        g(repo, 'remote', 'add', 'origin', str(remote))
+-        config_hash = hashlib.sha256((repo / '.git' / 'config').read_bytes()).hexdigest()
+-        (repo / '.env').write_text('DEMO_SECRET_DISABLED_0123456789\n')
+-        commit(repo, 'custom policy permits outside files')
+-        client_file = work / 'client.py'
+-        client_file.write_text('''import json,subprocess,sys
+-print("READY",flush=True)
+-for line in sys.stdin:
+- p=subprocess.run(json.loads(line),capture_output=True)
+- print(json.dumps({"exit_code":p.returncode,"stdout":p.stdout.decode("utf-8","replace"),"stderr":p.stderr.decode("utf-8","replace")}),flush=True)
+-''')
+-        client = subprocess.Popen([sys.executable, '-B', client_file], stdin=subprocess.PIPE,
+-                                  stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+-        assert client.stdout.readline().strip() == 'READY'
+-        backend, log = start_backend(relative_config)
+-        push('outside-configured-directory-allow', repo, remote, True, log)
+-        (repo / 'vault').mkdir()
+-        (repo / 'vault' / 'data.txt').write_text('ordinary contents in a configured sensitive directory\n')
+-        commit(repo, 'relative directory fixture')
+-        push('configured-relative-directory-block', repo, remote, False, log)
+-        stop_backend(backend)
+-        push('stop-restores-normal-push', repo, remote, True)
+-
+-        source = protected / 'source.dat'
+-        source.write_bytes(b'absolute-protected-file-fixture-0123456789\x00')
+-        absolute_config = save_config('absolute.json', [protected])
+-        policy = guard.load_policy(absolute_config)
+-        assert guard.content_findings(source.read_bytes(), policy) == ['protected-directory-content']
+-        source.write_bytes(b'new-protected-file-content-0123456789')
+-        policy.refresh()
+-        assert 'protected-directory-content' in guard.content_findings(source.read_bytes(), policy)
+-        assert 'protected-directory-content' in guard.content_findings(b'absolute-protected-file-fixture-0123456789\x00', policy)
+-        cases.append({'name': 'absolute-index-refresh-and-memory-history', 'passed': True})
+-        backend, log = start_backend(absolute_config)
+-        push('other-configured-policy-applies', repo, remote, True, log)
+-        (repo / 'renamed-upload.bin').write_bytes(source.read_bytes())
+-        commit(repo, 'copy external protected file under an unrelated name')
+-        push('configured-absolute-copy-rename-block', repo, remote, False, log)
+-        assert 'protected-directory-content' in log.read_text()
+-        stop_backend(backend)
+-        push('absolute-policy-stop-restores-push', repo, remote, True)
+-        invalid = work / 'invalid.json'
+-        invalid.write_text('{"sensitive_directories": "wrong"}')
+-        run([sys.executable, '-B', ROOT / 'backend.py', '--config', invalid], expected=2)
+-        cases.append({'name': 'invalid-config-fails-before-attach', 'passed': True})
+-        assert hashlib.sha256((repo / '.git' / 'config').read_bytes()).hexdigest() == config_hash
+-        assert hashlib.sha256(Path(binary).read_bytes()).hexdigest() == original_binary
+-        report = {'passed': True, 'cases': cases, 'records': records,
+-                  'git_binary_sha256_unchanged': original_binary, 'repo_config_sha256_unchanged': config_hash,
+-                  'source_sha256': {str(path): hashlib.sha256(path.read_bytes()).hexdigest()
+-                                    for path in ROOT.iterdir() if path.is_file()}}
+-        (ROOT / 'tests' / 'verification.json').write_text(json.dumps(report, ensure_ascii=False, indent=2), encoding='utf-8')
+-        print(f'[VERIFIED] {len(cases)} config/lifecycle checks passed', flush=True)
+-    finally:
+-        for backend, log in backends:
+-            if backend.poll() is None:
+-                backend.send_signal(signal.CTRL_BREAK_EVENT)
+-                try:
+-                    backend.wait(10)
+-                except subprocess.TimeoutExpired:
+-                    backend.kill()
+-                    backend.wait()
+-            log.close()
+-        if client:
+-            client.stdin.close()
+-            try:
+-                client.wait(10)
+-            except subprocess.TimeoutExpired:
+-                client.kill()
+-                client.wait()
+-        remove_fixture(work)
+-
+-
+-if __name__ == '__main__':
+-    main()
++"""Config and real ordinary-push checks; temporary repositories are cleaned up."""
++import hashlib
++import json
++import os
++from pathlib import Path
++import shutil
++import signal
++import stat
++import subprocess
++import sys
++import tempfile
++import time
++
++ROOT = Path(__file__).resolve().parents[1]
++sys.path.insert(0, str(ROOT))
++import guard
++
++
++def remove_fixture(path):
++    target = Path(path).resolve()
++    assert target.is_relative_to((ROOT / 'tests').resolve()) and target.name.startswith('.tmp-')
++
++    def writable(func, name, error):
++        item = Path(name).resolve()
++        assert item.is_relative_to(target) or item == target
++        if not isinstance(error[1], PermissionError):
++            raise error[1]
++        os.chmod(item, stat.S_IREAD | stat.S_IWRITE)
++        func(name)
++
++    shutil.rmtree(target, onerror=writable)
++
++
++def main():
++    work = Path(tempfile.mkdtemp(prefix='.tmp-', dir=ROOT / 'tests')).resolve()
++    assert work.is_relative_to((ROOT / 'tests').resolve())
++    records, cases, backends = [], [], []
++    client = None
++    binary = guard.git_executable()
++    original_binary = hashlib.sha256(Path(binary).read_bytes()).hexdigest()
++
++    def run(argv, expected=0, cwd=None):
++        result = subprocess.run([str(x) for x in argv], cwd=cwd, capture_output=True, timeout=60)
++        record = {'argv': [str(x) for x in argv], 'cwd': str(cwd or ROOT), 'exit_code': result.returncode,
++                  'stdout': result.stdout.decode('utf-8', 'replace'), 'stderr': result.stderr.decode('utf-8', 'replace')}
++        records.append(record)
++        if expected is not None:
++            assert result.returncode == expected, record
++        return result
++
++    def g(repo, *args, expected=0):
++        return run([binary, '-C', repo, *args], expected)
++
++    def save_config(name, directories, files=(), content=False):
++        path = work / name
++        path.write_text(json.dumps({'sensitive_directories': [str(x) for x in directories],
++                                    'sensitive_files': list(files), 'scan_content': content}), encoding='utf-8')
++        return path
++
++    def commit(repo, message):
++        g(repo, 'add', '-A')
++        g(repo, 'commit', '-m', message)
++        return g(repo, 'rev-parse', 'HEAD').stdout.decode().strip()
++
++    def start_backend(config):
++        path = work / (config.stem + '-backend.log')
++        log = path.open('w', encoding='utf-8')
++        backend = subprocess.Popen([sys.executable, '-B', ROOT / 'backend.py', '--pid', str(client.pid), '--config', config],
++                                   stdout=log, stderr=log, creationflags=subprocess.CREATE_NEW_PROCESS_GROUP)
++        backends.append((backend, log))
++        deadline = time.monotonic() + 30
++        while '"event": "READY"' not in path.read_text(encoding='utf-8'):
++            assert backend.poll() is None, path.read_text()
++            assert time.monotonic() < deadline
++            time.sleep(0.1)
++        return backend, path
++
++    def stop_backend(backend):
++        backend.send_signal(signal.CTRL_BREAK_EVENT)
++        assert backend.wait(15) == 0
++
++    def push(name, repo, remote, expect_success, log=None):
++        before = g(remote, 'rev-parse', '--verify', 'refs/heads/main', expected=None).stdout
++        argv = [binary, '-C', str(repo), 'push', 'origin', 'main']
++        offset = len(log.read_text()) if log else 0
++        client.stdin.write(json.dumps(argv) + '\n')
++        client.stdin.flush()
++        response = json.loads(client.stdout.readline())
++        records.append({'argv': argv, **response})
++        after = g(remote, 'rev-parse', '--verify', 'refs/heads/main', expected=None).stdout
++        if expect_success:
++            assert response['exit_code'] == 0, response
++        else:
++            assert response['exit_code'] != 0 and before == after, response
++            native = log.read_text()[offset:]
++            assert '"event": "DENY"' in native and '"event": "NATIVE_BLOCK"' in native, native
++            source = g(repo, 'rev-parse', 'HEAD').stdout.decode().strip()
++            assert g(remote, 'cat-file', '-e', source, expected=None).returncode != 0
++        cases.append({'name': name, 'passed': True, 'exit_code': response['exit_code'],
++                      'before_tip': before.decode().strip(), 'after_tip': after.decode().strip(),
++                      'backend_log': log.read_text()[offset:] if log else ''})
++        print(f'[PASS] {name}: exit={response["exit_code"]}', flush=True)
++
++    try:
++        relative_config = save_config('relative.json', ['vault'])
++        relative = guard.load_policy(relative_config)
++        assert guard.sensitive_path('vault/nested/data.txt', relative)
++        assert not guard.sensitive_path('vault2/data.txt', relative)
++        assert not guard.sensitive_path('.env', relative)
++        assert not guard.content_findings(b'DEMO_SECRET_DISABLED_0123456789', relative)
++        default = guard.Policy(['secrets', 'private'], ['.env', '*.pem'], True)
++        assert guard.sensitive_path('.env', default)
++        assert guard.sensitive_path('private/ordinary.txt', default)
++        cases.append({'name': 'policy-relative-prefix-and-switches', 'passed': True})
++
++        repo, remote, protected = work / 'source', work / 'receiver.git', work / 'protected'
++        for path in (repo, remote, protected):
++            path.mkdir()
++        g(repo, 'init', '-b', 'main')
++        g(remote, 'init', '--bare')
++        for key, value in [('user.name', 'Fixture'), ('user.email', 'fixture@example.invalid'), ('commit.gpgSign', 'false')]:
++            g(repo, 'config', key, value)
++        g(repo, 'remote', 'add', 'origin', str(remote))
++        config_hash = hashlib.sha256((repo / '.git' / 'config').read_bytes()).hexdigest()
++        (repo / '.env').write_text('DEMO_SECRET_DISABLED_0123456789\n')
++        commit(repo, 'custom policy permits outside files')
++        client_file = work / 'client.py'
++        client_file.write_text('''import json,subprocess,sys
++print("READY",flush=True)
++for line in sys.stdin:
++ p=subprocess.run(json.loads(line),capture_output=True)
++ print(json.dumps({"exit_code":p.returncode,"stdout":p.stdout.decode("utf-8","replace"),"stderr":p.stderr.decode("utf-8","replace")}),flush=True)
++''')
++        client = subprocess.Popen([sys.executable, '-B', client_file], stdin=subprocess.PIPE,
++                                  stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
++        assert client.stdout.readline().strip() == 'READY'
++        backend, log = start_backend(relative_config)
++        push('outside-configured-directory-allow', repo, remote, True, log)
++        (repo / 'vault').mkdir()
++        (repo / 'vault' / 'data.txt').write_text('ordinary contents in a configured sensitive directory\n')
++        commit(repo, 'relative directory fixture')
++        push('configured-relative-directory-block', repo, remote, False, log)
++        stop_backend(backend)
++        push('stop-restores-normal-push', repo, remote, True)
++
++        source = protected / 'source.dat'
++        source.write_bytes(b'absolute-protected-file-fixture-0123456789\x00')
++        absolute_config = save_config('absolute.json', [protected])
++        policy = guard.load_policy(absolute_config)
++        assert guard.content_findings(source.read_bytes(), policy) == ['protected-directory-content']
++        source.write_bytes(b'new-protected-file-content-0123456789')
++        policy.refresh()
++        assert 'protected-directory-content' in guard.content_findings(source.read_bytes(), policy)
++        assert 'protected-directory-content' in guard.content_findings(b'absolute-protected-file-fixture-0123456789\x00', policy)
++        cases.append({'name': 'absolute-index-refresh-and-memory-history', 'passed': True})
++        backend, log = start_backend(absolute_config)
++        push('other-configured-policy-applies', repo, remote, True, log)
++        (repo / 'renamed-upload.bin').write_bytes(source.read_bytes())
++        commit(repo, 'copy external protected file under an unrelated name')
++        push('configured-absolute-copy-rename-block', repo, remote, False, log)
++        assert 'protected-directory-content' in log.read_text()
++        stop_backend(backend)
++        push('absolute-policy-stop-restores-push', repo, remote, True)
++        invalid = work / 'invalid.json'
++        invalid.write_text('{"sensitive_directories": "wrong"}')
++        run([sys.executable, '-B', ROOT / 'backend.py', '--config', invalid], expected=2)
++        cases.append({'name': 'invalid-config-fails-before-attach', 'passed': True})
++        assert hashlib.sha256((repo / '.git' / 'config').read_bytes()).hexdigest() == config_hash
++        assert hashlib.sha256(Path(binary).read_bytes()).hexdigest() == original_binary
++        report = {'passed': True, 'cases': cases, 'records': records,
++                  'git_binary_sha256_unchanged': original_binary, 'repo_config_sha256_unchanged': config_hash,
++                  'source_sha256': {str(path): hashlib.sha256(path.read_bytes()).hexdigest()
++                                    for path in ROOT.iterdir() if path.is_file()}}
++        (ROOT / 'tests' / 'verification.json').write_text(json.dumps(report, ensure_ascii=False, indent=2), encoding='utf-8')
++        print(f'[VERIFIED] {len(cases)} config/lifecycle checks passed', flush=True)
++    finally:
++        for backend, log in backends:
++            if backend.poll() is None:
++                backend.send_signal(signal.CTRL_BREAK_EVENT)
++                try:
++                    backend.wait(10)
++                except subprocess.TimeoutExpired:
++                    backend.kill()
++                    backend.wait()
++            log.close()
++        if client:
++            client.stdin.close()
++            try:
++                client.wait(10)
++            except subprocess.TimeoutExpired:
++                client.kill()
++                client.wait()
++        remove_fixture(work)
++
++
++if __name__ == '__main__':
++    main()
+--- a/tests/rollback_update.py
++++ b/tests/rollback_update.py
+@@ -1,28 +1,41 @@
+-"""Restore the previous source version from baseline.zip; no system configuration changes."""
+-import argparse
+-from pathlib import Path
+-import zipfile
+-
+-ROOT = Path(__file__).resolve().parents[1]
+-FILES = ['backend.py', 'guard.py', 'watch_agent.js', 'README.md', '.gitignore',
+-         'requirements.txt', 'agent.js', 'verify.py', 'rollback.py']
+-
+-
+-def main():
+-    parser = argparse.ArgumentParser(description=__doc__)
+-    parser.add_argument('--target', type=Path, required=True)
+-    target = parser.parse_args().target.resolve(strict=True)
+-    if target != ROOT and not target.is_relative_to(ROOT):
+-        raise ValueError('Target must remain inside this demo directory')
+-    with zipfile.ZipFile(Path(__file__).with_name('baseline.zip')) as source:
+-        assert source.testzip() is None
+-        for name in FILES:
+-            (target / name).write_bytes(source.read(name))
+-    config = target / 'config.json'
+-    if config.exists():
+-        config.unlink()
+-    print('Previous source restored; no Git or system configuration changed.')
+-
+-
+-if __name__ == '__main__':
+-    main()
++"""Restore sources saved before the absolute-path fix; no Git/system changes."""
++import argparse
++import hashlib
++import json
++from pathlib import Path
++import zipfile
++
++ROOT = Path(__file__).resolve().parents[1]
++
++
++def main():
++    parser = argparse.ArgumentParser(description=__doc__)
++    parser.add_argument('--target', type=Path, required=True)
++    target = parser.parse_args().target.resolve(strict=True)
++    if target != ROOT and not target.is_relative_to(ROOT):
++        raise ValueError('Target must stay inside this demo directory')
++    with zipfile.ZipFile(Path(__file__).with_name('baseline.zip')) as archive:
++        if archive.testzip() is not None:
++            raise ValueError('Baseline archive CRC mismatch')
++        manifest = json.loads(archive.read('manifest.json'))
++        for name, expected in manifest.items():
++            destination = (target / name).resolve()
++            if not destination.is_relative_to(target):
++                raise ValueError('Baseline path leaves target')
++            content = archive.read(name)
++            if hashlib.sha256(content).hexdigest() != expected:
++                raise ValueError(f'Baseline hash mismatch: {name}')
++            destination.parent.mkdir(parents=True, exist_ok=True)
++            destination.write_bytes(content)
++            if hashlib.sha256(destination.read_bytes()).hexdigest() != expected:
++                raise ValueError(f'Restored hash mismatch: {name}')
++    added = (target / 'tests' / 'test_push_paths.py').resolve()
++    if not added.is_relative_to(target):
++        raise ValueError('Added file leaves target')
++    if added.exists():
++        added.unlink()
++    print('Original source hashes restored; no Git/system configuration changed.')
++
++
++if __name__ == '__main__':
++    main()
+--- /dev/null
++++ b/tests/test_push_paths.py
+@@ -0,0 +1,234 @@
++"""Reproduce old path leak and verify real pwsh/PATH Git pushes over TLS."""
++from pathlib import Path
++import hashlib
++import http.server
++import json
++import os
++import queue
++import signal
++import ssl
++import subprocess
++import sys
++import threading
++import time
++import urllib.parse
++import zipfile
++
++ROOT = Path(__file__).resolve().parents[1]
++sys.path.insert(0, str(ROOT))
++import guard
++from test_backend import remove_fixture
++import tempfile
++
++
++def main():
++    work = Path(tempfile.mkdtemp(prefix='.tmp-paths-', dir=ROOT / 'tests')).resolve()
++    records, cases, backends, clients = [], [], [], []
++    requests = []
++    server = None
++    binary = guard.git_executable()
++    binary_hash = hashlib.sha256(Path(binary).read_bytes()).hexdigest()
++
++    def run(argv, cwd=None, expected=0, input=None, flags=0):
++        result = subprocess.run([str(x) for x in argv], cwd=cwd, input=input, capture_output=True,
++                                timeout=60, creationflags=flags)
++        records.append({'argv': [str(x) for x in argv], 'cwd': str(cwd or ROOT),
++                        'exit_code': result.returncode, 'stdout': result.stdout.decode('utf-8', 'replace'),
++                        'stderr': result.stderr.decode('utf-8', 'replace')})
++        if expected is not None:
++            assert result.returncode == expected, records[-1]
++        return result
++
++    def g(repo, *args, expected=0):
++        return run([binary, '-C', repo, *args], expected=expected)
++
++    class Handler(http.server.BaseHTTPRequestHandler):
++        def log_message(self, *args):
++            pass
++
++        def do_GET(self):
++            self.serve_git()
++
++        def do_POST(self):
++            self.serve_git()
++
++        def serve_git(self):
++            requests.append({'method': self.command, 'path': self.path})
++            parsed = urllib.parse.urlsplit(self.path)
++            env = dict(os.environ, GIT_PROJECT_ROOT=str(work), GIT_HTTP_EXPORT_ALL='1',
++                       PATH_INFO=parsed.path, QUERY_STRING=parsed.query, REQUEST_METHOD=self.command,
++                       CONTENT_TYPE=self.headers.get('Content-Type', ''),
++                       CONTENT_LENGTH=self.headers.get('Content-Length', '0'), REMOTE_USER='fixture')
++            payload = self.rfile.read(int(env['CONTENT_LENGTH']))
++            proc = subprocess.run([binary, 'http-backend'], env=env, input=payload,
++                                  capture_output=True, timeout=30)
++            head, body = proc.stdout.split(b'\r\n\r\n', 1)
++            headers = [line.split(b':', 1) for line in head.split(b'\r\n')]
++            status = next((int(value.strip().split()[0]) for key, value in headers if key.lower() == b'status'), 200)
++            self.send_response(status)
++            for key, value in headers:
++                if key.lower() != b'status':
++                    self.send_header(key.decode(), value.strip().decode())
++            self.send_header('Content-Length', str(len(body)))
++            self.end_headers()
++            self.wfile.write(body)
++
++    def start_client(repo):
++        script = '''[Console]::WriteLine("CLIENT_READY");
++while ($line=[Console]::ReadLine()) {
++ $r=ConvertFrom-Json $line; Set-Location -LiteralPath $r.repo;
++ $a=@($r.args); $o=(& git @a 2>&1 | Out-String);
++ [Console]::WriteLine((@{exit_code=$LASTEXITCODE;output=$o} | ConvertTo-Json -Compress));
++}'''
++        client = subprocess.Popen([r'C:\Program Files\PowerShell\7\pwsh.exe', '-NoProfile', '-Command', script],
++                                  stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
++        clients.append(client)
++        assert client.stdout.readline().strip() == 'CLIENT_READY'
++        return client
++
++    def start_backend(source, config, client):
++        logpath = work / f'backend-{len(backends)}.log'
++        log = logpath.open('w', encoding='utf-8')
++        startup = subprocess.STARTUPINFO()
++        startup.dwFlags = subprocess.STARTF_USESHOWWINDOW
++        startup.wShowWindow = subprocess.SW_HIDE
++        proc = subprocess.Popen([sys.executable, '-B', source / 'backend.py', '--pid', str(client.pid), '--config', config],
++                                stdout=log, stderr=log, creationflags=subprocess.CREATE_NEW_CONSOLE, startupinfo=startup)
++        backends.append((proc, log))
++        deadline = time.monotonic() + 30
++        while '"event": "READY"' not in logpath.read_text(encoding='utf-8'):
++            assert proc.poll() is None, logpath.read_text()
++            assert time.monotonic() < deadline, logpath.read_text()
++            time.sleep(.1)
++        return proc, logpath
++
++    def stop_backend(proc, logpath, name):
++        # Send actual CTRL_C_EVENT only to the backend's isolated hidden console.
++        helper = '''import ctypes,sys,time
++k=ctypes.WinDLL('kernel32',use_last_error=True)
++k.FreeConsole()
++assert k.AttachConsole(int(sys.argv[1])),ctypes.get_last_error()
++assert k.SetConsoleCtrlHandler(None,True),ctypes.get_last_error()
++assert k.GenerateConsoleCtrlEvent(0,0),ctypes.get_last_error()
++time.sleep(.2)
++k.FreeConsole()
++print('CTRL_C_EVENT delivered to isolated backend console')
++'''
++        started = time.monotonic()
++        run([sys.executable, '-B', '-c', helper, str(proc.pid)], flags=subprocess.CREATE_NO_WINDOW)
++        assert proc.wait(10) == 0
++        elapsed = time.monotonic() - started
++        assert '"event": "STOPPED"' in logpath.read_text(), logpath.read_text()
++        cases.append({'name': name, 'passed': True, 'exit_code': proc.returncode, 'seconds': elapsed})
++        print(f'[PASS] {name}: exit=0, {elapsed:.2f}s', flush=True)
++
++    def push(name, client, repo, receiver, allow, logpath=None, baseline=False):
++        before = g(receiver, 'rev-parse', '--verify', 'refs/heads/main', expected=None).stdout
++        offset = len(logpath.read_text()) if logpath else 0
++        count = len(requests)
++        args = ['push', '-u', 'origin', 'main']
++        client.stdin.write(json.dumps({'repo': str(repo), 'args': args}) + '\n'); client.stdin.flush()
++        response_queue = queue.Queue()
++        threading.Thread(target=lambda: response_queue.put(client.stdout.readline()), daemon=True).start()
++        response = json.loads(response_queue.get(timeout=60))
++        records.append({'argv': ['git', *args], 'cwd': str(repo), **response})
++        after = g(receiver, 'rev-parse', '--verify', 'refs/heads/main', expected=None).stdout
++        native = logpath.read_text()[offset:] if logpath else ''
++        if allow:
++            assert response['exit_code'] == 0 and len(requests) > count, response
++        else:
++            assert response['exit_code'] != 0 and before == after and len(requests) == count, (response, native)
++            assert '"event": "GIT_PUSH"' in native and '"event": "DENY"' in native and '"event": "NATIVE_BLOCK"' in native, native
++            assert 'sensitive-path' in native, native
++            oid = g(repo, 'rev-parse', 'HEAD').stdout.decode().strip()
++            assert g(receiver, 'cat-file', '-e', oid, expected=None).returncode != 0
++        cases.append({'name': name, 'passed': True, 'exit_code': response['exit_code'],
++                      'before_tip': before.decode().strip(), 'after_tip': after.decode().strip(),
++                      'https_requests': len(requests) - count, 'backend_log': native,
++                      'baseline_leak': baseline})
++        print(f'[PASS] {name}: exit={response["exit_code"]}, HTTPS requests={len(requests)-count}', flush=True)
++
++    try:
++        baseline = work / 'baseline'; baseline.mkdir()
++        with zipfile.ZipFile(ROOT / 'tests' / 'baseline.zip') as archive:
++            for name in ['backend.py', 'guard.py', 'watch_agent.js']:
++                (baseline / name).write_bytes(archive.read(name))
++        cert, key = work / 'cert.pem', work / 'key.pem'
++        run([r'E:\Git\usr\bin\openssl.exe', 'req', '-x509', '-newkey', 'rsa:2048', '-nodes',
++             '-keyout', key, '-out', cert, '-days', '1', '-subj', '/CN=localhost',
++             '-addext', 'subjectAltName=DNS:localhost,IP:127.0.0.1'])
++        server = http.server.ThreadingHTTPServer(('127.0.0.1', 0), Handler)
++        context = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER); context.load_cert_chain(cert, key)
++        server.socket = context.wrap_socket(server.socket, server_side=True)
++        threading.Thread(target=server.serve_forever, daemon=True).start()
++        for version, source in [('baseline', baseline), ('modified', ROOT)]:
++            repo, receiver = work / f'{version}-repo', work / f'{version}.git'
++            repo.mkdir(); receiver.mkdir()
++            g(repo, 'init', '-b', 'main'); g(receiver, 'init', '--bare')
++            g(receiver, 'config', 'http.receivepack', 'true')
++            for name, value in [('user.name', 'Fixture'), ('user.email', 'fixture@example.invalid'),
++                                ('commit.gpgsign', 'false'), ('http.sslCAInfo', str(cert)), ('http.sslVerify', 'true'), ('http.schannelUseSSLCAInfo', 'true')]:
++                g(repo, 'config', name, value)
++            g(repo, 'remote', 'add', 'origin', f'https://localhost:{server.server_port}/{receiver.name}')
++            flag = repo / 'demo' / 'frida_git_guard' / 'flag'; flag.parent.mkdir(parents=True)
++            (repo / 'ordinary.txt').write_text('clean fixture\n'); g(repo, 'add', '.'); g(repo, 'commit', '-m', 'clean')
++            config = work / f'{version}.json'
++            config.write_text(json.dumps({'sensitive_directories': [], 'sensitive_files': [str(flag)], 'scan_content': False}))
++            def local_settings():
++                data = g(repo, 'config', '--local', '--null', '--list').stdout
++                return dict(item.split(b'\n', 1) for item in data.split(b'\0') if item)
++            initial_settings = local_settings()
++            client = start_client(repo)
++            backend, logpath = start_backend(source, config, client)
++            push(f'{version}-normal-pwsh-https-clean-allow', client, repo, receiver, True, logpath)
++            expected_settings = dict(initial_settings, **{})
++            expected_settings.update({b'branch.main.remote': b'origin', b'branch.main.merge': b'refs/heads/main'})
++            assert local_settings() == expected_settings, local_settings()
++            config_hash = hashlib.sha256((repo / '.git' / 'config').read_bytes()).hexdigest()
++            flag.write_text('ordinary content that must be protected by its exact configured path\n')
++            g(repo, 'add', '.'); g(repo, 'commit', '-m', 'sensitive file')
++            secret_commit = g(repo, 'rev-parse', 'HEAD').stdout.decode().strip()
++            if version == 'modified':
++                push('absolute-path-existing-file-block', client, repo, receiver, False, logpath)
++                stop_backend(backend, logpath, 'ctrl-c-stop-existing-file-backend')
++            g(repo, 'rm', '-f', 'demo/frida_git_guard/flag'); g(repo, 'commit', '-m', 'delete sensitive file')
++            if version == 'modified':
++                assert not flag.exists()
++                backend, logpath = start_backend(source, config, client)
++                push('absolute-path-deleted-history-after-restart-block', client, repo, receiver, False, logpath)
++                stop_backend(backend, logpath, 'ctrl-c-stop-deleted-file-backend')
++                push('backend-exit-restores-normal-https-push', client, repo, receiver, True)
++            else:
++                push('baseline-absolute-path-deleted-history-leak-reproduced', client, repo, receiver, True, logpath, baseline=True)
++                assert g(receiver, 'cat-file', '-e', secret_commit, expected=None).returncode == 0
++                stop_backend(backend, logpath, 'baseline-stop')
++            assert hashlib.sha256((repo / '.git' / 'config').read_bytes()).hexdigest() == config_hash
++        policy = guard.Policy([], ['demo/frida_git_guard/flag'], False)
++        assert guard.sensitive_path('demo/frida_git_guard/flag', policy)
++        assert not guard.sensitive_path('other/flag', policy)
++        user_policy = guard.load_policy(ROOT / 'config.json')
++        assert guard.sensitive_path('demo/frida_git_guard/flag', user_policy, ROOT.parents[1])
++        cases.append({'name': 'relative-specific-path-and-current-user-config', 'passed': True})
++        assert hashlib.sha256(Path(binary).read_bytes()).hexdigest() == binary_hash
++        report = {'passed': True, 'cases': cases, 'records': records, 'https_requests': requests,
++                  'tls_verification': True, 'git_binary_sha256_unchanged': binary_hash,
++                  'source_sha256': {str(ROOT / name): hashlib.sha256((ROOT / name).read_bytes()).hexdigest()
++                                    for name in ['backend.py', 'guard.py', 'watch_agent.js', 'config.json', 'README.md']}}
++        (ROOT / 'tests' / 'push-path-verification.json').write_text(json.dumps(report, ensure_ascii=False, indent=2), encoding='utf-8')
++        print(f'[VERIFIED] {len(cases)} baseline/path/TLS/console checks passed', flush=True)
++    finally:
++        for proc, log in backends:
++            if proc.poll() is None:
++                proc.kill(); proc.wait(15)
++            log.close()
++        for client in clients:
++            client.stdin.close()
++            try: client.wait(10)
++            except subprocess.TimeoutExpired: client.kill(); client.wait()
++        if server:
++            server.shutdown(); server.server_close()
++        remove_fixture(work)
++
++
++if __name__ == '__main__':
++    main()

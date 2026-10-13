@@ -1,0 +1,117 @@
+{
+  "passed": true,
+  "baseline_sha256": {
+    "backend.py": "055d2953c23b07e27fe90af24d957d83a1115783818bdf57482fe4b3962a3d49",
+    "guard.py": "9b3cae34cb52fd989135f9f45b9aab4b2939818b07428e6faac71edf2c2c83cd",
+    "watch_agent.js": "f1686d0127567e7935e91fe68e5bc86cff401af3b3a70d56d86362e04d5b5f90",
+    "config.json": "eb9b7777cdf21cdf2dbe7b69c8ec92979354314859fdbaf9e24a630e19b99010",
+    "README.md": "bce888a7b65c8f9e60b31d7b6ae722a5df83ce08f2a961d7261dc05cfd7fa619",
+    "requirements.txt": "f9f26691d211dfae46d60187d0e1973ce986bc39e223a719e42be9d76db50d19",
+    ".gitignore": "2da7e1c177274db6c22098ecbc5cd1a774dba2647a5b51dfadad3178d8c54103",
+    "tests/test_backend.py": "5bbe36386df5872db3c67de551c6319ab3113f32ee52c3f9bf23b18bdefc7863",
+    "tests/rollback_update.py": "efbb56f89bddc4bb67316346049a4b8f4afccba50acc7c942c8e79bcd01f680b"
+  },
+  "records": [
+    {
+      "argv": [
+        "E:\\Git\\mingw64\\bin\\git.exe",
+        "apply",
+        "--check",
+        "--unidiff-zero",
+        "D:\\ctf-ai\\dlp\\demo\\frida_git_guard\\tests\\changes.diff"
+      ],
+      "cwd": "D:\\ctf-ai\\dlp\\demo\\frida_git_guard\\tests\\.tmp-rollback-lvtzg047",
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "E:\\Git\\mingw64\\bin\\git.exe",
+        "apply",
+        "--unidiff-zero",
+        "D:\\ctf-ai\\dlp\\demo\\frida_git_guard\\tests\\changes.diff"
+      ],
+      "cwd": "D:\\ctf-ai\\dlp\\demo\\frida_git_guard\\tests\\.tmp-rollback-lvtzg047",
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": "D:/ctf-ai/dlp/demo/frida_git_guard/tests/changes.diff:309: trailing whitespace.\n\"\"\"Temporary Frida backend. Ordinary Git pushes from monitored terminals are gated.\"\"\"\r\nD:/ctf-ai/dlp/demo/frida_git_guard/tests/changes.diff:310: trailing whitespace.\nfrom __future__ import annotations\r\nD:/ctf-ai/dlp/demo/frida_git_guard/tests/changes.diff:311: trailing whitespace.\n\r\nD:/ctf-ai/dlp/demo/frida_git_guard/tests/changes.diff:312: trailing whitespace.\nimport argparse\r\nD:/ctf-ai/dlp/demo/frida_git_guard/tests/changes.diff:313: trailing whitespace.\nfrom dataclasses import dataclass\r\nwarning: squelched 1067 whitespace errors\nwarning: 1072 lines add whitespace errors.\n"
+    },
+    {
+      "argv": [
+        "E:\\Programs\\Anaconda\\python.exe",
+        "-B",
+        "D:\\ctf-ai\\dlp\\demo\\frida_git_guard\\tests\\.tmp-rollback-lvtzg047\\backend.py",
+        "--help"
+      ],
+      "cwd": "D:\\ctf-ai\\dlp\\demo\\frida_git_guard",
+      "exit_code": 0,
+      "stdout": "usage: backend.py [-h] [--pid PID] [--process PROCESS] [--config CONFIG]\r\n\r\nTemporary Frida backend. Ordinary Git pushes from monitored terminals are\r\ngated.\r\n\r\noptions:\r\n  -h, --help         show this help message and exit\r\n  --pid PID          monitor a specific launcher PID (repeatable)\r\n  --process PROCESS  extra launcher process name\r\n  --config CONFIG    sensitive path policy JSON\r\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "E:\\Programs\\Anaconda\\python.exe",
+        "-B",
+        "-c",
+        "import sys;from pathlib import Path;sys.path.insert(0,sys.argv[1]);import guard;p=guard.Policy([],['D:/fixture/demo/flag'],False);print(guard.sensitive_path('demo/flag',p,Path('D:/fixture')))",
+        "D:\\ctf-ai\\dlp\\demo\\frida_git_guard\\tests\\.tmp-rollback-lvtzg047"
+      ],
+      "cwd": "D:\\ctf-ai\\dlp\\demo\\frida_git_guard",
+      "exit_code": 0,
+      "stdout": "True\r\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "E:\\Programs\\Anaconda\\python.exe",
+        "-B",
+        "D:\\ctf-ai\\dlp\\demo\\frida_git_guard\\tests\\rollback_update.py",
+        "--target",
+        "D:\\ctf-ai\\dlp\\demo\\frida_git_guard\\tests\\.tmp-rollback-lvtzg047"
+      ],
+      "cwd": "D:\\ctf-ai\\dlp\\demo\\frida_git_guard",
+      "exit_code": 0,
+      "stdout": "Original source hashes restored; no Git/system configuration changed.\r\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "E:\\Programs\\Anaconda\\python.exe",
+        "-B",
+        "D:\\ctf-ai\\dlp\\demo\\frida_git_guard\\tests\\.tmp-rollback-lvtzg047\\backend.py",
+        "--help"
+      ],
+      "cwd": "D:\\ctf-ai\\dlp\\demo\\frida_git_guard",
+      "exit_code": 0,
+      "stdout": "usage: backend.py [-h] [--pid PID] [--process PROCESS] [--config CONFIG]\r\n\r\nTemporary Frida backend. Ordinary Git pushes from monitored terminals are\r\ngated.\r\n\r\noptions:\r\n  -h, --help         show this help message and exit\r\n  --pid PID          monitor a specific launcher PID (repeatable)\r\n  --process PROCESS  extra launcher process name\r\n  --config CONFIG    sensitive path policy JSON\r\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "E:\\Programs\\Anaconda\\python.exe",
+        "-B",
+        "-c",
+        "import sys;from pathlib import Path;sys.path.insert(0,sys.argv[1]);import guard;p=guard.Policy([],['D:/fixture/demo/flag'],False);print(guard.sensitive_path('demo/flag',p))",
+        "D:\\ctf-ai\\dlp\\demo\\frida_git_guard\\tests\\.tmp-rollback-lvtzg047"
+      ],
+      "cwd": "D:\\ctf-ai\\dlp\\demo\\frida_git_guard",
+      "exit_code": 0,
+      "stdout": "False\r\n",
+      "stderr": ""
+    }
+  ],
+  "modified_source_sha256": {
+    "backend.py": "17572116ac7b291e4e32a2b205b9079475d8aeefe63a62cd89db2e63e7cbaf9c",
+    "guard.py": "2c19c1db09906e24bd0e13977260729c8ef8a30687c1f004ad9bd8026f89683d",
+    "watch_agent.js": "f1686d0127567e7935e91fe68e5bc86cff401af3b3a70d56d86362e04d5b5f90",
+    "config.json": "eb9b7777cdf21cdf2dbe7b69c8ec92979354314859fdbaf9e24a630e19b99010",
+    "README.md": "263e6f334dd917d9c57a9096335584eadb0678b25a4d0d788891cf1a9fbcdbd4",
+    "requirements.txt": "f9f26691d211dfae46d60187d0e1973ce986bc39e223a719e42be9d76db50d19",
+    ".gitignore": "2da7e1c177274db6c22098ecbc5cd1a774dba2647a5b51dfadad3178d8c54103",
+    "tests/test_backend.py": "e763a6b1dac735dd9e1ef328d57c1c8553706bcbd759395c1b538f381cf46835",
+    "tests/rollback_update.py": "5ff88dfe0d0debf6b09a5f1be4332763b288733bb52fa87d3d55d0f2a0234fd0",
+    "tests/test_push_paths.py": "7922bcf4c72babed1be152d3d625471df74a6471c6337aa5dfbba00760af88d5"
+  },
+  "source_rollback_verified": true
+}
