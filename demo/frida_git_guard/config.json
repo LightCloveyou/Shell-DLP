@@ -11,7 +11,7 @@
     "id_rsa",
     "id_ed25519",
     "credentials.json",
-    "D:/ctf-ai/dlp/demo/frida_git_guard/flag"
+    "D:/ctf-ai/dlp/demo/frida_git_guard/flag1"
   ],
   "scan_content": true
 }
