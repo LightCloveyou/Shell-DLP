@@ -1,0 +1,15 @@
+{"type": "metadata", "timestamp_utc": "2026-10-13T05:29:24Z", "repo": "D:\\ctf-ai\\dlp", "local_head": "384b52715634e4072bee314113cd1e07c4ceb4d6", "remote_before": "e6af2d4b31a7f5434309ad6e9db63d83638f55a0", "terminal_pid": 16848, "backend_pid": 28088}
+{"type": "command", "shell": "C:\\Program Files\\PowerShell\\7\\pwsh.exe", "cwd": "D:\\ctf-ai\\dlp", "argv_text": "git push origin main", "exit_code": 0, "literal_output": "", "stderr": ""}
+{"type": "backend", "event": "MONITOR", "pid": 16848, "process": "pwsh.exe"}
+{"type": "backend", "event": "READY", "monitors": 1, "config": "D:\\ctf-ai\\dlp\\demo\\frida_git_guard\\tests\\git-guard-live-uucpyt79.json", "coverage": "monitored terminals and descendants only", "unprotected_pids": []}
+{"type": "backend", "event": "GIT_PUSH", "pid": 16848, "cwd": "D:\\ctf-ai\\dlp", "argv": ["E:\\Git\\cmd\\git.exe", "push", "origin", "main"], "stage": "launcher-before-create"}
+{"type": "backend", "event": "ALLOW", "pid": 16848, "scan_ms": 4781.5, "deny": false, "repo": "D:\\ctf-ai\\dlp\\.git", "findings": [], "policy_scope": "all local refs + HEAD + explicit push sources (conservative)"}
+{"type": "backend", "event": "MONITOR", "pid": 78252, "process": "git.exe"}
+{"type": "backend", "event": "GIT_PUSH", "pid": 78252, "cwd": "D:\\ctf-ai\\dlp", "argv": ["E:\\Git\\cmd\\git.exe", "push", "origin", "main"]}
+{"type": "backend", "event": "ALLOW", "pid": 78252, "scan_ms": 4750.2, "deny": false, "repo": "D:\\ctf-ai\\dlp\\.git", "findings": [], "policy_scope": "all local refs + HEAD + explicit push sources (conservative)"}
+{"type": "backend", "event": "MONITOR", "pid": 59492, "process": "git.exe"}
+{"type": "backend", "event": "GIT_PUSH", "pid": 59492, "cwd": "D:\\ctf-ai\\dlp", "argv": ["git.exe", "push", "origin", "main"]}
+{"type": "backend", "event": "ALLOW", "pid": 59492, "scan_ms": 4678.9, "deny": false, "repo": "D:\\ctf-ai\\dlp\\.git", "findings": [], "policy_scope": "all local refs + HEAD + explicit push sources (conservative)"}
+{"type": "backend", "event": "MONITOR", "pid": 58944, "process": "git.exe"}
+{"type": "backend", "event": "STOPPED"}
+{"type": "verification", "remote_after": "384b52715634e4072bee314113cd1e07c4ceb4d6", "expected": "384b52715634e4072bee314113cd1e07c4ceb4d6", "exit_code": 0, "passed": true}
