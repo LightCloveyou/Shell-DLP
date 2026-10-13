@@ -4,7 +4,7 @@
 
 ## 当前状态
 
-项目正在从 Linux eBPF 迁移到 Frida。Git 已经验证，SCP、Python 及其他命令执行路径正在迁移和修复中。
+Git 已经验证。SCP、Python 和其他功能正在迁移中。
 
 ## 进行中的工作
 
@@ -30,4 +30,4 @@ demo/frida_scp_guard
 demo/frida_python_guard
 ```
 
-三个独立示例分别包含策略配置、Frida 后台、进程启动拦截脚本和验证说明，目前均在迁移中。
+Git 示例已经验证；SCP、Python 和其他示例正在迁移中。
