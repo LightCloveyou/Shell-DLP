@@ -1,0 +1,17 @@
+{
+  "baseline": "demo/frida_python_guard did not exist",
+  "modified_command": "python -m unittest discover .\\demo\\frida_python_guard\\tests -v",
+  "modified_exit_status": 0,
+  "modified_output": "Ran 5 tests; OK",
+  "syntax_commands": [
+    "python -m py_compile .\\demo\\frida_python_guard\\backend.py .\\demo\\frida_python_guard\\guard.py",
+    "node --check .\\demo\\frida_python_guard\\launcher_agent.js"
+  ],
+  "syntax_exit_status": 0,
+  "verified_behaviors": [
+    "clean scripts including interpreter flags are allowed",
+    "sensitive script content and protected paths are blocked",
+    "sensitive python -c content is blocked",
+    "module and version invocations are allowed"
+  ]
+}

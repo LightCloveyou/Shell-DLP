@@ -1,0 +1,437 @@
+diff --git "a/D:\\ctf-ai\\dlp\\demo\\frida_python_guard\\.gitignore" "b/D:\\ctf-ai\\dlp\\demo\\frida_python_guard\\.gitignore"
+new file mode 100644
+index 0000000..84b90ca
+--- /dev/null
++++ "b/D:\\ctf-ai\\dlp\\demo\\frida_python_guard\\.gitignore"
+@@ -0,0 +1,4 @@
++__pycache__/
++*.pyc
++protected/*
++!protected/.gitkeep
+diff --git "a/D:\\ctf-ai\\dlp\\demo\\frida_python_guard\\backend.py" "b/D:\\ctf-ai\\dlp\\demo\\frida_python_guard\\backend.py"
+new file mode 100644
+index 0000000..59613f7
+--- /dev/null
++++ "b/D:\\ctf-ai\\dlp\\demo\\frida_python_guard\\backend.py"
+@@ -0,0 +1,150 @@
++"""Frida launch gate for one demo target (SCP or Python)."""
++from __future__ import annotations
++
++import argparse
++import json
++import os
++from pathlib import Path
++import queue
++import signal
++import threading
++import time
++
++import frida
++import guard
++
++ROOT = Path(__file__).resolve().parent
++DEFAULT_PROCESSES = {"powershell.exe", "pwsh.exe", "cmd.exe", "bash.exe", "sh.exe"}
++
++
++class Backend:
++    def __init__(self, pids=(), process_names=(), config_path=ROOT / "config.json"):
++        self.device = frida.get_local_device()
++        self.config_path = Path(config_path)
++        self.policy = guard.load_policy(self.config_path)
++        self.pids = set(pids)
++        self.names = {name.casefold() for name in process_names} or DEFAULT_PROCESSES
++        self.sessions = {}
++        self.events = queue.Queue()
++        self.stopping = threading.Event()
++        self.pending = {}
++        self.lock = threading.Lock()
++        self.device.on("child-added", self.child_added)
++
++    @staticmethod
++    def log(event, **fields):
++        print(json.dumps({"event": event, **fields}, ensure_ascii=False), flush=True)
++
++    def request_stop(self):
++        if self.stopping.is_set():
++            return
++        self.stopping.set()
++        self.log("STOP_REQUESTED", detail="正在释放等待中的命令并退出")
++        with self.lock:
++            waiting = list(self.pending.items())
++            self.pending.clear()
++        for (_, response_type), script in waiting:
++            try:
++                script.post({"type": response_type, "payload": {"deny": True}})
++            except Exception:
++                pass
++
++    def on_message(self, pid, script, message):
++        if message.get("type") != "send":
++            self.log("AGENT_ERROR", pid=pid, detail=message)
++            return
++        payload = message.get("payload", {})
++        kind = payload.get("type")
++        if kind == "launch-check":
++            response_type = "decision-" + str(payload.get("id"))
++            key = (pid, response_type)
++            with self.lock:
++                self.pending[key] = script
++            try:
++                decision = {"deny": True, "findings": [{"rule": "backend-stopping"}]} if self.stopping.is_set() else guard.scan_launch(payload.get("info", {}), self.policy)
++            except Exception as error:
++                decision = {"deny": True, "findings": [{"rule": "scan-error", "detail": str(error)}]}
++            try:
++                script.post({"type": response_type, "payload": decision})
++            finally:
++                with self.lock:
++                    self.pending.pop(key, None)
++            self.log("BLOCKED" if decision["deny"] else "ALLOWED", pid=pid,
++                     argv=payload.get("info", {}).get("argv", []), findings=decision.get("findings", []))
++        elif kind == "blocked":
++            self.log("NATIVE_BLOCK", pid=pid, win32_error=payload.get("win32_error", 5))
++        elif kind == "launcher-error":
++            self.log("LAUNCHER_ERROR", pid=pid, error=payload.get("error"))
++
++    def child_added(self, child):
++        name = Path(child.path or child.identifier or "").name
++        try:
++            if name.casefold() in self.names and not self.stopping.is_set():
++                self.attach(child.pid, name)
++        finally:
++            try:
++                self.device.resume(child.pid)
++            except Exception:
++                pass
++
++    def attach(self, pid, name):
++        if pid == os.getpid() or pid in self.sessions or self.stopping.is_set():
++            return
++        session = None
++        try:
++            session = self.device.attach(pid)
++            session.enable_child_gating()
++            script = session.create_script((ROOT / "launcher_agent.js").read_text(encoding="utf-8"))
++            script.on("message", lambda message, data, p=pid, s=script: self.on_message(p, s, message))
++            script.load()
++            self.sessions[pid] = (session, script)
++            session.on("detached", lambda *_, p=pid: self.sessions.pop(p, None))
++            self.log("MONITOR", pid=pid, process=name)
++        except (frida.ProcessNotFoundError, frida.InvalidOperationError, frida.TransportError) as error:
++            if session:
++                try:
++                    session.detach()
++                except Exception:
++                    pass
++            self.log("ATTACH_ERROR", pid=pid, process=name, error=str(error))
++
++    def discover(self):
++        for process in self.device.enumerate_processes():
++            if process.pid in self.pids or process.name.casefold() in self.names:
++                self.attach(process.pid, process.name)
++
++    def run(self):
++        self.discover()
++        self.log("READY", monitors=len(self.sessions), config=str(self.config_path),
++                 coverage="monitored terminal CreateProcess calls")
++        while not self.stopping.wait(0.5):
++            self.discover()
++        self.log("STOPPING", monitors=len(self.sessions))
++        for pid, (session, script) in list(self.sessions.items()):
++            try:
++                script.exports_sync.stop()
++            except Exception:
++                pass
++            try:
++                session.detach()
++            except Exception:
++                pass
++        self.sessions.clear()
++        self.log("STOPPED", monitors=0)
++
++
++def main():
++    parser = argparse.ArgumentParser()
++    parser.add_argument("--pid", action="append", type=int, default=[])
++    parser.add_argument("--process", action="append", default=[])
++    parser.add_argument("--config", type=Path, default=ROOT / "config.json")
++    args = parser.parse_args()
++    backend = Backend(args.pid, args.process, args.config)
++    signal.signal(signal.SIGINT, lambda *_: backend.request_stop())
++    if hasattr(signal, "SIGBREAK"):
++        signal.signal(signal.SIGBREAK, lambda *_: backend.request_stop())
++    backend.run()
++
++
++if __name__ == "__main__":
++    main()
+diff --git "a/D:\\ctf-ai\\dlp\\demo\\frida_python_guard\\config.json" "b/D:\\ctf-ai\\dlp\\demo\\frida_python_guard\\config.json"
+new file mode 100644
+index 0000000..48a04b4
+--- /dev/null
++++ "b/D:\\ctf-ai\\dlp\\demo\\frida_python_guard\\config.json"
+@@ -0,0 +1,5 @@
++{
++  "sensitive_directories": ["D:\\ctf-ai\\dlp\\demo\\frida_python_guard\\protected"],
++  "sensitive_files": ["*.pem", "*.key", ".env", "credentials.json"],
++  "scan_content": true
++}
+diff --git "a/D:\\ctf-ai\\dlp\\demo\\frida_python_guard\\guard.py" "b/D:\\ctf-ai\\dlp\\demo\\frida_python_guard\\guard.py"
+new file mode 100644
+index 0000000..171c29c
+--- /dev/null
++++ "b/D:\\ctf-ai\\dlp\\demo\\frida_python_guard\\guard.py"
+@@ -0,0 +1,94 @@
++"""Policy checks for Python entry points launched from a monitored Windows terminal."""
++from __future__ import annotations
++
++import fnmatch
++import json
++from pathlib import Path
++import re
++
++ROOT = Path(__file__).resolve().parent
++MAX_FILE_BYTES = 16 * 1024 * 1024
++CONTENT_RULES = (
++    ("demo-secret-marker", re.compile(rb"DEMO_SECRET_[A-Z0-9_]{8,}")),
++    ("private-key", re.compile(rb"-----BEGIN (?:RSA |EC |OPENSSH )?PRIVATE KEY-----")),
++    ("credential-assignment", re.compile(
++        rb"(?im)\b(?:api[_-]?key|access[_-]?token|password|secret)\s*[:=]\s*[\x22\x27]?[A-Za-z0-9_./+\-]{12,}")),
++)
++
++
++class Policy:
++    def __init__(self, directories: list[str], files: list[str], scan_content: bool):
++        self.directories = [Path(value).resolve() for value in directories]
++        self.files = files
++        self.scan_content = scan_content
++        for directory in self.directories:
++            if not directory.is_dir():
++                raise ValueError(f"Sensitive directory does not exist: {directory}")
++
++
++def load_policy(path: Path = ROOT / "config.json") -> Policy:
++    data = json.loads(path.read_text(encoding="utf-8-sig"))
++    expected = {"sensitive_directories", "sensitive_files", "scan_content"}
++    if not isinstance(data, dict) or set(data) != expected:
++        raise ValueError("Policy keys: sensitive_directories, sensitive_files, scan_content")
++    if type(data["scan_content"]) is not bool:
++        raise ValueError("scan_content must be true or false")
++    for key in ("sensitive_directories", "sensitive_files"):
++        if not isinstance(data[key], list) or not all(isinstance(v, str) and v.strip() for v in data[key]):
++            raise ValueError(f"{key} must be an array of nonempty strings")
++    return Policy(data["sensitive_directories"], data["sensitive_files"], data["scan_content"])
++
++
++def _sensitive_path(path: Path, policy: Policy) -> bool:
++    resolved = path.resolve()
++    folded = str(resolved).replace("\\", "/").casefold()
++    if any(resolved == root or root in resolved.parents for root in policy.directories):
++        return True
++    return any(fnmatch.fnmatchcase(resolved.name.casefold(), p.casefold()) or
++               fnmatch.fnmatchcase(folded, p.replace("\\", "/").casefold())
++               for p in policy.files)
++
++
++def scan_launch(info: dict, policy: Policy) -> dict:
++    argv = info.get("argv") or []
++    args = argv[1:]
++    if not args:
++        return {"deny": False, "reason": "interactive", "findings": []}
++    index = 0
++    takes_value = {"-W", "-X", "--check-hash-based-pycs"}
++    while index < len(args):
++        token = args[index]
++        if token == "--":
++            index += 1
++            break
++        if token in {"-c", "-m"}:
++            break
++        if not token.startswith("-") or token == "-":
++            break
++        if token in takes_value:
++            index += 2
++        else:
++            index += 1
++    if index >= len(args) or args[index] == "-":
++        return {"deny": False, "reason": "interactive-or-stdin", "findings": []}
++    if args[index] == "-c":
++        data = (args[index + 1] if len(args) > index + 1 else "").encode("utf-8", "replace")
++        findings = [{"path": "<python -c>", "rule": name} for name, regex in CONTENT_RULES
++                    if policy.scan_content and regex.search(data)]
++        return {"deny": bool(findings), "reason": "inline-code", "findings": findings}
++    if args[index] == "-m" or args[index] in {"--version", "-V", "-h", "--help"}:
++        return {"deny": False, "reason": "non-file-entry", "findings": []}
++    cwd = Path(info.get("cwd") or ".")
++    path = Path(args[index])
++    path = path if path.is_absolute() else cwd / path
++    findings = []
++    if _sensitive_path(path, policy):
++        findings.append({"path": str(path), "rule": "sensitive-path"})
++    elif not path.is_file():
++        findings.append({"path": str(path), "rule": "script-not-found"})
++    elif path.stat().st_size > MAX_FILE_BYTES:
++        findings.append({"path": str(path), "rule": "file-scan-limit"})
++    elif policy.scan_content:
++        data = path.read_bytes()
++        findings.extend({"path": str(path), "rule": name} for name, regex in CONTENT_RULES if regex.search(data))
++    return {"deny": bool(findings), "reason": "script", "findings": findings}
+diff --git "a/D:\\ctf-ai\\dlp\\demo\\frida_python_guard\\launcher_agent.js" "b/D:\\ctf-ai\\dlp\\demo\\frida_python_guard\\launcher_agent.js"
+new file mode 100644
+index 0000000..7ce2ee6
+--- /dev/null
++++ "b/D:\\ctf-ai\\dlp\\demo\\frida_python_guard\\launcher_agent.js"
+@@ -0,0 +1,18 @@
++'use strict';
++const kernel=Process.getModuleByName('kernel32.dll');
++const shell=Module.load('shell32.dll');
++const parse=new NativeFunction(shell.getExportByName('CommandLineToArgvW'),'pointer',['pointer','pointer']);
++const free=new NativeFunction(kernel.getExportByName('LocalFree'),'pointer',['pointer']);
++const signature=['pointer','pointer','pointer','pointer','int','uint32','pointer','pointer','pointer','pointer'];
++const replacements=[];let sequence=0,stopping=false;
++function argv(command){const n=Memory.alloc(4),p=parse(Memory.allocUtf16String(command),n),a=[];for(let i=0;i<n.readS32();i++)a.push(p.add(i*Process.pointerSize).readPointer().readUtf16String());free(p);return a;}
++for(const api of ['CreateProcessW','CreateProcessA']){
++ const address=kernel.getExportByName(api),original=new SystemFunction(address,'int',signature);replacements.push(address);
++ Interceptor.replace(address,new NativeCallback(function(...args){let deny=false;
++  if(!stopping)try{const text=p=>p.isNull()?'':(api.endsWith('A')?p.readAnsiString():p.readUtf16String());const app=text(args[0]),command=text(args[1]);const first=app||((command.match(/^\s*(?:"([^"]+)"|([^\s]+))/)||[]).slice(1).find(Boolean)||'');
++   if(/(?:^|[\\/])(?:python(?:\d+(?:\.\d+)?)?|pythonw(?:\d+(?:\.\d+)?)?|py)(?:\.exe)?$/i.test(first)){const words=argv(command||app),id=String(++sequence),slot={deny:true};const response=recv('decision-'+id,m=>{slot.deny=!!m.payload.deny;});send({type:'launch-check',id,info:{argv:words,cwd:text(args[7])||Process.getCurrentDir()}});response.wait();deny=slot.deny;}
++  }catch(error){deny=true;send({type:'launcher-error',error:String(error)});}
++  if(deny){send({type:'blocked',win32_error:5});this.lastError=5;return 0;}const result=original(...args);this.lastError=result.lastError;return result.value;
++ },'int',signature));
++}
++Interceptor.flush();rpc.exports={stop(){stopping=true;for(const address of replacements)Interceptor.revert(address);}};
+diff --git "a/D:\\ctf-ai\\dlp\\demo\\frida_python_guard\\README.md" "b/D:\\ctf-ai\\dlp\\demo\\frida_python_guard\\README.md"
+new file mode 100644
+index 0000000..9b2532d
+--- /dev/null
++++ "b/D:\\ctf-ai\\dlp\\demo\\frida_python_guard\\README.md"
+@@ -0,0 +1,23 @@
++# Frida Python Guard Demo
++
++独立的 Python 启动拦截示例，结构与 `frida_git_guard` 类似。后台接入已有 PowerShell、pwsh、cmd、bash、sh，在父进程的 `CreateProcessW/A` 返回前检查 Python 脚本或 `python -c` 内容。
++
++```powershell
++python -m pip install -r .\demo\frida_python_guard\requirements.txt
++python .\demo\frida_python_guard\backend.py
++```
++
++另开一个已被接入的终端进行现场验证：
++
++```powershell
++"print('clean python')" | Set-Content .\demo\frida_python_guard\clean.py
++python .\demo\frida_python_guard\clean.py
++
++"print('DEMO_SECRET_12345678')" | Set-Content .\demo\frida_python_guard\blocked.py
++python .\demo\frida_python_guard\blocked.py
++python -c "print('DEMO_SECRET_12345678')"
++```
++
++干净脚本应记录 `ALLOWED` 并真实执行；后两条应在创建 Python 进程前记录 `BLOCKED`/`NATIVE_BLOCK`。`-m`、标准输入和交互模式暂时只放行，运行时动态打开文件或发起网络连接仍等待后续手动验证。按 Ctrl+C 后后台会立即输出 `STOP_REQUESTED`，随后输出 `STOPPING`、`STOPPED`。
++
++自动化策略测试：`python -m unittest discover .\demo\frida_python_guard\tests -v`。验证记录、变更补丁和删除该新增目录的回滚脚本位于 `tests`。
+diff --git "a/D:\\ctf-ai\\dlp\\demo\\frida_python_guard\\requirements.txt" "b/D:\\ctf-ai\\dlp\\demo\\frida_python_guard\\requirements.txt"
+new file mode 100644
+index 0000000..748816c
+--- /dev/null
++++ "b/D:\\ctf-ai\\dlp\\demo\\frida_python_guard\\requirements.txt"
+@@ -0,0 +1 @@
++frida>=17,<18
+diff --git "a/D:\\ctf-ai\\dlp\\demo\\frida_python_guard\\protected\\.gitkeep" "b/D:\\ctf-ai\\dlp\\demo\\frida_python_guard\\protected\\.gitkeep"
+new file mode 100644
+index 0000000..e69de29
+diff --git "a/D:\\ctf-ai\\dlp\\demo\\frida_python_guard\\tests\\rollback.py" "b/D:\\ctf-ai\\dlp\\demo\\frida_python_guard\\tests\\rollback.py"
+new file mode 100644
+index 0000000..d1286c4
+--- /dev/null
++++ "b/D:\\ctf-ai\\dlp\\demo\\frida_python_guard\\tests\\rollback.py"
+@@ -0,0 +1,9 @@
++"""Remove this newly added demo directory after validating its fixed location."""
++from pathlib import Path
++import shutil
++
++root = Path(__file__).resolve().parents[1]
++if root.name != "frida_python_guard" or root.parent.name != "demo":
++    raise SystemExit(f"unexpected rollback target: {root}")
++shutil.rmtree(root)
++print(f"removed {root}")
+diff --git "a/D:\\ctf-ai\\dlp\\demo\\frida_python_guard\\tests\\test_guard.py" "b/D:\\ctf-ai\\dlp\\demo\\frida_python_guard\\tests\\test_guard.py"
+new file mode 100644
+index 0000000..50ce9e5
+--- /dev/null
++++ "b/D:\\ctf-ai\\dlp\\demo\\frida_python_guard\\tests\\test_guard.py"
+@@ -0,0 +1,53 @@
++import json
++from pathlib import Path
++import tempfile
++import unittest
++
++import sys
++sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
++import guard
++
++
++class PythonGuardTests(unittest.TestCase):
++    def setUp(self):
++        self.temp = tempfile.TemporaryDirectory(dir=Path(__file__).resolve().parent)
++        self.root = Path(self.temp.name)
++        self.protected = self.root / "protected"
++        self.protected.mkdir()
++        config = self.root / "config.json"
++        config.write_text(json.dumps({
++            "sensitive_directories": [str(self.protected)],
++            "sensitive_files": ["*.pem", ".env"],
++            "scan_content": True,
++        }), encoding="utf-8")
++        self.policy = guard.load_policy(config)
++
++    def tearDown(self):
++        self.temp.cleanup()
++
++    def scan(self, *args):
++        return guard.scan_launch({"argv": ["python.exe", *args], "cwd": str(self.root)}, self.policy)
++
++    def test_clean_script_is_allowed(self):
++        (self.root / "clean.py").write_text("print('ok')", encoding="utf-8")
++        self.assertFalse(self.scan("-u", "clean.py")["deny"])
++
++    def test_script_content_is_blocked(self):
++        (self.root / "blocked.py").write_text("print('DEMO_SECRET_12345678')", encoding="utf-8")
++        self.assertTrue(self.scan("-I", "-u", "blocked.py")["deny"])
++
++    def test_inline_content_is_blocked(self):
++        self.assertTrue(self.scan("-c", "print('DEMO_SECRET_12345678')")["deny"])
++
++    def test_module_and_version_are_allowed(self):
++        self.assertFalse(self.scan("--version")["deny"])
++        self.assertFalse(self.scan("-m", "pip", "--version")["deny"])
++
++    def test_protected_script_is_blocked(self):
++        script = self.protected / "plain.py"
++        script.write_text("print('plain')", encoding="utf-8")
++        self.assertTrue(self.scan(str(script))["deny"])
++
++
++if __name__ == "__main__":
++    unittest.main()
+diff --git "a/D:\\ctf-ai\\dlp\\demo\\frida_python_guard\\tests\\verification.json" "b/D:\\ctf-ai\\dlp\\demo\\frida_python_guard\\tests\\verification.json"
+new file mode 100644
+index 0000000..7785dfa
+--- /dev/null
++++ "b/D:\\ctf-ai\\dlp\\demo\\frida_python_guard\\tests\\verification.json"
+@@ -0,0 +1,17 @@
++{
++  "baseline": "demo/frida_python_guard did not exist",
++  "modified_command": "python -m unittest discover .\\demo\\frida_python_guard\\tests -v",
++  "modified_exit_status": 0,
++  "modified_output": "Ran 5 tests; OK",
++  "syntax_commands": [
++    "python -m py_compile .\\demo\\frida_python_guard\\backend.py .\\demo\\frida_python_guard\\guard.py",
++    "node --check .\\demo\\frida_python_guard\\launcher_agent.js"
++  ],
++  "syntax_exit_status": 0,
++  "verified_behaviors": [
++    "clean scripts including interpreter flags are allowed",
++    "sensitive script content and protected paths are blocked",
++    "sensitive python -c content is blocked",
++    "module and version invocations are allowed"
++  ]
++}

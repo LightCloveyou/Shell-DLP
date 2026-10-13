@@ -31,6 +31,8 @@ Git/Frida 验证实现位于：
 
 ```text
 demo/frida_git_guard
+demo/frida_scp_guard
+demo/frida_python_guard
 ```
 
-该示例包含策略配置、Frida 后台、进程启动拦截脚本、自动化测试、现场验证记录与回滚工具。
+三个独立示例分别包含策略配置、Frida 后台、进程启动拦截脚本和验证说明。Git 已完成现场验证；SCP 与 Python 示例已拆分落地，等待继续手动验证各终端与传输/执行路径。

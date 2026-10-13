@@ -1,0 +1,17 @@
+{
+  "baseline": "demo/frida_scp_guard did not exist",
+  "modified_command": "python -m unittest discover .\\demo\\frida_scp_guard\\tests -v",
+  "modified_exit_status": 0,
+  "modified_output": "Ran 4 tests; OK",
+  "syntax_commands": [
+    "python -m py_compile .\\demo\\frida_scp_guard\\backend.py .\\demo\\frida_scp_guard\\guard.py",
+    "node --check .\\demo\\frida_scp_guard\\launcher_agent.js"
+  ],
+  "syntax_exit_status": 0,
+  "verified_behaviors": [
+    "clean local SCP upload source is allowed",
+    "content marker and protected path are blocked",
+    "remote-to-local download is not classified as upload",
+    "Windows drive paths are not confused with host:path"
+  ]
+}

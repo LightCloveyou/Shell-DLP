@@ -1,0 +1,5 @@
+{
+  "sensitive_directories": ["D:\\ctf-ai\\dlp\\demo\\frida_python_guard\\protected"],
+  "sensitive_files": ["*.pem", "*.key", ".env", "credentials.json"],
+  "scan_content": true
+}
