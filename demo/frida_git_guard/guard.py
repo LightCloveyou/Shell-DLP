@@ -5,6 +5,8 @@ import json
 import posixpath
 import fnmatch
 import hashlib
+import io
+from functools import lru_cache
 from pathlib import Path
 import re
 import shutil
@@ -119,6 +121,7 @@ def content_findings(data: bytes, policy: Policy) -> list[str]:
     return rules
 
 
+@lru_cache(maxsize=1)
 def git_executable() -> str:
     """Avoid the small cmd/git.exe trampoline; instrument the actual Git binary."""
     found = shutil.which('git')
@@ -133,9 +136,9 @@ def git_executable() -> str:
     raise RuntimeError('Specify a Git for Windows installation with its full git.exe')
 
 
-def git(repo: Path, *args: str, check: bool = True) -> subprocess.CompletedProcess:
+def git(repo: Path, *args: str, check: bool = True, input: bytes | None = None) -> subprocess.CompletedProcess:
     result = subprocess.run(
-        [git_executable(), '-C', str(repo), *args], capture_output=True, timeout=30)
+        [git_executable(), '-C', str(repo), *args], input=input, capture_output=True, timeout=30)
     if check and result.returncode:
         raise RuntimeError(f'Git command failed ({result.returncode}): '
                            + result.stderr.decode('utf-8', 'replace'))
@@ -174,19 +177,11 @@ def repository_worktree(repo: Path) -> Path | None:
     return gitdir.parent if gitdir.name.casefold() == '.git' else None
 
 
-def scan_history(repo: Path, commit: str, policy: Policy, repo_root: Path | None = None) -> dict:
-    """Conservative: examine all ancestry of the exact commit, not just the worktree.
-
-    Enumerate every tree, so renames and deleted secrets remain visible. Cache
-    content results by blob OID but check path rules for each path separately.
-    No secret values enter the report. Resource limits result in a deny decision.
-    """
+def scan_history(repo: Path, commit: str | list[str], policy: Policy, repo_root: Path | None = None) -> dict:
+    """Scan all historical paths; read unique blob sizes/content in two Git batches."""
     repo_root = repo_root or repository_worktree(repo)
-    findings = []
-    seen_findings = set()
-    cache: dict[str, list[str]] = {}
-    total_bytes = entries = 0
-    # Replacement objects/grafts could otherwise hide the real outgoing ancestry.
+    findings, paths_by_blob = [], {}
+    entries = total_bytes = 0
     if git(repo, 'replace', '-l').stdout.strip():
         return {'deny': True, 'findings': [{'rule': 'replacement-objects-present'}]}
     graft_file = Path(git(repo, 'rev-parse', '--git-path', 'info/grafts').stdout.decode().strip())
@@ -196,16 +191,10 @@ def scan_history(repo: Path, commit: str, policy: Policy, repo_root: Path | None
         return {'deny': True, 'findings': [{'rule': 'legacy-grafts-present'}]}
     if git(repo, 'rev-parse', '--is-shallow-repository').stdout.strip() == b'true':
         return {'deny': True, 'findings': [{'rule': 'shallow-history'}]}
-    commits = git(repo, 'rev-list', '--max-count', str(MAX_COMMITS + 1), commit).stdout.decode().splitlines()
+    roots = [commit] if isinstance(commit, str) else commit
+    commits = git(repo, 'rev-list', '--max-count', str(MAX_COMMITS + 1), *roots).stdout.decode().splitlines()
     if len(commits) > MAX_COMMITS:
         return {'deny': True, 'findings': [{'rule': 'commit-limit'}]}
-
-    def record(path: str, oid: str, rule: str, tree_commit: str):
-        key = (path, oid, rule)
-        if key not in seen_findings:
-            seen_findings.add(key)
-            findings.append({'path': path, 'blob': oid, 'rule': rule, 'commit': tree_commit})
-
     for tree_commit in commits:
         tree = git(repo, 'ls-tree', '-r', '-z', tree_commit).stdout
         for entry in tree.split(b'\0'):
@@ -213,27 +202,51 @@ def scan_history(repo: Path, commit: str, policy: Policy, repo_root: Path | None
                 continue
             entries += 1
             if entries > MAX_TREE_ENTRIES:
-                record('', '', 'tree-entry-limit', tree_commit)
-                return {'deny': True, 'findings': findings}
+                return {'deny': True, 'findings': [{'rule': 'tree-entry-limit'}]}
             meta, path_bytes = entry.split(b'\t', 1)
             mode, objtype, oid_bytes = meta.split()
-            oid = oid_bytes.decode('ascii')
-            path = path_bytes.decode('utf-8', 'replace')
             if objtype != b'blob':
-                continue  # gitlinks contain commit IDs, not embedded submodule files.
+                continue
+            oid, path = oid_bytes.decode('ascii'), path_bytes.decode('utf-8', 'replace')
             if sensitive_path(path, policy, repo_root):
-                record(path, oid, 'sensitive-path', tree_commit)
-            if oid not in cache:
-                size = int(git(repo, 'cat-file', '-s', oid).stdout)
-                total_bytes += size
-                if size > MAX_BLOB_BYTES or total_bytes > MAX_TOTAL_BYTES:
-                    record(path, oid, 'blob-scan-limit', tree_commit)
+                return {'deny': True, 'findings': [{'path': path, 'blob': oid,
+                        'rule': 'sensitive-path', 'commit': tree_commit}]}
+            paths_by_blob.setdefault(oid, []).append((path, tree_commit))
+    if paths_by_blob:
+        request = ''.join(oid + '\n' for oid in paths_by_blob).encode('ascii')
+        sizes = git(repo, 'cat-file', '--batch-check', input=request).stdout.splitlines()
+        if len(sizes) != len(paths_by_blob):
+            raise RuntimeError('Unexpected Git batch-check response count')
+        for expected, line in zip(paths_by_blob, sizes):
+            oid, kind, raw_size = line.split()
+            if oid.decode() != expected or kind != b'blob':
+                raise RuntimeError('Unexpected Git batch-check object')
+            size = int(raw_size)
+            total_bytes += size
+            if size > MAX_BLOB_BYTES or total_bytes > MAX_TOTAL_BYTES:
+                path, tree_commit = paths_by_blob[expected][0]
+                return {'deny': True, 'findings': [{'path': path, 'blob': expected,
+                        'rule': 'blob-scan-limit', 'commit': tree_commit}]}
+        if policy.scan_content or policy.protected_hashes:
+            stream = io.BytesIO(git(repo, 'cat-file', '--batch', input=request).stdout)
+            for expected in paths_by_blob:
+                oid, kind, raw_size = stream.readline().split()
+                if oid.decode() != expected or kind != b'blob':
+                    raise RuntimeError('Unexpected Git batch object')
+                size = int(raw_size)
+                if size > MAX_BLOB_BYTES:
+                    raise RuntimeError('Git batch size changed')
+                data = stream.read(size)
+                if len(data) != size or stream.read(1) != b'\n':
+                    raise RuntimeError('Truncated Git batch content')
+                rules = content_findings(data, policy)
+                if rules:
+                    seen = set()
+                    for path, tree_commit in paths_by_blob[expected]:
+                        for rule in rules:
+                            if (path, rule) not in seen:
+                                seen.add((path, rule))
+                                findings.append({'path': path, 'blob': expected, 'rule': rule, 'commit': tree_commit})
                     return {'deny': True, 'findings': findings}
-                content = git(repo, 'cat-file', 'blob', oid).stdout
-                cache[oid] = content_findings(content, policy)
-            for rule in cache[oid]:
-                record(path, oid, rule, tree_commit)
-    return {'deny': bool(findings), 'findings': findings,
-            'commits_scanned': len(commits), 'blobs_scanned': len(cache),
-            'bytes_scanned': total_bytes, 'tree_entries': entries}
-
+    return {'deny': False, 'findings': [], 'commits_scanned': len(commits),
+            'blobs_scanned': len(paths_by_blob), 'bytes_scanned': total_bytes, 'tree_entries': entries}

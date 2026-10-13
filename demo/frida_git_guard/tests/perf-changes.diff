@@ -1,0 +1,555 @@
+--- a/backend.py
++++ b/backend.py
+@@ -13,0 +14 @@
++from functools import lru_cache
+@@ -18,0 +20 @@
++TERMINAL_PROCESSES = {'powershell.exe', 'pwsh.exe', 'cmd.exe', 'bash.exe', 'sh.exe'}
+@@ -21,0 +24,21 @@
++
++
++INFO_AGENT = r"""
++const k = Process.getModuleByName('kernel32.dll');
++const shell = Module.load('shell32.dll');
++const command = new NativeFunction(k.getExportByName('GetCommandLineW'), 'pointer', []);
++const parse = new NativeFunction(shell.getExportByName('CommandLineToArgvW'), 'pointer', ['pointer', 'pointer']);
++const free = new NativeFunction(k.getExportByName('LocalFree'), 'pointer', ['pointer']);
++rpc.exports = {info() {
++ const count = Memory.alloc(4), p = parse(command(), count), argv = [];
++ for (let i=0; i<count.readS32(); i++) argv.push(p.add(i*Process.pointerSize).readPointer().readUtf16String());
++ free(p); return {pid:Process.id,cwd:Process.getCurrentDir(),argv};
++}};
++"""
++
++
++@lru_cache(maxsize=1)
++def git_builtins():
++    result = subprocess.run([guard.git_executable(), '--list-cmds=builtins'],
++                            capture_output=True, check=True, timeout=15)
++    return frozenset(result.stdout.decode().splitlines())
+@@ -55,0 +79,2 @@
++        if command in git_builtins():
++            return prefix, None
+@@ -101 +126 @@
+-    findings, objects = [], set()
++    findings, objects, commit_roots = [], set(), []
+@@ -109 +134 @@
+-            findings.extend(guard.scan_history(repo, resolved, policy, repo_root)['findings'])
++            commit_roots.append(resolved)
+@@ -123,0 +149,2 @@
++    if commit_roots and not findings:
++        findings.extend(guard.scan_history(repo, commit_roots, policy, repo_root)['findings'])
+@@ -149 +176,6 @@
+-        self.active_cancel = None
++        self.active_cancels = set()
++        self.cancellation_lock = threading.Lock()
++        self.attach_locks = {}
++        self.fast_resumes = queue.Queue()
++        self.workers = []
++        git_builtins()  # Resolve Git installation/builtins once, before gating launches.
+@@ -157 +189,5 @@
+-        self.events.put(('child', child))
++        name = Path(child.path or child.identifier or '').name.lower()
++        if name == 'git.exe' or name in self.names:
++            self.events.put(('child', child))
++        else:
++            self.fast_resumes.put(child.pid)
+@@ -161,2 +197,3 @@
+-        cancel = self.active_cancel
+-        if cancel is not None:
++        with self.cancellation_lock:
++            cancels = list(self.active_cancels)
++        for cancel in cancels:
+@@ -166,15 +203,19 @@
+-        if pid in self.sessions or pid in self.excluded or self.stopping.is_set():
+-            return
+-        if name.lower() != 'git.exe' and time.monotonic() < self.failed.get(pid, 0):
+-            return
+-        cancel = frida.Cancellable()
+-        self.active_cancel = cancel
+-        deadline = threading.Timer(5, cancel.cancel)
+-        deadline.daemon = True
+-        deadline.start()
+-        try:
+-            with cancel:
+-                self._attach(pid, name)
+-        finally:
+-            deadline.cancel()
+-            self.active_cancel = None
++        lock = self.attach_locks.setdefault(pid, threading.Lock())
++        with lock:
++            if pid in self.sessions or pid in self.excluded or self.stopping.is_set():
++                return
++            if name.lower() != 'git.exe' and time.monotonic() < self.failed.get(pid, 0):
++                return
++            cancel = frida.Cancellable()
++            with self.cancellation_lock:
++                self.active_cancels.add(cancel)
++            deadline = threading.Timer(5, cancel.cancel)
++            deadline.daemon = True
++            deadline.start()
++            try:
++                with cancel:
++                    self._attach(pid, name)
++            finally:
++                deadline.cancel()
++                with self.cancellation_lock:
++                    self.active_cancels.discard(cancel)
+@@ -191 +232,14 @@
+-                script = session.create_script((ROOT / 'watch_agent.js').read_text(encoding='utf-8'))
++                probe = session.create_script(INFO_AGENT)
++                probe.load()
++                try:
++                    info = probe.exports_sync.info()
++                finally:
++                    probe.unload()
++                prefix, push_args = git_command(info)
++                if push_args is not None:
++                    script = session.create_script((ROOT / 'watch_agent.js').read_text(encoding='utf-8'))
++                    script.on('message', lambda message, data: self.events.put(('message', (pid, message))))
++                    script.load()
++                    script.exports_sync.configure(True)
++            else:
++                script = session.create_script((ROOT / 'launcher_agent.js').read_text(encoding='utf-8'))
+@@ -194,3 +247,0 @@
+-                info = script.exports_sync.info()
+-                prefix, push_args = git_command(info)
+-                script.exports_sync.configure(push_args is not None)
+@@ -213,3 +264,7 @@
+-            self.failed[pid] = time.monotonic() + 60
+-            if not self.stopping.is_set():
+-                self.log('ATTACH_ERROR', pid=pid, process=name, error=str(exc), retry_seconds=60)
++            first_failure = pid not in self.failed
++            retry = 10 if name.lower() in TERMINAL_PROCESSES else 300
++            self.failed[pid] = time.monotonic() + retry
++            if first_failure and not self.stopping.is_set():
++                self.log('ATTACH_ERROR', pid=pid, process=name, error=str(exc), retry_seconds=retry)
++                if name.lower() in TERMINAL_PROCESSES:
++                    self.log('UNPROTECTED_TERMINAL', pid=pid, process=name)
+@@ -218 +273 @@
+-    def discover(self):
++    def discover(self, desktop=False):
+@@ -222 +277,4 @@
+-            if (self.pids and proc.pid in self.pids) or (not self.pids and proc.name.lower() in self.names):
++            eligible = ((self.pids and proc.pid in self.pids)
++                        or (not self.pids and proc.name.lower() in self.names
++                            and ((proc.name.lower() not in TERMINAL_PROCESSES) == desktop)))
++            if eligible:
+@@ -227,0 +286,25 @@
++    def resume_child(self, pid):
++        try:
++            self.device.resume(pid)
++        except (frida.ProcessNotFoundError, frida.InvalidOperationError):
++            pass
++        finally:
++            self.pending.discard(pid)
++
++    def resume_worker(self):
++        while not self.stopping.is_set():
++            try:
++                pid = self.fast_resumes.get(timeout=0.1)
++            except queue.Empty:
++                continue
++            self.resume_child(pid)
++
++    def discover_worker(self, desktop):
++        while not self.stopping.is_set():
++            try:
++                self.discover(desktop)
++            except Exception as exc:
++                if not self.stopping.is_set():
++                    self.log('DISCOVERY_ERROR', error=str(exc))
++            self.stopping.wait(2 if desktop else 1)
++
+@@ -230 +312,0 @@
+-        self.log('CHILD', pid=child.pid, parent_pid=child.parent_pid, process=name)
+@@ -240,5 +322 @@
+-            try:
+-                self.device.resume(child.pid)
+-            except (frida.ProcessNotFoundError, frida.InvalidOperationError):
+-                pass
+-            self.pending.discard(child.pid)
++            self.resume_child(child.pid)
+@@ -254 +332,2 @@
+-        if data['type'] == 'check':
++        if data['type'] in {'check', 'launch-check'}:
++            started = time.perf_counter()
+@@ -257 +336,9 @@
+-                policy = scan_push(watched.info, watched.prefix, watched.push_args, self.policy)
++                if data['type'] == 'launch-check':
++                    info = data['info']
++                    prefix, push_args = git_command(info)
++                    if push_args is None:
++                        raise ValueError('Launcher push arguments changed')
++                    self.log('GIT_PUSH', pid=pid, cwd=info['cwd'], argv=info['argv'], stage='launcher-before-create')
++                    policy = scan_push(info, prefix, push_args, self.policy)
++                else:
++                    policy = scan_push(watched.info, watched.prefix, watched.push_args, self.policy)
+@@ -260,2 +347,5 @@
+-            watched.script.post({'type': 'decision', 'payload': {'deny': policy['deny']}})
+-            self.log('DENY' if policy['deny'] else 'ALLOW', pid=pid, **policy)
++            response_type = 'decision-' + data['id'] if data['type'] == 'launch-check' else 'decision'
++            watched.script.post({'type': response_type, 'payload': {'deny': policy['deny']}})
++            self.log('DENY' if policy['deny'] else 'ALLOW', pid=pid, scan_ms=round((time.perf_counter()-started)*1000,1), **policy)
++        elif data['type'] == 'launcher-error':
++            self.log('AGENT_ERROR', **data)
+@@ -266,0 +357,3 @@
++            resumer = threading.Thread(target=self.resume_worker, daemon=True, name='fast-resume')
++            self.workers.append(resumer)
++            resumer.start()
+@@ -272,2 +365,7 @@
+-            self.log('READY', monitors=len(self.sessions), config=str(self.config_path.absolute()))
+-            next_discovery = time.monotonic() + 1
++            self.log('READY', monitors=len(self.sessions), config=str(self.config_path.absolute()),
++                     coverage='monitored terminals and descendants only', unprotected_pids=list(self.failed))
++            if not self.pids:
++                for desktop in (False, True):
++                    worker = threading.Thread(target=self.discover_worker, args=(desktop,), daemon=True)
++                    self.workers.append(worker)
++                    worker.start()
+@@ -285,3 +383 @@
+-                if not self.pids and self.events.empty() and time.monotonic() >= next_discovery:
+-                    self.discover()
+-                    next_discovery = time.monotonic() + 1
++
+@@ -292 +388,3 @@
+-        self.stopping.set()
++        self.request_stop()
++        for worker in self.workers:
++            worker.join(timeout=6)
+--- a/guard.py
++++ b/guard.py
+@@ -7,0 +8,2 @@
++import io
++from functools import lru_cache
+@@ -121,0 +124 @@
++@lru_cache(maxsize=1)
+@@ -136 +139 @@
+-def git(repo: Path, *args: str, check: bool = True) -> subprocess.CompletedProcess:
++def git(repo: Path, *args: str, check: bool = True, input: bytes | None = None) -> subprocess.CompletedProcess:
+@@ -138 +141 @@
+-        [git_executable(), '-C', str(repo), *args], capture_output=True, timeout=30)
++        [git_executable(), '-C', str(repo), *args], input=input, capture_output=True, timeout=30)
+@@ -177,7 +180,2 @@
+-def scan_history(repo: Path, commit: str, policy: Policy, repo_root: Path | None = None) -> dict:
+-    """Conservative: examine all ancestry of the exact commit, not just the worktree.
+-
+-    Enumerate every tree, so renames and deleted secrets remain visible. Cache
+-    content results by blob OID but check path rules for each path separately.
+-    No secret values enter the report. Resource limits result in a deny decision.
+-    """
++def scan_history(repo: Path, commit: str | list[str], policy: Policy, repo_root: Path | None = None) -> dict:
++    """Scan all historical paths; read unique blob sizes/content in two Git batches."""
+@@ -185,5 +183,2 @@
+-    findings = []
+-    seen_findings = set()
+-    cache: dict[str, list[str]] = {}
+-    total_bytes = entries = 0
+-    # Replacement objects/grafts could otherwise hide the real outgoing ancestry.
++    findings, paths_by_blob = [], {}
++    entries = total_bytes = 0
+@@ -199 +194,2 @@
+-    commits = git(repo, 'rev-list', '--max-count', str(MAX_COMMITS + 1), commit).stdout.decode().splitlines()
++    roots = [commit] if isinstance(commit, str) else commit
++    commits = git(repo, 'rev-list', '--max-count', str(MAX_COMMITS + 1), *roots).stdout.decode().splitlines()
+@@ -202,7 +197,0 @@
+-
+-    def record(path: str, oid: str, rule: str, tree_commit: str):
+-        key = (path, oid, rule)
+-        if key not in seen_findings:
+-            seen_findings.add(key)
+-            findings.append({'path': path, 'blob': oid, 'rule': rule, 'commit': tree_commit})
+-
+@@ -216,2 +205 @@
+-                record('', '', 'tree-entry-limit', tree_commit)
+-                return {'deny': True, 'findings': findings}
++                return {'deny': True, 'findings': [{'rule': 'tree-entry-limit'}]}
+@@ -220,2 +207,0 @@
+-            oid = oid_bytes.decode('ascii')
+-            path = path_bytes.decode('utf-8', 'replace')
+@@ -223 +209,2 @@
+-                continue  # gitlinks contain commit IDs, not embedded submodule files.
++                continue
++            oid, path = oid_bytes.decode('ascii'), path_bytes.decode('utf-8', 'replace')
+@@ -225,6 +212,38 @@
+-                record(path, oid, 'sensitive-path', tree_commit)
+-            if oid not in cache:
+-                size = int(git(repo, 'cat-file', '-s', oid).stdout)
+-                total_bytes += size
+-                if size > MAX_BLOB_BYTES or total_bytes > MAX_TOTAL_BYTES:
+-                    record(path, oid, 'blob-scan-limit', tree_commit)
++                return {'deny': True, 'findings': [{'path': path, 'blob': oid,
++                        'rule': 'sensitive-path', 'commit': tree_commit}]}
++            paths_by_blob.setdefault(oid, []).append((path, tree_commit))
++    if paths_by_blob:
++        request = ''.join(oid + '\n' for oid in paths_by_blob).encode('ascii')
++        sizes = git(repo, 'cat-file', '--batch-check', input=request).stdout.splitlines()
++        if len(sizes) != len(paths_by_blob):
++            raise RuntimeError('Unexpected Git batch-check response count')
++        for expected, line in zip(paths_by_blob, sizes):
++            oid, kind, raw_size = line.split()
++            if oid.decode() != expected or kind != b'blob':
++                raise RuntimeError('Unexpected Git batch-check object')
++            size = int(raw_size)
++            total_bytes += size
++            if size > MAX_BLOB_BYTES or total_bytes > MAX_TOTAL_BYTES:
++                path, tree_commit = paths_by_blob[expected][0]
++                return {'deny': True, 'findings': [{'path': path, 'blob': expected,
++                        'rule': 'blob-scan-limit', 'commit': tree_commit}]}
++        if policy.scan_content or policy.protected_hashes:
++            stream = io.BytesIO(git(repo, 'cat-file', '--batch', input=request).stdout)
++            for expected in paths_by_blob:
++                oid, kind, raw_size = stream.readline().split()
++                if oid.decode() != expected or kind != b'blob':
++                    raise RuntimeError('Unexpected Git batch object')
++                size = int(raw_size)
++                if size > MAX_BLOB_BYTES:
++                    raise RuntimeError('Git batch size changed')
++                data = stream.read(size)
++                if len(data) != size or stream.read(1) != b'\n':
++                    raise RuntimeError('Truncated Git batch content')
++                rules = content_findings(data, policy)
++                if rules:
++                    seen = set()
++                    for path, tree_commit in paths_by_blob[expected]:
++                        for rule in rules:
++                            if (path, rule) not in seen:
++                                seen.add((path, rule))
++                                findings.append({'path': path, 'blob': expected, 'rule': rule, 'commit': tree_commit})
+@@ -232,8 +251,2 @@
+-                content = git(repo, 'cat-file', 'blob', oid).stdout
+-                cache[oid] = content_findings(content, policy)
+-            for rule in cache[oid]:
+-                record(path, oid, rule, tree_commit)
+-    return {'deny': bool(findings), 'findings': findings,
+-            'commits_scanned': len(commits), 'blobs_scanned': len(cache),
+-            'bytes_scanned': total_bytes, 'tree_entries': entries}
+-
++    return {'deny': False, 'findings': [], 'commits_scanned': len(commits),
++            'blobs_scanned': len(paths_by_blob), 'bytes_scanned': total_bytes, 'tree_entries': entries}
+--- a/README.md
++++ b/README.md
+@@ -33 +33 @@
+-看到 `READY` 和对应终端的 `MONITOR` 后，在该终端照常运行：
++看到对应终端 PID 的 `MONITOR` 后，在该终端照常运行：
+@@ -40 +40 @@
+-沿用现有 HTTPS/SSH 登录和代理配置。推送时应出现 `GIT_PUSH`，随后 `DENY`（拦截）或 `ALLOW`（放行）；只有 `MONITOR` 不代表该次推送已检查。仅保护已接入的终端及子进程；扫描所有本地引用的历史，可能保守拦截未推送分支。
++沿用现有 HTTPS/SSH 登录和代理配置。推送时应出现 `GIT_PUSH`，随后 `DENY`（拦截）或 `ALLOW`（放行）；`READY` 不代表所有终端均受保护；`UNPROTECTED_TERMINAL` 表示该终端尚未接入。仅保护已接入的终端及子进程；扫描所有本地引用的历史，可能保守拦截未推送分支。
+--- a/tests/test_backend.py
++++ b/tests/test_backend.py
+@@ -131,2 +131,6 @@
+- p=subprocess.run(json.loads(line),capture_output=True)
+- print(json.dumps({"exit_code":p.returncode,"stdout":p.stdout.decode("utf-8","replace"),"stderr":p.stderr.decode("utf-8","replace")}),flush=True)
++ try:
++  p=subprocess.run(json.loads(line),capture_output=True)
++  response={"exit_code":p.returncode,"stdout":p.stdout.decode("utf-8","replace"),"stderr":p.stderr.decode("utf-8","replace")}
++ except OSError as e:
++  response={"exit_code":None,"stdout":"","stderr":str(e),"launch_error":True}
++ print(json.dumps(response),flush=True)
+--- a/tests/test_push_paths.py
++++ b/tests/test_push_paths.py
+@@ -80,2 +80,4 @@
+- $a=@($r.args); $o=(& git @a 2>&1 | Out-String);
+- [Console]::WriteLine((@{exit_code=$LASTEXITCODE;output=$o} | ConvertTo-Json -Compress));
++ $a=@($r.args); $ErrorActionPreference='Stop';$launchError=$false;
++ try {$o=(& git @a 2>&1 | Out-String);$code=$LASTEXITCODE}
++ catch {$o=$_.ToString();$code=$null;$launchError=$true}
++ [Console]::WriteLine((@{exit_code=$code;output=$o;launch_error=$launchError} | ConvertTo-Json -Compress));
+@@ -216 +218 @@
+-                                    for name in ['backend.py', 'guard.py', 'watch_agent.js', 'config.json', 'README.md']}}
++                                    for name in ['backend.py', 'guard.py', 'watch_agent.js', 'launcher_agent.js', 'config.json', 'README.md']}}
+@@ -234 +236 @@
+-    main()
++    main()
+--- /dev/null
++++ b/launcher_agent.js
+@@ -0,0 +1,60 @@
++'use strict';
++const kernel = Process.getModuleByName('kernel32.dll');
++const shell = Module.load('shell32.dll');
++const parse = new NativeFunction(shell.getExportByName('CommandLineToArgvW'), 'pointer', ['pointer', 'pointer']);
++const free = new NativeFunction(kernel.getExportByName('LocalFree'), 'pointer', ['pointer']);
++let sequence = 0;
++let stopping = false;
++const replacements = [];
++const pending = new Map();
++function argv(command) {
++  const count=Memory.alloc(4), p=parse(Memory.allocUtf16String(command),count), out=[];
++  for(let i=0;i<count.readS32();i++)out.push(p.add(i*Process.pointerSize).readPointer().readUtf16String());
++  free(p);return out;
++}
++function directPush(args) {
++  const takesValue=new Set(['-C','-c','--git-dir','--work-tree','--namespace','--config-env','--super-prefix']);
++  let i=1;
++  while(i<args.length&&args[i].startsWith('-')) {
++    const token=args[i++];if(token==='--')break;if(takesValue.has(token))i++;
++  }
++  return args[i]==='push';
++}
++const signature=['pointer','pointer','pointer','pointer','int','uint32','pointer','pointer','pointer','pointer'];
++const addresses=new Set();
++for(const api of ['CreateProcessW','CreateProcessA']) {
++  const address=kernel.getExportByName(api);
++  if(addresses.has(address.toString()))continue;addresses.add(address.toString());
++  const original=new SystemFunction(address,'int',signature);
++  replacements.push(address);
++  Interceptor.replace(address,new NativeCallback(function(...args) {
++    let deny=false;
++    if(!stopping) {
++      try {
++        const text=p=>p.isNull()?'':(api.endsWith('A')?p.readAnsiString():p.readUtf16String());
++        const app=text(args[0]),command=text(args[1]);
++        const first=app||((command.match(/^\s*(?:"([^"]+)"|([^\s]+))/)||[]).slice(1).find(Boolean)||'');
++        if(/(?:^|[\\/])git(?:\.exe)?$/i.test(first)) {
++          const words=argv(command||app);
++          if(directPush(words)) {
++            const id=String(++sequence), info={argv:words,cwd:text(args[7])||Process.getCurrentDir()};
++            const slot={deny:true};pending.set(id,slot);
++            const response=recv('decision-'+id,message=>{slot.deny=!!message.payload.deny;});
++            send({type:'launch-check',id,info,pid:Process.id});response.wait();
++            deny=slot.deny;pending.delete(id);
++          }
++        }
++      } catch(error) {
++        // A detected Git push that loses its decision must fail before creation.
++        deny=true;send({type:'launcher-error',error:String(error),pid:Process.id});
++      }
++    }
++    if(deny) {
++      send({type:'blocked',pid:Process.id,api,stage:'launcher-before-create',win32_error:5,native_return:0});
++      this.lastError=5;return 0;
++    }
++    const result=original(...args);this.lastError=result.lastError;return result.value;
++  },'int',signature));
++}
++Interceptor.flush();
++rpc.exports={stop(){stopping=true;for(const address of replacements)Interceptor.revert(address);}};
+\ No newline at end of file
+--- /dev/null
++++ b/tests/test_performance.py
+@@ -0,0 +1,96 @@
++"""Real pwsh command latency and historical scanner comparison; isolated fixtures."""
++from pathlib import Path
++import hashlib,json,os,queue,signal,statistics,subprocess,sys,tempfile,threading,time,zipfile
++ROOT=Path(__file__).resolve().parents[1]
++sys.path.insert(0,str(ROOT));import guard
++from test_backend import remove_fixture
++
++
++def main():
++ w=Path(tempfile.mkdtemp(prefix='.tmp-perf-',dir=ROOT/'tests')).resolve()
++ records,metrics,backends=[],{},[];client=None
++ binary=guard.git_executable();original_hash=hashlib.sha256(Path(binary).read_bytes()).hexdigest()
++ def run(argv,cwd=None):
++  r=subprocess.run([str(x) for x in argv],cwd=cwd,capture_output=True,timeout=60)
++  records.append({'argv':[str(x) for x in argv],'cwd':str(cwd or ROOT),'exit_code':r.returncode,'stdout':r.stdout.decode('utf-8','replace'),'stderr':r.stderr.decode('utf-8','replace')})
++  assert r.returncode==0,records[-1];return r
++ def g(*args):return run([binary,'-C',repo,*args])
++ def launch(source):
++  p=w/f'backend-{len(backends)}.log';f=p.open('w',encoding='utf-8')
++  b=subprocess.Popen([sys.executable,'-B',source/'backend.py','--pid',str(client.pid),'--config',config],stdout=f,stderr=f,creationflags=subprocess.CREATE_NEW_PROCESS_GROUP)
++  backends.append((b,f,p));deadline=time.monotonic()+30
++  while '"event": "READY"' not in p.read_text():
++   assert b.poll() is None,p.read_text();assert time.monotonic()<deadline,p.read_text();time.sleep(.05)
++  return b
++ def stop(b):
++  b.send_signal(signal.CTRL_BREAK_EVENT);assert b.wait(15)==0
++ def command(args):
++  req={'args':args,'repo':str(repo)};started=time.perf_counter()
++  client.stdin.write(json.dumps(req)+'\n');client.stdin.flush()
++  q=queue.Queue();threading.Thread(target=lambda:q.put(client.stdout.readline()),daemon=True).start()
++  result=json.loads(q.get(timeout=60));elapsed=(time.perf_counter()-started)*1000
++  records.append({'argv':args,'cwd':str(repo),**result,'wall_ms':elapsed});assert result['exit_code']==0,result
++  return elapsed
++ def measure(name):
++  tests={'git-status':['git','status','--porcelain'],'git-rev-parse':['git','rev-parse','--short','HEAD'],'python-version':[sys.executable,'--version']}
++  metrics[name]={}
++  for test,args in tests.items():
++   command(args);values=[command(args) for _ in range(7)]
++   metrics[name][test]={'median_ms':statistics.median(values),'max_ms':max(values),'samples_ms':values}
++   print(f'[{name}] {test}: median {statistics.median(values):.1f} ms',flush=True)
++ try:
++  baseline=w/'baseline';baseline.mkdir()
++  with zipfile.ZipFile(ROOT/'tests'/'perf-baseline.zip') as z:
++   for name in ['backend.py','guard.py','watch_agent.js']:(baseline/name).write_bytes(z.read(name))
++  repo=w/'repo';repo.mkdir();g('init','-b','main');g('config','user.name','Fixture');g('config','user.email','fixture@example.invalid');g('config','commit.gpgsign','false')
++  for i in range(24):(repo/f'file-{i}.txt').write_text(f'ordinary benchmark data item {i}\n')
++  g('add','.');g('commit','-m','initial')
++  for i in range(3):
++   (repo/f'file-{i}.txt').write_text(f'changed ordinary benchmark data {i}\n');g('add','.');g('commit','-m',f'change {i}')
++  config=w/'policy.json';config.write_text(json.dumps({'sensitive_directories':[],'sensitive_files':['flag'],'scan_content':True}))
++  config_hash=hashlib.sha256((repo/'.git'/'config').read_bytes()).hexdigest()
++  ps='''[Console]::WriteLine("READY");while($line=[Console]::ReadLine()) {$r=ConvertFrom-Json $line;Set-Location -LiteralPath $r.repo;$a=@($r.args);$exe=$a[0];$a=@($a|Select-Object -Skip 1);$ErrorActionPreference='Stop';try{$o=(& $exe @a 2>&1|Out-String);$code=$LASTEXITCODE;$failed=$false}catch{$o=$_.ToString();$code=$null;$failed=$true};[Console]::WriteLine((@{exit_code=$code;output=$o;launch_error=$failed}|ConvertTo-Json -Compress))}'''
++  client=subprocess.Popen([r'C:\Program Files\PowerShell\7\pwsh.exe','-NoProfile','-Command',ps],stdin=subprocess.PIPE,stdout=subprocess.PIPE,stderr=subprocess.PIPE,text=True)
++  assert client.stdout.readline().strip()=='READY'
++  measure('off')
++  b=launch(baseline);measure('baseline');stop(b)
++  b=launch(ROOT);measure('modified');stop(b)
++  measure('after-stop')
++  scan_code='''from pathlib import Path
++import sys,time,json,subprocess
++sys.path.insert(0,sys.argv[1]);import guard
++original=subprocess.run;calls=[]
++def trace(*args,**kw):
++ r=original(*args,**kw)
++ calls.append({'argv':[str(x) for x in r.args],'exit_code':r.returncode,'stdout':r.stdout.decode('utf-8','replace'),'stderr':r.stderr.decode('utf-8','replace')})
++ return r
++subprocess.run=trace
++p=guard.Policy([],['flag'],True);started=time.perf_counter();result=guard.scan_history(Path(sys.argv[2]),'HEAD',p);elapsed=(time.perf_counter()-started)*1000
++print(json.dumps({'wall_ms':elapsed,'result':result,'git_subprocess_count':len(calls),'commands':calls}))
++'''
++  for name,source in [('baseline',baseline),('modified',ROOT)]:
++   r=run([sys.executable,'-B','-c',scan_code,source,repo]);result=json.loads(r.stdout);assert not result['result']['deny']
++   metrics[name]['history-scan']=result
++   print(f'[{name}] history scan: {result["wall_ms"]:.1f} ms, {result["git_subprocess_count"]} Git subprocesses',flush=True)
++  assert hashlib.sha256((repo/'.git'/'config').read_bytes()).hexdigest()==config_hash
++  assert hashlib.sha256(Path(binary).read_bytes()).hexdigest()==original_hash
++  for test in ['git-status','git-rev-parse','history-scan']:
++   key='wall_ms' if test=='history-scan' else 'median_ms'
++   assert metrics['modified'][test][key]<metrics['baseline'][test][key],(test,metrics)
++  report={'passed':True,'metrics':metrics,'records':records,'backend_logs':[p.read_text() for b,f,p in backends],
++          'repo_config_sha256_unchanged':config_hash,'git_binary_sha256_unchanged':original_hash,
++          'source_sha256':{name:hashlib.sha256((ROOT/name).read_bytes()).hexdigest() for name in ['backend.py','guard.py','watch_agent.js','launcher_agent.js','config.json']}}
++  (ROOT/'tests'/'performance-verification.json').write_text(json.dumps(report,ensure_ascii=False,indent=2),encoding='utf-8')
++  print('[VERIFIED] ordinary Git commands and history scan improved; stop restores normal commands.',flush=True)
++ finally:
++  for b,f,p in backends:
++   if b.poll() is None:b.kill();b.wait(15)
++   f.close()
++  if client:
++   client.stdin.close()
++   try:client.wait(10)
++   except subprocess.TimeoutExpired:client.kill();client.wait()
++  remove_fixture(w)
++
++
++if __name__=='__main__':main()
+\ No newline at end of file
+--- /dev/null
++++ b/tests/rollback_performance.py
+@@ -0,0 +1,26 @@
++"""Restore the working version before performance changes, inside this demo only."""
++import argparse,hashlib,json,zipfile
++from pathlib import Path
++ROOT=Path(__file__).resolve().parents[1]
++
++def main():
++ parser=argparse.ArgumentParser(description=__doc__);parser.add_argument('--target',type=Path,required=True)
++ target=parser.parse_args().target.resolve(strict=True)
++ if target!=ROOT and not target.is_relative_to(ROOT):raise ValueError('Target must stay inside demo')
++ with zipfile.ZipFile(Path(__file__).with_name('perf-baseline.zip')) as z:
++  if z.testzip() is not None:raise ValueError('Baseline CRC mismatch')
++  manifest=json.loads(z.read('manifest.json'))
++  for name,expected in manifest.items():
++   dest=(target/name).resolve()
++   if not dest.is_relative_to(target):raise ValueError('Baseline leaves target')
++   data=z.read(name)
++   if hashlib.sha256(data).hexdigest()!=expected:raise ValueError('Baseline hash mismatch')
++   dest.parent.mkdir(parents=True,exist_ok=True);dest.write_bytes(data)
++   if hashlib.sha256(dest.read_bytes()).hexdigest()!=expected:raise ValueError('Restored hash mismatch')
++ for name in ['launcher_agent.js','tests/test_performance.py']:
++  dest=(target/name).resolve()
++  if not dest.is_relative_to(target):raise ValueError('Added file leaves target')
++  if dest.exists():dest.unlink()
++ print('Pre-performance source hashes restored; Git/system configuration unchanged.')
++
++if __name__=='__main__':main()

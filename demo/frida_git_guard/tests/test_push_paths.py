@@ -77,8 +77,10 @@ def main():
         script = '''[Console]::WriteLine("CLIENT_READY");
 while ($line=[Console]::ReadLine()) {
  $r=ConvertFrom-Json $line; Set-Location -LiteralPath $r.repo;
- $a=@($r.args); $o=(& git @a 2>&1 | Out-String);
- [Console]::WriteLine((@{exit_code=$LASTEXITCODE;output=$o} | ConvertTo-Json -Compress));
+ $a=@($r.args); $ErrorActionPreference='Stop';$launchError=$false;
+ try {$o=(& git @a 2>&1 | Out-String);$code=$LASTEXITCODE}
+ catch {$o=$_.ToString();$code=$null;$launchError=$true}
+ [Console]::WriteLine((@{exit_code=$code;output=$o;launch_error=$launchError} | ConvertTo-Json -Compress));
 }'''
         client = subprocess.Popen([r'C:\Program Files\PowerShell\7\pwsh.exe', '-NoProfile', '-Command', script],
                                   stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
@@ -213,7 +215,7 @@ print('CTRL_C_EVENT delivered to isolated backend console')
         report = {'passed': True, 'cases': cases, 'records': records, 'https_requests': requests,
                   'tls_verification': True, 'git_binary_sha256_unchanged': binary_hash,
                   'source_sha256': {str(ROOT / name): hashlib.sha256((ROOT / name).read_bytes()).hexdigest()
-                                    for name in ['backend.py', 'guard.py', 'watch_agent.js', 'config.json', 'README.md']}}
+                                    for name in ['backend.py', 'guard.py', 'watch_agent.js', 'launcher_agent.js', 'config.json', 'README.md']}}
         (ROOT / 'tests' / 'push-path-verification.json').write_text(json.dumps(report, ensure_ascii=False, indent=2), encoding='utf-8')
         print(f'[VERIFIED] {len(cases)} baseline/path/TLS/console checks passed', flush=True)
     finally:

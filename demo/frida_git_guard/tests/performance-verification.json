@@ -1,0 +1,3096 @@
+{
+  "passed": true,
+  "metrics": {
+    "off": {
+      "git-status": {
+        "median_ms": 66.9740000157617,
+        "max_ms": 79.84800002304837,
+        "samples_ms": [
+          66.9740000157617,
+          74.23889997880906,
+          63.24360001599416,
+          65.66139997448772,
+          65.85209997138008,
+          79.84800002304837,
+          70.41019998723641
+        ]
+      },
+      "git-rev-parse": {
+        "median_ms": 56.13209999864921,
+        "max_ms": 68.08399996953085,
+        "samples_ms": [
+          68.08399996953085,
+          50.3432999830693,
+          56.13209999864921,
+          54.897000023629516,
+          59.91579999681562,
+          61.530500010121614,
+          51.622900005895644
+        ]
+      },
+      "python-version": {
+        "median_ms": 18.8639999832958,
+        "max_ms": 25.60629998333752,
+        "samples_ms": [
+          19.336699973791838,
+          18.837500014342368,
+          25.60629998333752,
+          18.1690999888815,
+          18.8639999832958,
+          19.769599952269346,
+          17.36860000528395
+        ]
+      }
+    },
+    "baseline": {
+      "git-status": {
+        "median_ms": 437.62900005094707,
+        "max_ms": 604.0259000146762,
+        "samples_ms": [
+          410.38939997088164,
+          437.62900005094707,
+          378.8337000296451,
+          436.925699992571,
+          517.6869999850169,
+          518.7669000006281,
+          604.0259000146762
+        ]
+      },
+      "git-rev-parse": {
+        "median_ms": 543.2939999736845,
+        "max_ms": 562.2984999790788,
+        "samples_ms": [
+          562.2984999790788,
+          552.0856999792159,
+          483.36230003042147,
+          398.0751000344753,
+          543.2939999736845,
+          559.3191999942064,
+          523.3520999900065
+        ]
+      },
+      "python-version": {
+        "median_ms": 41.010200046002865,
+        "max_ms": 43.58249995857477,
+        "samples_ms": [
+          43.030699947848916,
+          37.71760000381619,
+          32.72250003647059,
+          33.55950000695884,
+          41.50589997880161,
+          43.58249995857477,
+          41.010200046002865
+        ]
+      },
+      "history-scan": {
+        "wall_ms": 10612.975399999414,
+        "result": {
+          "deny": false,
+          "findings": [],
+          "commits_scanned": 4,
+          "blobs_scanned": 27,
+          "bytes_scanned": 887,
+          "tree_entries": 96
+        },
+        "git_subprocess_count": 126,
+        "commands": [
+          {
+            "argv": [
+              "E:\\Git\\cmd\\git.EXE",
+              "--exec-path"
+            ],
+            "exit_code": 0,
+            "stdout": "E:/Git/mingw64/libexec/git-core\n",
+            "stderr": ""
+          },
+          {
+            "argv": [
+              "E:\\Git\\mingw64\\bin\\git.exe",
+              "-C",
+              "D:\\ctf-ai\\dlp\\demo\\frida_git_guard\\tests\\.tmp-perf-fhas0h32\\repo",
+              "rev-parse",
+              "--show-toplevel"
+            ],
+            "exit_code": 0,
+            "stdout": "D:/ctf-ai/dlp/demo/frida_git_guard/tests/.tmp-perf-fhas0h32/repo\n",
+            "stderr": ""
+          },
+          {
+            "argv": [
+              "E:\\Git\\cmd\\git.EXE",
+              "--exec-path"
+            ],
+            "exit_code": 0,
+            "stdout": "E:/Git/mingw64/libexec/git-core\n",
+            "stderr": ""
+          },
+          {
+            "argv": [
+              "E:\\Git\\mingw64\\bin\\git.exe",
+              "-C",
+              "D:\\ctf-ai\\dlp\\demo\\frida_git_guard\\tests\\.tmp-perf-fhas0h32\\repo",
+              "replace",
+              "-l"
+            ],
+            "exit_code": 0,
+            "stdout": "",
+            "stderr": ""
+          },
+          {
+            "argv": [
+              "E:\\Git\\cmd\\git.EXE",
+              "--exec-path"
+            ],
+            "exit_code": 0,
+            "stdout": "E:/Git/mingw64/libexec/git-core\n",
+            "stderr": ""
+          },
+          {
+            "argv": [
+              "E:\\Git\\mingw64\\bin\\git.exe",
+              "-C",
+              "D:\\ctf-ai\\dlp\\demo\\frida_git_guard\\tests\\.tmp-perf-fhas0h32\\repo",
+              "rev-parse",
+              "--git-path",
+              "info/grafts"
+            ],
+            "exit_code": 0,
+            "stdout": ".git/info/grafts\n",
+            "stderr": ""
+          },
+          {
+            "argv": [
+              "E:\\Git\\cmd\\git.EXE",
+              "--exec-path"
+            ],
+            "exit_code": 0,
+            "stdout": "E:/Git/mingw64/libexec/git-core\n",
+            "stderr": ""
+          },
+          {
+            "argv": [
+              "E:\\Git\\mingw64\\bin\\git.exe",
+              "-C",
+              "D:\\ctf-ai\\dlp\\demo\\frida_git_guard\\tests\\.tmp-perf-fhas0h32\\repo",
+              "rev-parse",
+              "--is-shallow-repository"
+            ],
+            "exit_code": 0,
+            "stdout": "false\n",
+            "stderr": ""
+          },
+          {
+            "argv": [
+              "E:\\Git\\cmd\\git.EXE",
+              "--exec-path"
+            ],
+            "exit_code": 0,
+            "stdout": "E:/Git/mingw64/libexec/git-core\n",
+            "stderr": ""
+          },
+          {
+            "argv": [
+              "E:\\Git\\mingw64\\bin\\git.exe",
+              "-C",
+              "D:\\ctf-ai\\dlp\\demo\\frida_git_guard\\tests\\.tmp-perf-fhas0h32\\repo",
+              "rev-list",
+              "--max-count",
+              "1001",
+              "HEAD"
+            ],
+            "exit_code": 0,
+            "stdout": "101ddd1b0c399be9e784b76455d38c3ad569eb77\n1b140a3200f89b7cc47b1da5e58cf30a27e74e5a\nda5f5d967c80b08e11f68b41efec0798b6753ac7\n607f0ce41e01214786443079c7742720063d6b03\n",
+            "stderr": ""
+          },
+          {
+            "argv": [
+              "E:\\Git\\cmd\\git.EXE",
+              "--exec-path"
+            ],
+            "exit_code": 0,
+            "stdout": "E:/Git/mingw64/libexec/git-core\n",
+            "stderr": ""
+          },
+          {
+            "argv": [
+              "E:\\Git\\mingw64\\bin\\git.exe",
+              "-C",
+              "D:\\ctf-ai\\dlp\\demo\\frida_git_guard\\tests\\.tmp-perf-fhas0h32\\repo",
+              "ls-tree",
+              "-r",
+              "-z",
+              "101ddd1b0c399be9e784b76455d38c3ad569eb77"
+            ],
+            "exit_code": 0,
+            "stdout": "100644 blob 7a72c7d299a6e8bc244d9508cb22a65f08f45936\tfile-0.txt\u0000100644 blob 4124d4153025f5bbb582a12e29b1dad6a69f6b28\tfile-1.txt\u0000100644 blob 010a0eba928a9ec7ea3a8d88851b3985d959cea5\tfile-10.txt\u0000100644 blob 0b6f88539042faddb71f6b2ce6802f912565a60d\tfile-11.txt\u0000100644 blob ab7ffac4c1cc965f52f324fab3f2d1f749ee52d6\tfile-12.txt\u0000100644 blob 206dda33fd521c673d865e93b9247167f2f073d3\tfile-13.txt\u0000100644 blob 632602d422a3839b0de4943169d76be391ca785c\tfile-14.txt\u0000100644 blob 86a24c08c7d33d278e54d00814d63aabbb912f86\tfile-15.txt\u0000100644 blob 794d59375b602628f816121c05943a64e05610b2\tfile-16.txt\u0000100644 blob 71baf7c50d08b6bedbd817ad0babff47a61ed37a\tfile-17.txt\u0000100644 blob f8c70b4267e083371a5fa1cb079a895e76a1bd08\tfile-18.txt\u0000100644 blob 342f4dd0d4529cd7a1171812d353498ca12fd754\tfile-19.txt\u0000100644 blob ebd01a123a4cab21b4436ba95cbc1220663686be\tfile-2.txt\u0000100644 blob bb52f9862c8840ae77d725f166b899668f9061cc\tfile-20.txt\u0000100644 blob e476ff45ce855951e3c5c55e3c7a4ca609272f2f\tfile-21.txt\u0000100644 blob 0ec63a305bf45eecfd73f1111a9ebb985a1217cf\tfile-22.txt\u0000100644 blob ff5a6d9ea1a84b0a503b0870395f0995a36ba8bc\tfile-23.txt\u0000100644 blob 6882aea65ef3ea0ccc9fa99dbdba3dee761cdaab\tfile-3.txt\u0000100644 blob 1e8233126de567813a108ac669e2ed3953b7dd30\tfile-4.txt\u0000100644 blob cebe218daad98a86ddfaaa86d9df0039a0d1b130\tfile-5.txt\u0000100644 blob 57cef937c81486223003f8526674ca730bbfc0c7\tfile-6.txt\u0000100644 blob c231657ee146214e1c667bd47a1162f427c60024\tfile-7.txt\u0000100644 blob 23506dfbaddd81f61c1d69bb409195cdd34dc133\tfile-8.txt\u0000100644 blob c7a9a1056600701a09885ac9d413bad8ee58f778\tfile-9.txt\u0000",
+            "stderr": ""
+          },
+          {
+            "argv": [
+              "E:\\Git\\cmd\\git.EXE",
+              "--exec-path"
+            ],
+            "exit_code": 0,
+            "stdout": "E:/Git/mingw64/libexec/git-core\n",
+            "stderr": ""
+          },
+          {
+            "argv": [
+              "E:\\Git\\mingw64\\bin\\git.exe",
+              "-C",
+              "D:\\ctf-ai\\dlp\\demo\\frida_git_guard\\tests\\.tmp-perf-fhas0h32\\repo",
+              "cat-file",
+              "-s",
+              "7a72c7d299a6e8bc244d9508cb22a65f08f45936"
+            ],
+            "exit_code": 0,
+            "stdout": "35\n",
+            "stderr": ""
+          },
+          {
+            "argv": [
+              "E:\\Git\\cmd\\git.EXE",
+              "--exec-path"
+            ],
+            "exit_code": 0,
+            "stdout": "E:/Git/mingw64/libexec/git-core\n",
+            "stderr": ""
+          },
+          {
+            "argv": [
+              "E:\\Git\\mingw64\\bin\\git.exe",
+              "-C",
+              "D:\\ctf-ai\\dlp\\demo\\frida_git_guard\\tests\\.tmp-perf-fhas0h32\\repo",
+              "cat-file",
+              "blob",
+              "7a72c7d299a6e8bc244d9508cb22a65f08f45936"
+            ],
+            "exit_code": 0,
+            "stdout": "changed ordinary benchmark data 0\r\n",
+            "stderr": ""
+          },
+          {
+            "argv": [
+              "E:\\Git\\cmd\\git.EXE",
+              "--exec-path"
+            ],
+            "exit_code": 0,
+            "stdout": "E:/Git/mingw64/libexec/git-core\n",
+            "stderr": ""
+          },
+          {
+            "argv": [
+              "E:\\Git\\mingw64\\bin\\git.exe",
+              "-C",
+              "D:\\ctf-ai\\dlp\\demo\\frida_git_guard\\tests\\.tmp-perf-fhas0h32\\repo",
+              "cat-file",
+              "-s",
+              "4124d4153025f5bbb582a12e29b1dad6a69f6b28"
+            ],
+            "exit_code": 0,
+            "stdout": "35\n",
+            "stderr": ""
+          },
+          {
+            "argv": [
+              "E:\\Git\\cmd\\git.EXE",
+              "--exec-path"
+            ],
+            "exit_code": 0,
+            "stdout": "E:/Git/mingw64/libexec/git-core\n",
+            "stderr": ""
+          },
+          {
+            "argv": [
+              "E:\\Git\\mingw64\\bin\\git.exe",
+              "-C",
+              "D:\\ctf-ai\\dlp\\demo\\frida_git_guard\\tests\\.tmp-perf-fhas0h32\\repo",
+              "cat-file",
+              "blob",
+              "4124d4153025f5bbb582a12e29b1dad6a69f6b28"
+            ],
+            "exit_code": 0,
+            "stdout": "changed ordinary benchmark data 1\r\n",
+            "stderr": ""
+          },
+          {
+            "argv": [
+              "E:\\Git\\cmd\\git.EXE",
+              "--exec-path"
+            ],
+            "exit_code": 0,
+            "stdout": "E:/Git/mingw64/libexec/git-core\n",
+            "stderr": ""
+          },
+          {
+            "argv": [
+              "E:\\Git\\mingw64\\bin\\git.exe",
+              "-C",
+              "D:\\ctf-ai\\dlp\\demo\\frida_git_guard\\tests\\.tmp-perf-fhas0h32\\repo",
+              "cat-file",
+              "-s",
+              "010a0eba928a9ec7ea3a8d88851b3985d959cea5"
+            ],
+            "exit_code": 0,
+            "stdout": "33\n",
+            "stderr": ""
+          },
+          {
+            "argv": [
+              "E:\\Git\\cmd\\git.EXE",
+              "--exec-path"
+            ],
+            "exit_code": 0,
+            "stdout": "E:/Git/mingw64/libexec/git-core\n",
+            "stderr": ""
+          },
+          {
+            "argv": [
+              "E:\\Git\\mingw64\\bin\\git.exe",
+              "-C",
+              "D:\\ctf-ai\\dlp\\demo\\frida_git_guard\\tests\\.tmp-perf-fhas0h32\\repo",
+              "cat-file",
+              "blob",
+              "010a0eba928a9ec7ea3a8d88851b3985d959cea5"
+            ],
+            "exit_code": 0,
+            "stdout": "ordinary benchmark data item 10\r\n",
+            "stderr": ""
+          },
+          {
+            "argv": [
+              "E:\\Git\\cmd\\git.EXE",
+              "--exec-path"
+            ],
+            "exit_code": 0,
+            "stdout": "E:/Git/mingw64/libexec/git-core\n",
+            "stderr": ""
+          },
+          {
+            "argv": [
+              "E:\\Git\\mingw64\\bin\\git.exe",
+              "-C",
+              "D:\\ctf-ai\\dlp\\demo\\frida_git_guard\\tests\\.tmp-perf-fhas0h32\\repo",
+              "cat-file",
+              "-s",
+              "0b6f88539042faddb71f6b2ce6802f912565a60d"
+            ],
+            "exit_code": 0,
+            "stdout": "33\n",
+            "stderr": ""
+          },
+          {
+            "argv": [
+              "E:\\Git\\cmd\\git.EXE",
+              "--exec-path"
+            ],
+            "exit_code": 0,
+            "stdout": "E:/Git/mingw64/libexec/git-core\n",
+            "stderr": ""
+          },
+          {
+            "argv": [
+              "E:\\Git\\mingw64\\bin\\git.exe",
+              "-C",
+              "D:\\ctf-ai\\dlp\\demo\\frida_git_guard\\tests\\.tmp-perf-fhas0h32\\repo",
+              "cat-file",
+              "blob",
+              "0b6f88539042faddb71f6b2ce6802f912565a60d"
+            ],
+            "exit_code": 0,
+            "stdout": "ordinary benchmark data item 11\r\n",
+            "stderr": ""
+          },
+          {
+            "argv": [
+              "E:\\Git\\cmd\\git.EXE",
+              "--exec-path"
+            ],
+            "exit_code": 0,
+            "stdout": "E:/Git/mingw64/libexec/git-core\n",
+            "stderr": ""
+          },
+          {
+            "argv": [
+              "E:\\Git\\mingw64\\bin\\git.exe",
+              "-C",
+              "D:\\ctf-ai\\dlp\\demo\\frida_git_guard\\tests\\.tmp-perf-fhas0h32\\repo",
+              "cat-file",
+              "-s",
+              "ab7ffac4c1cc965f52f324fab3f2d1f749ee52d6"
+            ],
+            "exit_code": 0,
+            "stdout": "33\n",
+            "stderr": ""
+          },
+          {
+            "argv": [
+              "E:\\Git\\cmd\\git.EXE",
+              "--exec-path"
+            ],
+            "exit_code": 0,
+            "stdout": "E:/Git/mingw64/libexec/git-core\n",
+            "stderr": ""
+          },
+          {
+            "argv": [
+              "E:\\Git\\mingw64\\bin\\git.exe",
+              "-C",
+              "D:\\ctf-ai\\dlp\\demo\\frida_git_guard\\tests\\.tmp-perf-fhas0h32\\repo",
+              "cat-file",
+              "blob",
+              "ab7ffac4c1cc965f52f324fab3f2d1f749ee52d6"
+            ],
+            "exit_code": 0,
+            "stdout": "ordinary benchmark data item 12\r\n",
+            "stderr": ""
+          },
+          {
+            "argv": [
+              "E:\\Git\\cmd\\git.EXE",
+              "--exec-path"
+            ],
+            "exit_code": 0,
+            "stdout": "E:/Git/mingw64/libexec/git-core\n",
+            "stderr": ""
+          },
+          {
+            "argv": [
+              "E:\\Git\\mingw64\\bin\\git.exe",
+              "-C",
+              "D:\\ctf-ai\\dlp\\demo\\frida_git_guard\\tests\\.tmp-perf-fhas0h32\\repo",
+              "cat-file",
+              "-s",
+              "206dda33fd521c673d865e93b9247167f2f073d3"
+            ],
+            "exit_code": 0,
+            "stdout": "33\n",
+            "stderr": ""
+          },
+          {
+            "argv": [
+              "E:\\Git\\cmd\\git.EXE",
+              "--exec-path"
+            ],
+            "exit_code": 0,
+            "stdout": "E:/Git/mingw64/libexec/git-core\n",
+            "stderr": ""
+          },
+          {
+            "argv": [
+              "E:\\Git\\mingw64\\bin\\git.exe",
+              "-C",
+              "D:\\ctf-ai\\dlp\\demo\\frida_git_guard\\tests\\.tmp-perf-fhas0h32\\repo",
+              "cat-file",
+              "blob",
+              "206dda33fd521c673d865e93b9247167f2f073d3"
+            ],
+            "exit_code": 0,
+            "stdout": "ordinary benchmark data item 13\r\n",
+            "stderr": ""
+          },
+          {
+            "argv": [
+              "E:\\Git\\cmd\\git.EXE",
+              "--exec-path"
+            ],
+            "exit_code": 0,
+            "stdout": "E:/Git/mingw64/libexec/git-core\n",
+            "stderr": ""
+          },
+          {
+            "argv": [
+              "E:\\Git\\mingw64\\bin\\git.exe",
+              "-C",
+              "D:\\ctf-ai\\dlp\\demo\\frida_git_guard\\tests\\.tmp-perf-fhas0h32\\repo",
+              "cat-file",
+              "-s",
+              "632602d422a3839b0de4943169d76be391ca785c"
+            ],
+            "exit_code": 0,
+            "stdout": "33\n",
+            "stderr": ""
+          },
+          {
+            "argv": [
+              "E:\\Git\\cmd\\git.EXE",
+              "--exec-path"
+            ],
+            "exit_code": 0,
+            "stdout": "E:/Git/mingw64/libexec/git-core\n",
+            "stderr": ""
+          },
+          {
+            "argv": [
+              "E:\\Git\\mingw64\\bin\\git.exe",
+              "-C",
+              "D:\\ctf-ai\\dlp\\demo\\frida_git_guard\\tests\\.tmp-perf-fhas0h32\\repo",
+              "cat-file",
+              "blob",
+              "632602d422a3839b0de4943169d76be391ca785c"
+            ],
+            "exit_code": 0,
+            "stdout": "ordinary benchmark data item 14\r\n",
+            "stderr": ""
+          },
+          {
+            "argv": [
+              "E:\\Git\\cmd\\git.EXE",
+              "--exec-path"
+            ],
+            "exit_code": 0,
+            "stdout": "E:/Git/mingw64/libexec/git-core\n",
+            "stderr": ""
+          },
+          {
+            "argv": [
+              "E:\\Git\\mingw64\\bin\\git.exe",
+              "-C",
+              "D:\\ctf-ai\\dlp\\demo\\frida_git_guard\\tests\\.tmp-perf-fhas0h32\\repo",
+              "cat-file",
+              "-s",
+              "86a24c08c7d33d278e54d00814d63aabbb912f86"
+            ],
+            "exit_code": 0,
+            "stdout": "33\n",
+            "stderr": ""
+          },
+          {
+            "argv": [
+              "E:\\Git\\cmd\\git.EXE",
+              "--exec-path"
+            ],
+            "exit_code": 0,
+            "stdout": "E:/Git/mingw64/libexec/git-core\n",
+            "stderr": ""
+          },
+          {
+            "argv": [
+              "E:\\Git\\mingw64\\bin\\git.exe",
+              "-C",
+              "D:\\ctf-ai\\dlp\\demo\\frida_git_guard\\tests\\.tmp-perf-fhas0h32\\repo",
+              "cat-file",
+              "blob",
+              "86a24c08c7d33d278e54d00814d63aabbb912f86"
+            ],
+            "exit_code": 0,
+            "stdout": "ordinary benchmark data item 15\r\n",
+            "stderr": ""
+          },
+          {
+            "argv": [
+              "E:\\Git\\cmd\\git.EXE",
+              "--exec-path"
+            ],
+            "exit_code": 0,
+            "stdout": "E:/Git/mingw64/libexec/git-core\n",
+            "stderr": ""
+          },
+          {
+            "argv": [
+              "E:\\Git\\mingw64\\bin\\git.exe",
+              "-C",
+              "D:\\ctf-ai\\dlp\\demo\\frida_git_guard\\tests\\.tmp-perf-fhas0h32\\repo",
+              "cat-file",
+              "-s",
+              "794d59375b602628f816121c05943a64e05610b2"
+            ],
+            "exit_code": 0,
+            "stdout": "33\n",
+            "stderr": ""
+          },
+          {
+            "argv": [
+              "E:\\Git\\cmd\\git.EXE",
+              "--exec-path"
+            ],
+            "exit_code": 0,
+            "stdout": "E:/Git/mingw64/libexec/git-core\n",
+            "stderr": ""
+          },
+          {
+            "argv": [
+              "E:\\Git\\mingw64\\bin\\git.exe",
+              "-C",
+              "D:\\ctf-ai\\dlp\\demo\\frida_git_guard\\tests\\.tmp-perf-fhas0h32\\repo",
+              "cat-file",
+              "blob",
+              "794d59375b602628f816121c05943a64e05610b2"
+            ],
+            "exit_code": 0,
+            "stdout": "ordinary benchmark data item 16\r\n",
+            "stderr": ""
+          },
+          {
+            "argv": [
+              "E:\\Git\\cmd\\git.EXE",
+              "--exec-path"
+            ],
+            "exit_code": 0,
+            "stdout": "E:/Git/mingw64/libexec/git-core\n",
+            "stderr": ""
+          },
+          {
+            "argv": [
+              "E:\\Git\\mingw64\\bin\\git.exe",
+              "-C",
+              "D:\\ctf-ai\\dlp\\demo\\frida_git_guard\\tests\\.tmp-perf-fhas0h32\\repo",
+              "cat-file",
+              "-s",
+              "71baf7c50d08b6bedbd817ad0babff47a61ed37a"
+            ],
+            "exit_code": 0,
+            "stdout": "33\n",
+            "stderr": ""
+          },
+          {
+            "argv": [
+              "E:\\Git\\cmd\\git.EXE",
+              "--exec-path"
+            ],
+            "exit_code": 0,
+            "stdout": "E:/Git/mingw64/libexec/git-core\n",
+            "stderr": ""
+          },
+          {
+            "argv": [
+              "E:\\Git\\mingw64\\bin\\git.exe",
+              "-C",
+              "D:\\ctf-ai\\dlp\\demo\\frida_git_guard\\tests\\.tmp-perf-fhas0h32\\repo",
+              "cat-file",
+              "blob",
+              "71baf7c50d08b6bedbd817ad0babff47a61ed37a"
+            ],
+            "exit_code": 0,
+            "stdout": "ordinary benchmark data item 17\r\n",
+            "stderr": ""
+          },
+          {
+            "argv": [
+              "E:\\Git\\cmd\\git.EXE",
+              "--exec-path"
+            ],
+            "exit_code": 0,
+            "stdout": "E:/Git/mingw64/libexec/git-core\n",
+            "stderr": ""
+          },
+          {
+            "argv": [
+              "E:\\Git\\mingw64\\bin\\git.exe",
+              "-C",
+              "D:\\ctf-ai\\dlp\\demo\\frida_git_guard\\tests\\.tmp-perf-fhas0h32\\repo",
+              "cat-file",
+              "-s",
+              "f8c70b4267e083371a5fa1cb079a895e76a1bd08"
+            ],
+            "exit_code": 0,
+            "stdout": "33\n",
+            "stderr": ""
+          },
+          {
+            "argv": [
+              "E:\\Git\\cmd\\git.EXE",
+              "--exec-path"
+            ],
+            "exit_code": 0,
+            "stdout": "E:/Git/mingw64/libexec/git-core\n",
+            "stderr": ""
+          },
+          {
+            "argv": [
+              "E:\\Git\\mingw64\\bin\\git.exe",
+              "-C",
+              "D:\\ctf-ai\\dlp\\demo\\frida_git_guard\\tests\\.tmp-perf-fhas0h32\\repo",
+              "cat-file",
+              "blob",
+              "f8c70b4267e083371a5fa1cb079a895e76a1bd08"
+            ],
+            "exit_code": 0,
+            "stdout": "ordinary benchmark data item 18\r\n",
+            "stderr": ""
+          },
+          {
+            "argv": [
+              "E:\\Git\\cmd\\git.EXE",
+              "--exec-path"
+            ],
+            "exit_code": 0,
+            "stdout": "E:/Git/mingw64/libexec/git-core\n",
+            "stderr": ""
+          },
+          {
+            "argv": [
+              "E:\\Git\\mingw64\\bin\\git.exe",
+              "-C",
+              "D:\\ctf-ai\\dlp\\demo\\frida_git_guard\\tests\\.tmp-perf-fhas0h32\\repo",
+              "cat-file",
+              "-s",
+              "342f4dd0d4529cd7a1171812d353498ca12fd754"
+            ],
+            "exit_code": 0,
+            "stdout": "33\n",
+            "stderr": ""
+          },
+          {
+            "argv": [
+              "E:\\Git\\cmd\\git.EXE",
+              "--exec-path"
+            ],
+            "exit_code": 0,
+            "stdout": "E:/Git/mingw64/libexec/git-core\n",
+            "stderr": ""
+          },
+          {
+            "argv": [
+              "E:\\Git\\mingw64\\bin\\git.exe",
+              "-C",
+              "D:\\ctf-ai\\dlp\\demo\\frida_git_guard\\tests\\.tmp-perf-fhas0h32\\repo",
+              "cat-file",
+              "blob",
+              "342f4dd0d4529cd7a1171812d353498ca12fd754"
+            ],
+            "exit_code": 0,
+            "stdout": "ordinary benchmark data item 19\r\n",
+            "stderr": ""
+          },
+          {
+            "argv": [
+              "E:\\Git\\cmd\\git.EXE",
+              "--exec-path"
+            ],
+            "exit_code": 0,
+            "stdout": "E:/Git/mingw64/libexec/git-core\n",
+            "stderr": ""
+          },
+          {
+            "argv": [
+              "E:\\Git\\mingw64\\bin\\git.exe",
+              "-C",
+              "D:\\ctf-ai\\dlp\\demo\\frida_git_guard\\tests\\.tmp-perf-fhas0h32\\repo",
+              "cat-file",
+              "-s",
+              "ebd01a123a4cab21b4436ba95cbc1220663686be"
+            ],
+            "exit_code": 0,
+            "stdout": "35\n",
+            "stderr": ""
+          },
+          {
+            "argv": [
+              "E:\\Git\\cmd\\git.EXE",
+              "--exec-path"
+            ],
+            "exit_code": 0,
+            "stdout": "E:/Git/mingw64/libexec/git-core\n",
+            "stderr": ""
+          },
+          {
+            "argv": [
+              "E:\\Git\\mingw64\\bin\\git.exe",
+              "-C",
+              "D:\\ctf-ai\\dlp\\demo\\frida_git_guard\\tests\\.tmp-perf-fhas0h32\\repo",
+              "cat-file",
+              "blob",
+              "ebd01a123a4cab21b4436ba95cbc1220663686be"
+            ],
+            "exit_code": 0,
+            "stdout": "changed ordinary benchmark data 2\r\n",
+            "stderr": ""
+          },
+          {
+            "argv": [
+              "E:\\Git\\cmd\\git.EXE",
+              "--exec-path"
+            ],
+            "exit_code": 0,
+            "stdout": "E:/Git/mingw64/libexec/git-core\n",
+            "stderr": ""
+          },
+          {
+            "argv": [
+              "E:\\Git\\mingw64\\bin\\git.exe",
+              "-C",
+              "D:\\ctf-ai\\dlp\\demo\\frida_git_guard\\tests\\.tmp-perf-fhas0h32\\repo",
+              "cat-file",
+              "-s",
+              "bb52f9862c8840ae77d725f166b899668f9061cc"
+            ],
+            "exit_code": 0,
+            "stdout": "33\n",
+            "stderr": ""
+          },
+          {
+            "argv": [
+              "E:\\Git\\cmd\\git.EXE",
+              "--exec-path"
+            ],
+            "exit_code": 0,
+            "stdout": "E:/Git/mingw64/libexec/git-core\n",
+            "stderr": ""
+          },
+          {
+            "argv": [
+              "E:\\Git\\mingw64\\bin\\git.exe",
+              "-C",
+              "D:\\ctf-ai\\dlp\\demo\\frida_git_guard\\tests\\.tmp-perf-fhas0h32\\repo",
+              "cat-file",
+              "blob",
+              "bb52f9862c8840ae77d725f166b899668f9061cc"
+            ],
+            "exit_code": 0,
+            "stdout": "ordinary benchmark data item 20\r\n",
+            "stderr": ""
+          },
+          {
+            "argv": [
+              "E:\\Git\\cmd\\git.EXE",
+              "--exec-path"
+            ],
+            "exit_code": 0,
+            "stdout": "E:/Git/mingw64/libexec/git-core\n",
+            "stderr": ""
+          },
+          {
+            "argv": [
+              "E:\\Git\\mingw64\\bin\\git.exe",
+              "-C",
+              "D:\\ctf-ai\\dlp\\demo\\frida_git_guard\\tests\\.tmp-perf-fhas0h32\\repo",
+              "cat-file",
+              "-s",
+              "e476ff45ce855951e3c5c55e3c7a4ca609272f2f"
+            ],
+            "exit_code": 0,
+            "stdout": "33\n",
+            "stderr": ""
+          },
+          {
+            "argv": [
+              "E:\\Git\\cmd\\git.EXE",
+              "--exec-path"
+            ],
+            "exit_code": 0,
+            "stdout": "E:/Git/mingw64/libexec/git-core\n",
+            "stderr": ""
+          },
+          {
+            "argv": [
+              "E:\\Git\\mingw64\\bin\\git.exe",
+              "-C",
+              "D:\\ctf-ai\\dlp\\demo\\frida_git_guard\\tests\\.tmp-perf-fhas0h32\\repo",
+              "cat-file",
+              "blob",
+              "e476ff45ce855951e3c5c55e3c7a4ca609272f2f"
+            ],
+            "exit_code": 0,
+            "stdout": "ordinary benchmark data item 21\r\n",
+            "stderr": ""
+          },
+          {
+            "argv": [
+              "E:\\Git\\cmd\\git.EXE",
+              "--exec-path"
+            ],
+            "exit_code": 0,
+            "stdout": "E:/Git/mingw64/libexec/git-core\n",
+            "stderr": ""
+          },
+          {
+            "argv": [
+              "E:\\Git\\mingw64\\bin\\git.exe",
+              "-C",
+              "D:\\ctf-ai\\dlp\\demo\\frida_git_guard\\tests\\.tmp-perf-fhas0h32\\repo",
+              "cat-file",
+              "-s",
+              "0ec63a305bf45eecfd73f1111a9ebb985a1217cf"
+            ],
+            "exit_code": 0,
+            "stdout": "33\n",
+            "stderr": ""
+          },
+          {
+            "argv": [
+              "E:\\Git\\cmd\\git.EXE",
+              "--exec-path"
+            ],
+            "exit_code": 0,
+            "stdout": "E:/Git/mingw64/libexec/git-core\n",
+            "stderr": ""
+          },
+          {
+            "argv": [
+              "E:\\Git\\mingw64\\bin\\git.exe",
+              "-C",
+              "D:\\ctf-ai\\dlp\\demo\\frida_git_guard\\tests\\.tmp-perf-fhas0h32\\repo",
+              "cat-file",
+              "blob",
+              "0ec63a305bf45eecfd73f1111a9ebb985a1217cf"
+            ],
+            "exit_code": 0,
+            "stdout": "ordinary benchmark data item 22\r\n",
+            "stderr": ""
+          },
+          {
+            "argv": [
+              "E:\\Git\\cmd\\git.EXE",
+              "--exec-path"
+            ],
+            "exit_code": 0,
+            "stdout": "E:/Git/mingw64/libexec/git-core\n",
+            "stderr": ""
+          },
+          {
+            "argv": [
+              "E:\\Git\\mingw64\\bin\\git.exe",
+              "-C",
+              "D:\\ctf-ai\\dlp\\demo\\frida_git_guard\\tests\\.tmp-perf-fhas0h32\\repo",
+              "cat-file",
+              "-s",
+              "ff5a6d9ea1a84b0a503b0870395f0995a36ba8bc"
+            ],
+            "exit_code": 0,
+            "stdout": "33\n",
+            "stderr": ""
+          },
+          {
+            "argv": [
+              "E:\\Git\\cmd\\git.EXE",
+              "--exec-path"
+            ],
+            "exit_code": 0,
+            "stdout": "E:/Git/mingw64/libexec/git-core\n",
+            "stderr": ""
+          },
+          {
+            "argv": [
+              "E:\\Git\\mingw64\\bin\\git.exe",
+              "-C",
+              "D:\\ctf-ai\\dlp\\demo\\frida_git_guard\\tests\\.tmp-perf-fhas0h32\\repo",
+              "cat-file",
+              "blob",
+              "ff5a6d9ea1a84b0a503b0870395f0995a36ba8bc"
+            ],
+            "exit_code": 0,
+            "stdout": "ordinary benchmark data item 23\r\n",
+            "stderr": ""
+          },
+          {
+            "argv": [
+              "E:\\Git\\cmd\\git.EXE",
+              "--exec-path"
+            ],
+            "exit_code": 0,
+            "stdout": "E:/Git/mingw64/libexec/git-core\n",
+            "stderr": ""
+          },
+          {
+            "argv": [
+              "E:\\Git\\mingw64\\bin\\git.exe",
+              "-C",
+              "D:\\ctf-ai\\dlp\\demo\\frida_git_guard\\tests\\.tmp-perf-fhas0h32\\repo",
+              "cat-file",
+              "-s",
+              "6882aea65ef3ea0ccc9fa99dbdba3dee761cdaab"
+            ],
+            "exit_code": 0,
+            "stdout": "32\n",
+            "stderr": ""
+          },
+          {
+            "argv": [
+              "E:\\Git\\cmd\\git.EXE",
+              "--exec-path"
+            ],
+            "exit_code": 0,
+            "stdout": "E:/Git/mingw64/libexec/git-core\n",
+            "stderr": ""
+          },
+          {
+            "argv": [
+              "E:\\Git\\mingw64\\bin\\git.exe",
+              "-C",
+              "D:\\ctf-ai\\dlp\\demo\\frida_git_guard\\tests\\.tmp-perf-fhas0h32\\repo",
+              "cat-file",
+              "blob",
+              "6882aea65ef3ea0ccc9fa99dbdba3dee761cdaab"
+            ],
+            "exit_code": 0,
+            "stdout": "ordinary benchmark data item 3\r\n",
+            "stderr": ""
+          },
+          {
+            "argv": [
+              "E:\\Git\\cmd\\git.EXE",
+              "--exec-path"
+            ],
+            "exit_code": 0,
+            "stdout": "E:/Git/mingw64/libexec/git-core\n",
+            "stderr": ""
+          },
+          {
+            "argv": [
+              "E:\\Git\\mingw64\\bin\\git.exe",
+              "-C",
+              "D:\\ctf-ai\\dlp\\demo\\frida_git_guard\\tests\\.tmp-perf-fhas0h32\\repo",
+              "cat-file",
+              "-s",
+              "1e8233126de567813a108ac669e2ed3953b7dd30"
+            ],
+            "exit_code": 0,
+            "stdout": "32\n",
+            "stderr": ""
+          },
+          {
+            "argv": [
+              "E:\\Git\\cmd\\git.EXE",
+              "--exec-path"
+            ],
+            "exit_code": 0,
+            "stdout": "E:/Git/mingw64/libexec/git-core\n",
+            "stderr": ""
+          },
+          {
+            "argv": [
+              "E:\\Git\\mingw64\\bin\\git.exe",
+              "-C",
+              "D:\\ctf-ai\\dlp\\demo\\frida_git_guard\\tests\\.tmp-perf-fhas0h32\\repo",
+              "cat-file",
+              "blob",
+              "1e8233126de567813a108ac669e2ed3953b7dd30"
+            ],
+            "exit_code": 0,
+            "stdout": "ordinary benchmark data item 4\r\n",
+            "stderr": ""
+          },
+          {
+            "argv": [
+              "E:\\Git\\cmd\\git.EXE",
+              "--exec-path"
+            ],
+            "exit_code": 0,
+            "stdout": "E:/Git/mingw64/libexec/git-core\n",
+            "stderr": ""
+          },
+          {
+            "argv": [
+              "E:\\Git\\mingw64\\bin\\git.exe",
+              "-C",
+              "D:\\ctf-ai\\dlp\\demo\\frida_git_guard\\tests\\.tmp-perf-fhas0h32\\repo",
+              "cat-file",
+              "-s",
+              "cebe218daad98a86ddfaaa86d9df0039a0d1b130"
+            ],
+            "exit_code": 0,
+            "stdout": "32\n",
+            "stderr": ""
+          },
+          {
+            "argv": [
+              "E:\\Git\\cmd\\git.EXE",
+              "--exec-path"
+            ],
+            "exit_code": 0,
+            "stdout": "E:/Git/mingw64/libexec/git-core\n",
+            "stderr": ""
+          },
+          {
+            "argv": [
+              "E:\\Git\\mingw64\\bin\\git.exe",
+              "-C",
+              "D:\\ctf-ai\\dlp\\demo\\frida_git_guard\\tests\\.tmp-perf-fhas0h32\\repo",
+              "cat-file",
+              "blob",
+              "cebe218daad98a86ddfaaa86d9df0039a0d1b130"
+            ],
+            "exit_code": 0,
+            "stdout": "ordinary benchmark data item 5\r\n",
+            "stderr": ""
+          },
+          {
+            "argv": [
+              "E:\\Git\\cmd\\git.EXE",
+              "--exec-path"
+            ],
+            "exit_code": 0,
+            "stdout": "E:/Git/mingw64/libexec/git-core\n",
+            "stderr": ""
+          },
+          {
+            "argv": [
+              "E:\\Git\\mingw64\\bin\\git.exe",
+              "-C",
+              "D:\\ctf-ai\\dlp\\demo\\frida_git_guard\\tests\\.tmp-perf-fhas0h32\\repo",
+              "cat-file",
+              "-s",
+              "57cef937c81486223003f8526674ca730bbfc0c7"
+            ],
+            "exit_code": 0,
+            "stdout": "32\n",
+            "stderr": ""
+          },
+          {
+            "argv": [
+              "E:\\Git\\cmd\\git.EXE",
+              "--exec-path"
+            ],
+            "exit_code": 0,
+            "stdout": "E:/Git/mingw64/libexec/git-core\n",
+            "stderr": ""
+          },
+          {
+            "argv": [
+              "E:\\Git\\mingw64\\bin\\git.exe",
+              "-C",
+              "D:\\ctf-ai\\dlp\\demo\\frida_git_guard\\tests\\.tmp-perf-fhas0h32\\repo",
+              "cat-file",
+              "blob",
+              "57cef937c81486223003f8526674ca730bbfc0c7"
+            ],
+            "exit_code": 0,
+            "stdout": "ordinary benchmark data item 6\r\n",
+            "stderr": ""
+          },
+          {
+            "argv": [
+              "E:\\Git\\cmd\\git.EXE",
+              "--exec-path"
+            ],
+            "exit_code": 0,
+            "stdout": "E:/Git/mingw64/libexec/git-core\n",
+            "stderr": ""
+          },
+          {
+            "argv": [
+              "E:\\Git\\mingw64\\bin\\git.exe",
+              "-C",
+              "D:\\ctf-ai\\dlp\\demo\\frida_git_guard\\tests\\.tmp-perf-fhas0h32\\repo",
+              "cat-file",
+              "-s",
+              "c231657ee146214e1c667bd47a1162f427c60024"
+            ],
+            "exit_code": 0,
+            "stdout": "32\n",
+            "stderr": ""
+          },
+          {
+            "argv": [
+              "E:\\Git\\cmd\\git.EXE",
+              "--exec-path"
+            ],
+            "exit_code": 0,
+            "stdout": "E:/Git/mingw64/libexec/git-core\n",
+            "stderr": ""
+          },
+          {
+            "argv": [
+              "E:\\Git\\mingw64\\bin\\git.exe",
+              "-C",
+              "D:\\ctf-ai\\dlp\\demo\\frida_git_guard\\tests\\.tmp-perf-fhas0h32\\repo",
+              "cat-file",
+              "blob",
+              "c231657ee146214e1c667bd47a1162f427c60024"
+            ],
+            "exit_code": 0,
+            "stdout": "ordinary benchmark data item 7\r\n",
+            "stderr": ""
+          },
+          {
+            "argv": [
+              "E:\\Git\\cmd\\git.EXE",
+              "--exec-path"
+            ],
+            "exit_code": 0,
+            "stdout": "E:/Git/mingw64/libexec/git-core\n",
+            "stderr": ""
+          },
+          {
+            "argv": [
+              "E:\\Git\\mingw64\\bin\\git.exe",
+              "-C",
+              "D:\\ctf-ai\\dlp\\demo\\frida_git_guard\\tests\\.tmp-perf-fhas0h32\\repo",
+              "cat-file",
+              "-s",
+              "23506dfbaddd81f61c1d69bb409195cdd34dc133"
+            ],
+            "exit_code": 0,
+            "stdout": "32\n",
+            "stderr": ""
+          },
+          {
+            "argv": [
+              "E:\\Git\\cmd\\git.EXE",
+              "--exec-path"
+            ],
+            "exit_code": 0,
+            "stdout": "E:/Git/mingw64/libexec/git-core\n",
+            "stderr": ""
+          },
+          {
+            "argv": [
+              "E:\\Git\\mingw64\\bin\\git.exe",
+              "-C",
+              "D:\\ctf-ai\\dlp\\demo\\frida_git_guard\\tests\\.tmp-perf-fhas0h32\\repo",
+              "cat-file",
+              "blob",
+              "23506dfbaddd81f61c1d69bb409195cdd34dc133"
+            ],
+            "exit_code": 0,
+            "stdout": "ordinary benchmark data item 8\r\n",
+            "stderr": ""
+          },
+          {
+            "argv": [
+              "E:\\Git\\cmd\\git.EXE",
+              "--exec-path"
+            ],
+            "exit_code": 0,
+            "stdout": "E:/Git/mingw64/libexec/git-core\n",
+            "stderr": ""
+          },
+          {
+            "argv": [
+              "E:\\Git\\mingw64\\bin\\git.exe",
+              "-C",
+              "D:\\ctf-ai\\dlp\\demo\\frida_git_guard\\tests\\.tmp-perf-fhas0h32\\repo",
+              "cat-file",
+              "-s",
+              "c7a9a1056600701a09885ac9d413bad8ee58f778"
+            ],
+            "exit_code": 0,
+            "stdout": "32\n",
+            "stderr": ""
+          },
+          {
+            "argv": [
+              "E:\\Git\\cmd\\git.EXE",
+              "--exec-path"
+            ],
+            "exit_code": 0,
+            "stdout": "E:/Git/mingw64/libexec/git-core\n",
+            "stderr": ""
+          },
+          {
+            "argv": [
+              "E:\\Git\\mingw64\\bin\\git.exe",
+              "-C",
+              "D:\\ctf-ai\\dlp\\demo\\frida_git_guard\\tests\\.tmp-perf-fhas0h32\\repo",
+              "cat-file",
+              "blob",
+              "c7a9a1056600701a09885ac9d413bad8ee58f778"
+            ],
+            "exit_code": 0,
+            "stdout": "ordinary benchmark data item 9\r\n",
+            "stderr": ""
+          },
+          {
+            "argv": [
+              "E:\\Git\\cmd\\git.EXE",
+              "--exec-path"
+            ],
+            "exit_code": 0,
+            "stdout": "E:/Git/mingw64/libexec/git-core\n",
+            "stderr": ""
+          },
+          {
+            "argv": [
+              "E:\\Git\\mingw64\\bin\\git.exe",
+              "-C",
+              "D:\\ctf-ai\\dlp\\demo\\frida_git_guard\\tests\\.tmp-perf-fhas0h32\\repo",
+              "ls-tree",
+              "-r",
+              "-z",
+              "1b140a3200f89b7cc47b1da5e58cf30a27e74e5a"
+            ],
+            "exit_code": 0,
+            "stdout": "100644 blob 7a72c7d299a6e8bc244d9508cb22a65f08f45936\tfile-0.txt\u0000100644 blob 4124d4153025f5bbb582a12e29b1dad6a69f6b28\tfile-1.txt\u0000100644 blob 010a0eba928a9ec7ea3a8d88851b3985d959cea5\tfile-10.txt\u0000100644 blob 0b6f88539042faddb71f6b2ce6802f912565a60d\tfile-11.txt\u0000100644 blob ab7ffac4c1cc965f52f324fab3f2d1f749ee52d6\tfile-12.txt\u0000100644 blob 206dda33fd521c673d865e93b9247167f2f073d3\tfile-13.txt\u0000100644 blob 632602d422a3839b0de4943169d76be391ca785c\tfile-14.txt\u0000100644 blob 86a24c08c7d33d278e54d00814d63aabbb912f86\tfile-15.txt\u0000100644 blob 794d59375b602628f816121c05943a64e05610b2\tfile-16.txt\u0000100644 blob 71baf7c50d08b6bedbd817ad0babff47a61ed37a\tfile-17.txt\u0000100644 blob f8c70b4267e083371a5fa1cb079a895e76a1bd08\tfile-18.txt\u0000100644 blob 342f4dd0d4529cd7a1171812d353498ca12fd754\tfile-19.txt\u0000100644 blob 2447b0d5283efff539dff65420e7396eca735ce8\tfile-2.txt\u0000100644 blob bb52f9862c8840ae77d725f166b899668f9061cc\tfile-20.txt\u0000100644 blob e476ff45ce855951e3c5c55e3c7a4ca609272f2f\tfile-21.txt\u0000100644 blob 0ec63a305bf45eecfd73f1111a9ebb985a1217cf\tfile-22.txt\u0000100644 blob ff5a6d9ea1a84b0a503b0870395f0995a36ba8bc\tfile-23.txt\u0000100644 blob 6882aea65ef3ea0ccc9fa99dbdba3dee761cdaab\tfile-3.txt\u0000100644 blob 1e8233126de567813a108ac669e2ed3953b7dd30\tfile-4.txt\u0000100644 blob cebe218daad98a86ddfaaa86d9df0039a0d1b130\tfile-5.txt\u0000100644 blob 57cef937c81486223003f8526674ca730bbfc0c7\tfile-6.txt\u0000100644 blob c231657ee146214e1c667bd47a1162f427c60024\tfile-7.txt\u0000100644 blob 23506dfbaddd81f61c1d69bb409195cdd34dc133\tfile-8.txt\u0000100644 blob c7a9a1056600701a09885ac9d413bad8ee58f778\tfile-9.txt\u0000",
+            "stderr": ""
+          },
+          {
+            "argv": [
+              "E:\\Git\\cmd\\git.EXE",
+              "--exec-path"
+            ],
+            "exit_code": 0,
+            "stdout": "E:/Git/mingw64/libexec/git-core\n",
+            "stderr": ""
+          },
+          {
+            "argv": [
+              "E:\\Git\\mingw64\\bin\\git.exe",
+              "-C",
+              "D:\\ctf-ai\\dlp\\demo\\frida_git_guard\\tests\\.tmp-perf-fhas0h32\\repo",
+              "cat-file",
+              "-s",
+              "2447b0d5283efff539dff65420e7396eca735ce8"
+            ],
+            "exit_code": 0,
+            "stdout": "32\n",
+            "stderr": ""
+          },
+          {
+            "argv": [
+              "E:\\Git\\cmd\\git.EXE",
+              "--exec-path"
+            ],
+            "exit_code": 0,
+            "stdout": "E:/Git/mingw64/libexec/git-core\n",
+            "stderr": ""
+          },
+          {
+            "argv": [
+              "E:\\Git\\mingw64\\bin\\git.exe",
+              "-C",
+              "D:\\ctf-ai\\dlp\\demo\\frida_git_guard\\tests\\.tmp-perf-fhas0h32\\repo",
+              "cat-file",
+              "blob",
+              "2447b0d5283efff539dff65420e7396eca735ce8"
+            ],
+            "exit_code": 0,
+            "stdout": "ordinary benchmark data item 2\r\n",
+            "stderr": ""
+          },
+          {
+            "argv": [
+              "E:\\Git\\cmd\\git.EXE",
+              "--exec-path"
+            ],
+            "exit_code": 0,
+            "stdout": "E:/Git/mingw64/libexec/git-core\n",
+            "stderr": ""
+          },
+          {
+            "argv": [
+              "E:\\Git\\mingw64\\bin\\git.exe",
+              "-C",
+              "D:\\ctf-ai\\dlp\\demo\\frida_git_guard\\tests\\.tmp-perf-fhas0h32\\repo",
+              "ls-tree",
+              "-r",
+              "-z",
+              "da5f5d967c80b08e11f68b41efec0798b6753ac7"
+            ],
+            "exit_code": 0,
+            "stdout": "100644 blob 7a72c7d299a6e8bc244d9508cb22a65f08f45936\tfile-0.txt\u0000100644 blob c4e5f1b74eac6ba59226d98895dfee5c985529d4\tfile-1.txt\u0000100644 blob 010a0eba928a9ec7ea3a8d88851b3985d959cea5\tfile-10.txt\u0000100644 blob 0b6f88539042faddb71f6b2ce6802f912565a60d\tfile-11.txt\u0000100644 blob ab7ffac4c1cc965f52f324fab3f2d1f749ee52d6\tfile-12.txt\u0000100644 blob 206dda33fd521c673d865e93b9247167f2f073d3\tfile-13.txt\u0000100644 blob 632602d422a3839b0de4943169d76be391ca785c\tfile-14.txt\u0000100644 blob 86a24c08c7d33d278e54d00814d63aabbb912f86\tfile-15.txt\u0000100644 blob 794d59375b602628f816121c05943a64e05610b2\tfile-16.txt\u0000100644 blob 71baf7c50d08b6bedbd817ad0babff47a61ed37a\tfile-17.txt\u0000100644 blob f8c70b4267e083371a5fa1cb079a895e76a1bd08\tfile-18.txt\u0000100644 blob 342f4dd0d4529cd7a1171812d353498ca12fd754\tfile-19.txt\u0000100644 blob 2447b0d5283efff539dff65420e7396eca735ce8\tfile-2.txt\u0000100644 blob bb52f9862c8840ae77d725f166b899668f9061cc\tfile-20.txt\u0000100644 blob e476ff45ce855951e3c5c55e3c7a4ca609272f2f\tfile-21.txt\u0000100644 blob 0ec63a305bf45eecfd73f1111a9ebb985a1217cf\tfile-22.txt\u0000100644 blob ff5a6d9ea1a84b0a503b0870395f0995a36ba8bc\tfile-23.txt\u0000100644 blob 6882aea65ef3ea0ccc9fa99dbdba3dee761cdaab\tfile-3.txt\u0000100644 blob 1e8233126de567813a108ac669e2ed3953b7dd30\tfile-4.txt\u0000100644 blob cebe218daad98a86ddfaaa86d9df0039a0d1b130\tfile-5.txt\u0000100644 blob 57cef937c81486223003f8526674ca730bbfc0c7\tfile-6.txt\u0000100644 blob c231657ee146214e1c667bd47a1162f427c60024\tfile-7.txt\u0000100644 blob 23506dfbaddd81f61c1d69bb409195cdd34dc133\tfile-8.txt\u0000100644 blob c7a9a1056600701a09885ac9d413bad8ee58f778\tfile-9.txt\u0000",
+            "stderr": ""
+          },
+          {
+            "argv": [
+              "E:\\Git\\cmd\\git.EXE",
+              "--exec-path"
+            ],
+            "exit_code": 0,
+            "stdout": "E:/Git/mingw64/libexec/git-core\n",
+            "stderr": ""
+          },
+          {
+            "argv": [
+              "E:\\Git\\mingw64\\bin\\git.exe",
+              "-C",
+              "D:\\ctf-ai\\dlp\\demo\\frida_git_guard\\tests\\.tmp-perf-fhas0h32\\repo",
+              "cat-file",
+              "-s",
+              "c4e5f1b74eac6ba59226d98895dfee5c985529d4"
+            ],
+            "exit_code": 0,
+            "stdout": "32\n",
+            "stderr": ""
+          },
+          {
+            "argv": [
+              "E:\\Git\\cmd\\git.EXE",
+              "--exec-path"
+            ],
+            "exit_code": 0,
+            "stdout": "E:/Git/mingw64/libexec/git-core\n",
+            "stderr": ""
+          },
+          {
+            "argv": [
+              "E:\\Git\\mingw64\\bin\\git.exe",
+              "-C",
+              "D:\\ctf-ai\\dlp\\demo\\frida_git_guard\\tests\\.tmp-perf-fhas0h32\\repo",
+              "cat-file",
+              "blob",
+              "c4e5f1b74eac6ba59226d98895dfee5c985529d4"
+            ],
+            "exit_code": 0,
+            "stdout": "ordinary benchmark data item 1\r\n",
+            "stderr": ""
+          },
+          {
+            "argv": [
+              "E:\\Git\\cmd\\git.EXE",
+              "--exec-path"
+            ],
+            "exit_code": 0,
+            "stdout": "E:/Git/mingw64/libexec/git-core\n",
+            "stderr": ""
+          },
+          {
+            "argv": [
+              "E:\\Git\\mingw64\\bin\\git.exe",
+              "-C",
+              "D:\\ctf-ai\\dlp\\demo\\frida_git_guard\\tests\\.tmp-perf-fhas0h32\\repo",
+              "ls-tree",
+              "-r",
+              "-z",
+              "607f0ce41e01214786443079c7742720063d6b03"
+            ],
+            "exit_code": 0,
+            "stdout": "100644 blob d773a9e4cbd1b9cb013da2817eca4b67e722839f\tfile-0.txt\u0000100644 blob c4e5f1b74eac6ba59226d98895dfee5c985529d4\tfile-1.txt\u0000100644 blob 010a0eba928a9ec7ea3a8d88851b3985d959cea5\tfile-10.txt\u0000100644 blob 0b6f88539042faddb71f6b2ce6802f912565a60d\tfile-11.txt\u0000100644 blob ab7ffac4c1cc965f52f324fab3f2d1f749ee52d6\tfile-12.txt\u0000100644 blob 206dda33fd521c673d865e93b9247167f2f073d3\tfile-13.txt\u0000100644 blob 632602d422a3839b0de4943169d76be391ca785c\tfile-14.txt\u0000100644 blob 86a24c08c7d33d278e54d00814d63aabbb912f86\tfile-15.txt\u0000100644 blob 794d59375b602628f816121c05943a64e05610b2\tfile-16.txt\u0000100644 blob 71baf7c50d08b6bedbd817ad0babff47a61ed37a\tfile-17.txt\u0000100644 blob f8c70b4267e083371a5fa1cb079a895e76a1bd08\tfile-18.txt\u0000100644 blob 342f4dd0d4529cd7a1171812d353498ca12fd754\tfile-19.txt\u0000100644 blob 2447b0d5283efff539dff65420e7396eca735ce8\tfile-2.txt\u0000100644 blob bb52f9862c8840ae77d725f166b899668f9061cc\tfile-20.txt\u0000100644 blob e476ff45ce855951e3c5c55e3c7a4ca609272f2f\tfile-21.txt\u0000100644 blob 0ec63a305bf45eecfd73f1111a9ebb985a1217cf\tfile-22.txt\u0000100644 blob ff5a6d9ea1a84b0a503b0870395f0995a36ba8bc\tfile-23.txt\u0000100644 blob 6882aea65ef3ea0ccc9fa99dbdba3dee761cdaab\tfile-3.txt\u0000100644 blob 1e8233126de567813a108ac669e2ed3953b7dd30\tfile-4.txt\u0000100644 blob cebe218daad98a86ddfaaa86d9df0039a0d1b130\tfile-5.txt\u0000100644 blob 57cef937c81486223003f8526674ca730bbfc0c7\tfile-6.txt\u0000100644 blob c231657ee146214e1c667bd47a1162f427c60024\tfile-7.txt\u0000100644 blob 23506dfbaddd81f61c1d69bb409195cdd34dc133\tfile-8.txt\u0000100644 blob c7a9a1056600701a09885ac9d413bad8ee58f778\tfile-9.txt\u0000",
+            "stderr": ""
+          },
+          {
+            "argv": [
+              "E:\\Git\\cmd\\git.EXE",
+              "--exec-path"
+            ],
+            "exit_code": 0,
+            "stdout": "E:/Git/mingw64/libexec/git-core\n",
+            "stderr": ""
+          },
+          {
+            "argv": [
+              "E:\\Git\\mingw64\\bin\\git.exe",
+              "-C",
+              "D:\\ctf-ai\\dlp\\demo\\frida_git_guard\\tests\\.tmp-perf-fhas0h32\\repo",
+              "cat-file",
+              "-s",
+              "d773a9e4cbd1b9cb013da2817eca4b67e722839f"
+            ],
+            "exit_code": 0,
+            "stdout": "32\n",
+            "stderr": ""
+          },
+          {
+            "argv": [
+              "E:\\Git\\cmd\\git.EXE",
+              "--exec-path"
+            ],
+            "exit_code": 0,
+            "stdout": "E:/Git/mingw64/libexec/git-core\n",
+            "stderr": ""
+          },
+          {
+            "argv": [
+              "E:\\Git\\mingw64\\bin\\git.exe",
+              "-C",
+              "D:\\ctf-ai\\dlp\\demo\\frida_git_guard\\tests\\.tmp-perf-fhas0h32\\repo",
+              "cat-file",
+              "blob",
+              "d773a9e4cbd1b9cb013da2817eca4b67e722839f"
+            ],
+            "exit_code": 0,
+            "stdout": "ordinary benchmark data item 0\r\n",
+            "stderr": ""
+          }
+        ]
+      }
+    },
+    "modified": {
+      "git-status": {
+        "median_ms": 173.4340999973938,
+        "max_ms": 204.74149996880442,
+        "samples_ms": [
+          190.1695000124164,
+          164.30860001128167,
+          179.59120002342388,
+          173.4340999973938,
+          204.74149996880442,
+          156.24370001023635,
+          161.20400000363588
+        ]
+      },
+      "git-rev-parse": {
+        "median_ms": 174.6152999694459,
+        "max_ms": 218.39379996526986,
+        "samples_ms": [
+          204.63290001498535,
+          173.7921999883838,
+          218.39379996526986,
+          174.6152999694459,
+          175.90440000640228,
+          172.63300000922754,
+          173.27530001057312
+        ]
+      },
+      "python-version": {
+        "median_ms": 31.35389997623861,
+        "max_ms": 34.68460001749918,
+        "samples_ms": [
+          25.564500014297664,
+          25.91909997863695,
+          31.518900010269135,
+          34.68460001749918,
+          31.35389997623861,
+          32.736599969211966,
+          29.06610001809895
+        ]
+      },
+      "history-scan": {
+        "wall_ms": 571.7378000263125,
+        "result": {
+          "deny": false,
+          "findings": [],
+          "commits_scanned": 4,
+          "blobs_scanned": 27,
+          "bytes_scanned": 887,
+          "tree_entries": 96
+        },
+        "git_subprocess_count": 12,
+        "commands": [
+          {
+            "argv": [
+              "E:\\Git\\cmd\\git.EXE",
+              "--exec-path"
+            ],
+            "exit_code": 0,
+            "stdout": "E:/Git/mingw64/libexec/git-core\n",
+            "stderr": ""
+          },
+          {
+            "argv": [
+              "E:\\Git\\mingw64\\bin\\git.exe",
+              "-C",
+              "D:\\ctf-ai\\dlp\\demo\\frida_git_guard\\tests\\.tmp-perf-fhas0h32\\repo",
+              "rev-parse",
+              "--show-toplevel"
+            ],
+            "exit_code": 0,
+            "stdout": "D:/ctf-ai/dlp/demo/frida_git_guard/tests/.tmp-perf-fhas0h32/repo\n",
+            "stderr": ""
+          },
+          {
+            "argv": [
+              "E:\\Git\\mingw64\\bin\\git.exe",
+              "-C",
+              "D:\\ctf-ai\\dlp\\demo\\frida_git_guard\\tests\\.tmp-perf-fhas0h32\\repo",
+              "replace",
+              "-l"
+            ],
+            "exit_code": 0,
+            "stdout": "",
+            "stderr": ""
+          },
+          {
+            "argv": [
+              "E:\\Git\\mingw64\\bin\\git.exe",
+              "-C",
+              "D:\\ctf-ai\\dlp\\demo\\frida_git_guard\\tests\\.tmp-perf-fhas0h32\\repo",
+              "rev-parse",
+              "--git-path",
+              "info/grafts"
+            ],
+            "exit_code": 0,
+            "stdout": ".git/info/grafts\n",
+            "stderr": ""
+          },
+          {
+            "argv": [
+              "E:\\Git\\mingw64\\bin\\git.exe",
+              "-C",
+              "D:\\ctf-ai\\dlp\\demo\\frida_git_guard\\tests\\.tmp-perf-fhas0h32\\repo",
+              "rev-parse",
+              "--is-shallow-repository"
+            ],
+            "exit_code": 0,
+            "stdout": "false\n",
+            "stderr": ""
+          },
+          {
+            "argv": [
+              "E:\\Git\\mingw64\\bin\\git.exe",
+              "-C",
+              "D:\\ctf-ai\\dlp\\demo\\frida_git_guard\\tests\\.tmp-perf-fhas0h32\\repo",
+              "rev-list",
+              "--max-count",
+              "1001",
+              "HEAD"
+            ],
+            "exit_code": 0,
+            "stdout": "101ddd1b0c399be9e784b76455d38c3ad569eb77\n1b140a3200f89b7cc47b1da5e58cf30a27e74e5a\nda5f5d967c80b08e11f68b41efec0798b6753ac7\n607f0ce41e01214786443079c7742720063d6b03\n",
+            "stderr": ""
+          },
+          {
+            "argv": [
+              "E:\\Git\\mingw64\\bin\\git.exe",
+              "-C",
+              "D:\\ctf-ai\\dlp\\demo\\frida_git_guard\\tests\\.tmp-perf-fhas0h32\\repo",
+              "ls-tree",
+              "-r",
+              "-z",
+              "101ddd1b0c399be9e784b76455d38c3ad569eb77"
+            ],
+            "exit_code": 0,
+            "stdout": "100644 blob 7a72c7d299a6e8bc244d9508cb22a65f08f45936\tfile-0.txt\u0000100644 blob 4124d4153025f5bbb582a12e29b1dad6a69f6b28\tfile-1.txt\u0000100644 blob 010a0eba928a9ec7ea3a8d88851b3985d959cea5\tfile-10.txt\u0000100644 blob 0b6f88539042faddb71f6b2ce6802f912565a60d\tfile-11.txt\u0000100644 blob ab7ffac4c1cc965f52f324fab3f2d1f749ee52d6\tfile-12.txt\u0000100644 blob 206dda33fd521c673d865e93b9247167f2f073d3\tfile-13.txt\u0000100644 blob 632602d422a3839b0de4943169d76be391ca785c\tfile-14.txt\u0000100644 blob 86a24c08c7d33d278e54d00814d63aabbb912f86\tfile-15.txt\u0000100644 blob 794d59375b602628f816121c05943a64e05610b2\tfile-16.txt\u0000100644 blob 71baf7c50d08b6bedbd817ad0babff47a61ed37a\tfile-17.txt\u0000100644 blob f8c70b4267e083371a5fa1cb079a895e76a1bd08\tfile-18.txt\u0000100644 blob 342f4dd0d4529cd7a1171812d353498ca12fd754\tfile-19.txt\u0000100644 blob ebd01a123a4cab21b4436ba95cbc1220663686be\tfile-2.txt\u0000100644 blob bb52f9862c8840ae77d725f166b899668f9061cc\tfile-20.txt\u0000100644 blob e476ff45ce855951e3c5c55e3c7a4ca609272f2f\tfile-21.txt\u0000100644 blob 0ec63a305bf45eecfd73f1111a9ebb985a1217cf\tfile-22.txt\u0000100644 blob ff5a6d9ea1a84b0a503b0870395f0995a36ba8bc\tfile-23.txt\u0000100644 blob 6882aea65ef3ea0ccc9fa99dbdba3dee761cdaab\tfile-3.txt\u0000100644 blob 1e8233126de567813a108ac669e2ed3953b7dd30\tfile-4.txt\u0000100644 blob cebe218daad98a86ddfaaa86d9df0039a0d1b130\tfile-5.txt\u0000100644 blob 57cef937c81486223003f8526674ca730bbfc0c7\tfile-6.txt\u0000100644 blob c231657ee146214e1c667bd47a1162f427c60024\tfile-7.txt\u0000100644 blob 23506dfbaddd81f61c1d69bb409195cdd34dc133\tfile-8.txt\u0000100644 blob c7a9a1056600701a09885ac9d413bad8ee58f778\tfile-9.txt\u0000",
+            "stderr": ""
+          },
+          {
+            "argv": [
+              "E:\\Git\\mingw64\\bin\\git.exe",
+              "-C",
+              "D:\\ctf-ai\\dlp\\demo\\frida_git_guard\\tests\\.tmp-perf-fhas0h32\\repo",
+              "ls-tree",
+              "-r",
+              "-z",
+              "1b140a3200f89b7cc47b1da5e58cf30a27e74e5a"
+            ],
+            "exit_code": 0,
+            "stdout": "100644 blob 7a72c7d299a6e8bc244d9508cb22a65f08f45936\tfile-0.txt\u0000100644 blob 4124d4153025f5bbb582a12e29b1dad6a69f6b28\tfile-1.txt\u0000100644 blob 010a0eba928a9ec7ea3a8d88851b3985d959cea5\tfile-10.txt\u0000100644 blob 0b6f88539042faddb71f6b2ce6802f912565a60d\tfile-11.txt\u0000100644 blob ab7ffac4c1cc965f52f324fab3f2d1f749ee52d6\tfile-12.txt\u0000100644 blob 206dda33fd521c673d865e93b9247167f2f073d3\tfile-13.txt\u0000100644 blob 632602d422a3839b0de4943169d76be391ca785c\tfile-14.txt\u0000100644 blob 86a24c08c7d33d278e54d00814d63aabbb912f86\tfile-15.txt\u0000100644 blob 794d59375b602628f816121c05943a64e05610b2\tfile-16.txt\u0000100644 blob 71baf7c50d08b6bedbd817ad0babff47a61ed37a\tfile-17.txt\u0000100644 blob f8c70b4267e083371a5fa1cb079a895e76a1bd08\tfile-18.txt\u0000100644 blob 342f4dd0d4529cd7a1171812d353498ca12fd754\tfile-19.txt\u0000100644 blob 2447b0d5283efff539dff65420e7396eca735ce8\tfile-2.txt\u0000100644 blob bb52f9862c8840ae77d725f166b899668f9061cc\tfile-20.txt\u0000100644 blob e476ff45ce855951e3c5c55e3c7a4ca609272f2f\tfile-21.txt\u0000100644 blob 0ec63a305bf45eecfd73f1111a9ebb985a1217cf\tfile-22.txt\u0000100644 blob ff5a6d9ea1a84b0a503b0870395f0995a36ba8bc\tfile-23.txt\u0000100644 blob 6882aea65ef3ea0ccc9fa99dbdba3dee761cdaab\tfile-3.txt\u0000100644 blob 1e8233126de567813a108ac669e2ed3953b7dd30\tfile-4.txt\u0000100644 blob cebe218daad98a86ddfaaa86d9df0039a0d1b130\tfile-5.txt\u0000100644 blob 57cef937c81486223003f8526674ca730bbfc0c7\tfile-6.txt\u0000100644 blob c231657ee146214e1c667bd47a1162f427c60024\tfile-7.txt\u0000100644 blob 23506dfbaddd81f61c1d69bb409195cdd34dc133\tfile-8.txt\u0000100644 blob c7a9a1056600701a09885ac9d413bad8ee58f778\tfile-9.txt\u0000",
+            "stderr": ""
+          },
+          {
+            "argv": [
+              "E:\\Git\\mingw64\\bin\\git.exe",
+              "-C",
+              "D:\\ctf-ai\\dlp\\demo\\frida_git_guard\\tests\\.tmp-perf-fhas0h32\\repo",
+              "ls-tree",
+              "-r",
+              "-z",
+              "da5f5d967c80b08e11f68b41efec0798b6753ac7"
+            ],
+            "exit_code": 0,
+            "stdout": "100644 blob 7a72c7d299a6e8bc244d9508cb22a65f08f45936\tfile-0.txt\u0000100644 blob c4e5f1b74eac6ba59226d98895dfee5c985529d4\tfile-1.txt\u0000100644 blob 010a0eba928a9ec7ea3a8d88851b3985d959cea5\tfile-10.txt\u0000100644 blob 0b6f88539042faddb71f6b2ce6802f912565a60d\tfile-11.txt\u0000100644 blob ab7ffac4c1cc965f52f324fab3f2d1f749ee52d6\tfile-12.txt\u0000100644 blob 206dda33fd521c673d865e93b9247167f2f073d3\tfile-13.txt\u0000100644 blob 632602d422a3839b0de4943169d76be391ca785c\tfile-14.txt\u0000100644 blob 86a24c08c7d33d278e54d00814d63aabbb912f86\tfile-15.txt\u0000100644 blob 794d59375b602628f816121c05943a64e05610b2\tfile-16.txt\u0000100644 blob 71baf7c50d08b6bedbd817ad0babff47a61ed37a\tfile-17.txt\u0000100644 blob f8c70b4267e083371a5fa1cb079a895e76a1bd08\tfile-18.txt\u0000100644 blob 342f4dd0d4529cd7a1171812d353498ca12fd754\tfile-19.txt\u0000100644 blob 2447b0d5283efff539dff65420e7396eca735ce8\tfile-2.txt\u0000100644 blob bb52f9862c8840ae77d725f166b899668f9061cc\tfile-20.txt\u0000100644 blob e476ff45ce855951e3c5c55e3c7a4ca609272f2f\tfile-21.txt\u0000100644 blob 0ec63a305bf45eecfd73f1111a9ebb985a1217cf\tfile-22.txt\u0000100644 blob ff5a6d9ea1a84b0a503b0870395f0995a36ba8bc\tfile-23.txt\u0000100644 blob 6882aea65ef3ea0ccc9fa99dbdba3dee761cdaab\tfile-3.txt\u0000100644 blob 1e8233126de567813a108ac669e2ed3953b7dd30\tfile-4.txt\u0000100644 blob cebe218daad98a86ddfaaa86d9df0039a0d1b130\tfile-5.txt\u0000100644 blob 57cef937c81486223003f8526674ca730bbfc0c7\tfile-6.txt\u0000100644 blob c231657ee146214e1c667bd47a1162f427c60024\tfile-7.txt\u0000100644 blob 23506dfbaddd81f61c1d69bb409195cdd34dc133\tfile-8.txt\u0000100644 blob c7a9a1056600701a09885ac9d413bad8ee58f778\tfile-9.txt\u0000",
+            "stderr": ""
+          },
+          {
+            "argv": [
+              "E:\\Git\\mingw64\\bin\\git.exe",
+              "-C",
+              "D:\\ctf-ai\\dlp\\demo\\frida_git_guard\\tests\\.tmp-perf-fhas0h32\\repo",
+              "ls-tree",
+              "-r",
+              "-z",
+              "607f0ce41e01214786443079c7742720063d6b03"
+            ],
+            "exit_code": 0,
+            "stdout": "100644 blob d773a9e4cbd1b9cb013da2817eca4b67e722839f\tfile-0.txt\u0000100644 blob c4e5f1b74eac6ba59226d98895dfee5c985529d4\tfile-1.txt\u0000100644 blob 010a0eba928a9ec7ea3a8d88851b3985d959cea5\tfile-10.txt\u0000100644 blob 0b6f88539042faddb71f6b2ce6802f912565a60d\tfile-11.txt\u0000100644 blob ab7ffac4c1cc965f52f324fab3f2d1f749ee52d6\tfile-12.txt\u0000100644 blob 206dda33fd521c673d865e93b9247167f2f073d3\tfile-13.txt\u0000100644 blob 632602d422a3839b0de4943169d76be391ca785c\tfile-14.txt\u0000100644 blob 86a24c08c7d33d278e54d00814d63aabbb912f86\tfile-15.txt\u0000100644 blob 794d59375b602628f816121c05943a64e05610b2\tfile-16.txt\u0000100644 blob 71baf7c50d08b6bedbd817ad0babff47a61ed37a\tfile-17.txt\u0000100644 blob f8c70b4267e083371a5fa1cb079a895e76a1bd08\tfile-18.txt\u0000100644 blob 342f4dd0d4529cd7a1171812d353498ca12fd754\tfile-19.txt\u0000100644 blob 2447b0d5283efff539dff65420e7396eca735ce8\tfile-2.txt\u0000100644 blob bb52f9862c8840ae77d725f166b899668f9061cc\tfile-20.txt\u0000100644 blob e476ff45ce855951e3c5c55e3c7a4ca609272f2f\tfile-21.txt\u0000100644 blob 0ec63a305bf45eecfd73f1111a9ebb985a1217cf\tfile-22.txt\u0000100644 blob ff5a6d9ea1a84b0a503b0870395f0995a36ba8bc\tfile-23.txt\u0000100644 blob 6882aea65ef3ea0ccc9fa99dbdba3dee761cdaab\tfile-3.txt\u0000100644 blob 1e8233126de567813a108ac669e2ed3953b7dd30\tfile-4.txt\u0000100644 blob cebe218daad98a86ddfaaa86d9df0039a0d1b130\tfile-5.txt\u0000100644 blob 57cef937c81486223003f8526674ca730bbfc0c7\tfile-6.txt\u0000100644 blob c231657ee146214e1c667bd47a1162f427c60024\tfile-7.txt\u0000100644 blob 23506dfbaddd81f61c1d69bb409195cdd34dc133\tfile-8.txt\u0000100644 blob c7a9a1056600701a09885ac9d413bad8ee58f778\tfile-9.txt\u0000",
+            "stderr": ""
+          },
+          {
+            "argv": [
+              "E:\\Git\\mingw64\\bin\\git.exe",
+              "-C",
+              "D:\\ctf-ai\\dlp\\demo\\frida_git_guard\\tests\\.tmp-perf-fhas0h32\\repo",
+              "cat-file",
+              "--batch-check"
+            ],
+            "exit_code": 0,
+            "stdout": "7a72c7d299a6e8bc244d9508cb22a65f08f45936 blob 35\n4124d4153025f5bbb582a12e29b1dad6a69f6b28 blob 35\n010a0eba928a9ec7ea3a8d88851b3985d959cea5 blob 33\n0b6f88539042faddb71f6b2ce6802f912565a60d blob 33\nab7ffac4c1cc965f52f324fab3f2d1f749ee52d6 blob 33\n206dda33fd521c673d865e93b9247167f2f073d3 blob 33\n632602d422a3839b0de4943169d76be391ca785c blob 33\n86a24c08c7d33d278e54d00814d63aabbb912f86 blob 33\n794d59375b602628f816121c05943a64e05610b2 blob 33\n71baf7c50d08b6bedbd817ad0babff47a61ed37a blob 33\nf8c70b4267e083371a5fa1cb079a895e76a1bd08 blob 33\n342f4dd0d4529cd7a1171812d353498ca12fd754 blob 33\nebd01a123a4cab21b4436ba95cbc1220663686be blob 35\nbb52f9862c8840ae77d725f166b899668f9061cc blob 33\ne476ff45ce855951e3c5c55e3c7a4ca609272f2f blob 33\n0ec63a305bf45eecfd73f1111a9ebb985a1217cf blob 33\nff5a6d9ea1a84b0a503b0870395f0995a36ba8bc blob 33\n6882aea65ef3ea0ccc9fa99dbdba3dee761cdaab blob 32\n1e8233126de567813a108ac669e2ed3953b7dd30 blob 32\ncebe218daad98a86ddfaaa86d9df0039a0d1b130 blob 32\n57cef937c81486223003f8526674ca730bbfc0c7 blob 32\nc231657ee146214e1c667bd47a1162f427c60024 blob 32\n23506dfbaddd81f61c1d69bb409195cdd34dc133 blob 32\nc7a9a1056600701a09885ac9d413bad8ee58f778 blob 32\n2447b0d5283efff539dff65420e7396eca735ce8 blob 32\nc4e5f1b74eac6ba59226d98895dfee5c985529d4 blob 32\nd773a9e4cbd1b9cb013da2817eca4b67e722839f blob 32\n",
+            "stderr": ""
+          },
+          {
+            "argv": [
+              "E:\\Git\\mingw64\\bin\\git.exe",
+              "-C",
+              "D:\\ctf-ai\\dlp\\demo\\frida_git_guard\\tests\\.tmp-perf-fhas0h32\\repo",
+              "cat-file",
+              "--batch"
+            ],
+            "exit_code": 0,
+            "stdout": "7a72c7d299a6e8bc244d9508cb22a65f08f45936 blob 35\nchanged ordinary benchmark data 0\r\n\n4124d4153025f5bbb582a12e29b1dad6a69f6b28 blob 35\nchanged ordinary benchmark data 1\r\n\n010a0eba928a9ec7ea3a8d88851b3985d959cea5 blob 33\nordinary benchmark data item 10\r\n\n0b6f88539042faddb71f6b2ce6802f912565a60d blob 33\nordinary benchmark data item 11\r\n\nab7ffac4c1cc965f52f324fab3f2d1f749ee52d6 blob 33\nordinary benchmark data item 12\r\n\n206dda33fd521c673d865e93b9247167f2f073d3 blob 33\nordinary benchmark data item 13\r\n\n632602d422a3839b0de4943169d76be391ca785c blob 33\nordinary benchmark data item 14\r\n\n86a24c08c7d33d278e54d00814d63aabbb912f86 blob 33\nordinary benchmark data item 15\r\n\n794d59375b602628f816121c05943a64e05610b2 blob 33\nordinary benchmark data item 16\r\n\n71baf7c50d08b6bedbd817ad0babff47a61ed37a blob 33\nordinary benchmark data item 17\r\n\nf8c70b4267e083371a5fa1cb079a895e76a1bd08 blob 33\nordinary benchmark data item 18\r\n\n342f4dd0d4529cd7a1171812d353498ca12fd754 blob 33\nordinary benchmark data item 19\r\n\nebd01a123a4cab21b4436ba95cbc1220663686be blob 35\nchanged ordinary benchmark data 2\r\n\nbb52f9862c8840ae77d725f166b899668f9061cc blob 33\nordinary benchmark data item 20\r\n\ne476ff45ce855951e3c5c55e3c7a4ca609272f2f blob 33\nordinary benchmark data item 21\r\n\n0ec63a305bf45eecfd73f1111a9ebb985a1217cf blob 33\nordinary benchmark data item 22\r\n\nff5a6d9ea1a84b0a503b0870395f0995a36ba8bc blob 33\nordinary benchmark data item 23\r\n\n6882aea65ef3ea0ccc9fa99dbdba3dee761cdaab blob 32\nordinary benchmark data item 3\r\n\n1e8233126de567813a108ac669e2ed3953b7dd30 blob 32\nordinary benchmark data item 4\r\n\ncebe218daad98a86ddfaaa86d9df0039a0d1b130 blob 32\nordinary benchmark data item 5\r\n\n57cef937c81486223003f8526674ca730bbfc0c7 blob 32\nordinary benchmark data item 6\r\n\nc231657ee146214e1c667bd47a1162f427c60024 blob 32\nordinary benchmark data item 7\r\n\n23506dfbaddd81f61c1d69bb409195cdd34dc133 blob 32\nordinary benchmark data item 8\r\n\nc7a9a1056600701a09885ac9d413bad8ee58f778 blob 32\nordinary benchmark data item 9\r\n\n2447b0d5283efff539dff65420e7396eca735ce8 blob 32\nordinary benchmark data item 2\r\n\nc4e5f1b74eac6ba59226d98895dfee5c985529d4 blob 32\nordinary benchmark data item 1\r\n\nd773a9e4cbd1b9cb013da2817eca4b67e722839f blob 32\nordinary benchmark data item 0\r\n\n",
+            "stderr": ""
+          }
+        ]
+      }
+    },
+    "after-stop": {
+      "git-status": {
+        "median_ms": 74.49949998408556,
+        "max_ms": 106.21959995478392,
+        "samples_ms": [
+          106.21959995478392,
+          69.256899994798,
+          74.49949998408556,
+          76.65740000084043,
+          61.10729998908937,
+          68.03870003204793,
+          99.98780000023544
+        ]
+      },
+      "git-rev-parse": {
+        "median_ms": 99.831199971959,
+        "max_ms": 126.22699997154996,
+        "samples_ms": [
+          86.91559999715537,
+          117.16820002766326,
+          126.22699997154996,
+          81.70799998333678,
+          99.831199971959,
+          109.90460001630709,
+          99.20340002281591
+        ]
+      },
+      "python-version": {
+        "median_ms": 39.05640001175925,
+        "max_ms": 51.913000002969056,
+        "samples_ms": [
+          30.82039998844266,
+          40.99469998618588,
+          37.86689997650683,
+          39.05640001175925,
+          41.658799978904426,
+          51.913000002969056,
+          32.542800006922334
+        ]
+      }
+    }
+  },
+  "records": [
+    {
+      "argv": [
+        "E:\\Git\\mingw64\\bin\\git.exe",
+        "-C",
+        "D:\\ctf-ai\\dlp\\demo\\frida_git_guard\\tests\\.tmp-perf-fhas0h32\\repo",
+        "init",
+        "-b",
+        "main"
+      ],
+      "cwd": "D:\\ctf-ai\\dlp\\demo\\frida_git_guard",
+      "exit_code": 0,
+      "stdout": "Initialized empty Git repository in D:/ctf-ai/dlp/demo/frida_git_guard/tests/.tmp-perf-fhas0h32/repo/.git/\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "E:\\Git\\mingw64\\bin\\git.exe",
+        "-C",
+        "D:\\ctf-ai\\dlp\\demo\\frida_git_guard\\tests\\.tmp-perf-fhas0h32\\repo",
+        "config",
+        "user.name",
+        "Fixture"
+      ],
+      "cwd": "D:\\ctf-ai\\dlp\\demo\\frida_git_guard",
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "E:\\Git\\mingw64\\bin\\git.exe",
+        "-C",
+        "D:\\ctf-ai\\dlp\\demo\\frida_git_guard\\tests\\.tmp-perf-fhas0h32\\repo",
+        "config",
+        "user.email",
+        "fixture@example.invalid"
+      ],
+      "cwd": "D:\\ctf-ai\\dlp\\demo\\frida_git_guard",
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "E:\\Git\\mingw64\\bin\\git.exe",
+        "-C",
+        "D:\\ctf-ai\\dlp\\demo\\frida_git_guard\\tests\\.tmp-perf-fhas0h32\\repo",
+        "config",
+        "commit.gpgsign",
+        "false"
+      ],
+      "cwd": "D:\\ctf-ai\\dlp\\demo\\frida_git_guard",
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "E:\\Git\\mingw64\\bin\\git.exe",
+        "-C",
+        "D:\\ctf-ai\\dlp\\demo\\frida_git_guard\\tests\\.tmp-perf-fhas0h32\\repo",
+        "add",
+        "."
+      ],
+      "cwd": "D:\\ctf-ai\\dlp\\demo\\frida_git_guard",
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "E:\\Git\\mingw64\\bin\\git.exe",
+        "-C",
+        "D:\\ctf-ai\\dlp\\demo\\frida_git_guard\\tests\\.tmp-perf-fhas0h32\\repo",
+        "commit",
+        "-m",
+        "initial"
+      ],
+      "cwd": "D:\\ctf-ai\\dlp\\demo\\frida_git_guard",
+      "exit_code": 0,
+      "stdout": "[main (root-commit) 607f0ce] initial\n 24 files changed, 24 insertions(+)\n create mode 100644 file-0.txt\n create mode 100644 file-1.txt\n create mode 100644 file-10.txt\n create mode 100644 file-11.txt\n create mode 100644 file-12.txt\n create mode 100644 file-13.txt\n create mode 100644 file-14.txt\n create mode 100644 file-15.txt\n create mode 100644 file-16.txt\n create mode 100644 file-17.txt\n create mode 100644 file-18.txt\n create mode 100644 file-19.txt\n create mode 100644 file-2.txt\n create mode 100644 file-20.txt\n create mode 100644 file-21.txt\n create mode 100644 file-22.txt\n create mode 100644 file-23.txt\n create mode 100644 file-3.txt\n create mode 100644 file-4.txt\n create mode 100644 file-5.txt\n create mode 100644 file-6.txt\n create mode 100644 file-7.txt\n create mode 100644 file-8.txt\n create mode 100644 file-9.txt\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "E:\\Git\\mingw64\\bin\\git.exe",
+        "-C",
+        "D:\\ctf-ai\\dlp\\demo\\frida_git_guard\\tests\\.tmp-perf-fhas0h32\\repo",
+        "add",
+        "."
+      ],
+      "cwd": "D:\\ctf-ai\\dlp\\demo\\frida_git_guard",
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "E:\\Git\\mingw64\\bin\\git.exe",
+        "-C",
+        "D:\\ctf-ai\\dlp\\demo\\frida_git_guard\\tests\\.tmp-perf-fhas0h32\\repo",
+        "commit",
+        "-m",
+        "change 0"
+      ],
+      "cwd": "D:\\ctf-ai\\dlp\\demo\\frida_git_guard",
+      "exit_code": 0,
+      "stdout": "[main da5f5d9] change 0\n 1 file changed, 1 insertion(+), 1 deletion(-)\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "E:\\Git\\mingw64\\bin\\git.exe",
+        "-C",
+        "D:\\ctf-ai\\dlp\\demo\\frida_git_guard\\tests\\.tmp-perf-fhas0h32\\repo",
+        "add",
+        "."
+      ],
+      "cwd": "D:\\ctf-ai\\dlp\\demo\\frida_git_guard",
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "E:\\Git\\mingw64\\bin\\git.exe",
+        "-C",
+        "D:\\ctf-ai\\dlp\\demo\\frida_git_guard\\tests\\.tmp-perf-fhas0h32\\repo",
+        "commit",
+        "-m",
+        "change 1"
+      ],
+      "cwd": "D:\\ctf-ai\\dlp\\demo\\frida_git_guard",
+      "exit_code": 0,
+      "stdout": "[main 1b140a3] change 1\n 1 file changed, 1 insertion(+), 1 deletion(-)\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "E:\\Git\\mingw64\\bin\\git.exe",
+        "-C",
+        "D:\\ctf-ai\\dlp\\demo\\frida_git_guard\\tests\\.tmp-perf-fhas0h32\\repo",
+        "add",
+        "."
+      ],
+      "cwd": "D:\\ctf-ai\\dlp\\demo\\frida_git_guard",
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "E:\\Git\\mingw64\\bin\\git.exe",
+        "-C",
+        "D:\\ctf-ai\\dlp\\demo\\frida_git_guard\\tests\\.tmp-perf-fhas0h32\\repo",
+        "commit",
+        "-m",
+        "change 2"
+      ],
+      "cwd": "D:\\ctf-ai\\dlp\\demo\\frida_git_guard",
+      "exit_code": 0,
+      "stdout": "[main 101ddd1] change 2\n 1 file changed, 1 insertion(+), 1 deletion(-)\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "git",
+        "status",
+        "--porcelain"
+      ],
+      "cwd": "D:\\ctf-ai\\dlp\\demo\\frida_git_guard\\tests\\.tmp-perf-fhas0h32\\repo",
+      "launch_error": false,
+      "output": "",
+      "exit_code": 0,
+      "wall_ms": 254.71099995775148
+    },
+    {
+      "argv": [
+        "git",
+        "status",
+        "--porcelain"
+      ],
+      "cwd": "D:\\ctf-ai\\dlp\\demo\\frida_git_guard\\tests\\.tmp-perf-fhas0h32\\repo",
+      "launch_error": false,
+      "output": "",
+      "exit_code": 0,
+      "wall_ms": 66.9740000157617
+    },
+    {
+      "argv": [
+        "git",
+        "status",
+        "--porcelain"
+      ],
+      "cwd": "D:\\ctf-ai\\dlp\\demo\\frida_git_guard\\tests\\.tmp-perf-fhas0h32\\repo",
+      "launch_error": false,
+      "output": "",
+      "exit_code": 0,
+      "wall_ms": 74.23889997880906
+    },
+    {
+      "argv": [
+        "git",
+        "status",
+        "--porcelain"
+      ],
+      "cwd": "D:\\ctf-ai\\dlp\\demo\\frida_git_guard\\tests\\.tmp-perf-fhas0h32\\repo",
+      "launch_error": false,
+      "output": "",
+      "exit_code": 0,
+      "wall_ms": 63.24360001599416
+    },
+    {
+      "argv": [
+        "git",
+        "status",
+        "--porcelain"
+      ],
+      "cwd": "D:\\ctf-ai\\dlp\\demo\\frida_git_guard\\tests\\.tmp-perf-fhas0h32\\repo",
+      "launch_error": false,
+      "output": "",
+      "exit_code": 0,
+      "wall_ms": 65.66139997448772
+    },
+    {
+      "argv": [
+        "git",
+        "status",
+        "--porcelain"
+      ],
+      "cwd": "D:\\ctf-ai\\dlp\\demo\\frida_git_guard\\tests\\.tmp-perf-fhas0h32\\repo",
+      "launch_error": false,
+      "output": "",
+      "exit_code": 0,
+      "wall_ms": 65.85209997138008
+    },
+    {
+      "argv": [
+        "git",
+        "status",
+        "--porcelain"
+      ],
+      "cwd": "D:\\ctf-ai\\dlp\\demo\\frida_git_guard\\tests\\.tmp-perf-fhas0h32\\repo",
+      "launch_error": false,
+      "output": "",
+      "exit_code": 0,
+      "wall_ms": 79.84800002304837
+    },
+    {
+      "argv": [
+        "git",
+        "status",
+        "--porcelain"
+      ],
+      "cwd": "D:\\ctf-ai\\dlp\\demo\\frida_git_guard\\tests\\.tmp-perf-fhas0h32\\repo",
+      "launch_error": false,
+      "output": "",
+      "exit_code": 0,
+      "wall_ms": 70.41019998723641
+    },
+    {
+      "argv": [
+        "git",
+        "rev-parse",
+        "--short",
+        "HEAD"
+      ],
+      "cwd": "D:\\ctf-ai\\dlp\\demo\\frida_git_guard\\tests\\.tmp-perf-fhas0h32\\repo",
+      "launch_error": false,
+      "output": "101ddd1\r\n",
+      "exit_code": 0,
+      "wall_ms": 56.191899988334626
+    },
+    {
+      "argv": [
+        "git",
+        "rev-parse",
+        "--short",
+        "HEAD"
+      ],
+      "cwd": "D:\\ctf-ai\\dlp\\demo\\frida_git_guard\\tests\\.tmp-perf-fhas0h32\\repo",
+      "launch_error": false,
+      "output": "101ddd1\r\n",
+      "exit_code": 0,
+      "wall_ms": 68.08399996953085
+    },
+    {
+      "argv": [
+        "git",
+        "rev-parse",
+        "--short",
+        "HEAD"
+      ],
+      "cwd": "D:\\ctf-ai\\dlp\\demo\\frida_git_guard\\tests\\.tmp-perf-fhas0h32\\repo",
+      "launch_error": false,
+      "output": "101ddd1\r\n",
+      "exit_code": 0,
+      "wall_ms": 50.3432999830693
+    },
+    {
+      "argv": [
+        "git",
+        "rev-parse",
+        "--short",
+        "HEAD"
+      ],
+      "cwd": "D:\\ctf-ai\\dlp\\demo\\frida_git_guard\\tests\\.tmp-perf-fhas0h32\\repo",
+      "launch_error": false,
+      "output": "101ddd1\r\n",
+      "exit_code": 0,
+      "wall_ms": 56.13209999864921
+    },
+    {
+      "argv": [
+        "git",
+        "rev-parse",
+        "--short",
+        "HEAD"
+      ],
+      "cwd": "D:\\ctf-ai\\dlp\\demo\\frida_git_guard\\tests\\.tmp-perf-fhas0h32\\repo",
+      "launch_error": false,
+      "output": "101ddd1\r\n",
+      "exit_code": 0,
+      "wall_ms": 54.897000023629516
+    },
+    {
+      "argv": [
+        "git",
+        "rev-parse",
+        "--short",
+        "HEAD"
+      ],
+      "cwd": "D:\\ctf-ai\\dlp\\demo\\frida_git_guard\\tests\\.tmp-perf-fhas0h32\\repo",
+      "launch_error": false,
+      "output": "101ddd1\r\n",
+      "exit_code": 0,
+      "wall_ms": 59.91579999681562
+    },
+    {
+      "argv": [
+        "git",
+        "rev-parse",
+        "--short",
+        "HEAD"
+      ],
+      "cwd": "D:\\ctf-ai\\dlp\\demo\\frida_git_guard\\tests\\.tmp-perf-fhas0h32\\repo",
+      "launch_error": false,
+      "output": "101ddd1\r\n",
+      "exit_code": 0,
+      "wall_ms": 61.530500010121614
+    },
+    {
+      "argv": [
+        "git",
+        "rev-parse",
+        "--short",
+        "HEAD"
+      ],
+      "cwd": "D:\\ctf-ai\\dlp\\demo\\frida_git_guard\\tests\\.tmp-perf-fhas0h32\\repo",
+      "launch_error": false,
+      "output": "101ddd1\r\n",
+      "exit_code": 0,
+      "wall_ms": 51.622900005895644
+    },
+    {
+      "argv": [
+        "E:\\Programs\\Anaconda\\python.exe",
+        "--version"
+      ],
+      "cwd": "D:\\ctf-ai\\dlp\\demo\\frida_git_guard\\tests\\.tmp-perf-fhas0h32\\repo",
+      "launch_error": false,
+      "output": "Python 3.13.5\r\n",
+      "exit_code": 0,
+      "wall_ms": 22.413300001062453
+    },
+    {
+      "argv": [
+        "E:\\Programs\\Anaconda\\python.exe",
+        "--version"
+      ],
+      "cwd": "D:\\ctf-ai\\dlp\\demo\\frida_git_guard\\tests\\.tmp-perf-fhas0h32\\repo",
+      "launch_error": false,
+      "output": "Python 3.13.5\r\n",
+      "exit_code": 0,
+      "wall_ms": 19.336699973791838
+    },
+    {
+      "argv": [
+        "E:\\Programs\\Anaconda\\python.exe",
+        "--version"
+      ],
+      "cwd": "D:\\ctf-ai\\dlp\\demo\\frida_git_guard\\tests\\.tmp-perf-fhas0h32\\repo",
+      "launch_error": false,
+      "output": "Python 3.13.5\r\n",
+      "exit_code": 0,
+      "wall_ms": 18.837500014342368
+    },
+    {
+      "argv": [
+        "E:\\Programs\\Anaconda\\python.exe",
+        "--version"
+      ],
+      "cwd": "D:\\ctf-ai\\dlp\\demo\\frida_git_guard\\tests\\.tmp-perf-fhas0h32\\repo",
+      "launch_error": false,
+      "output": "Python 3.13.5\r\n",
+      "exit_code": 0,
+      "wall_ms": 25.60629998333752
+    },
+    {
+      "argv": [
+        "E:\\Programs\\Anaconda\\python.exe",
+        "--version"
+      ],
+      "cwd": "D:\\ctf-ai\\dlp\\demo\\frida_git_guard\\tests\\.tmp-perf-fhas0h32\\repo",
+      "launch_error": false,
+      "output": "Python 3.13.5\r\n",
+      "exit_code": 0,
+      "wall_ms": 18.1690999888815
+    },
+    {
+      "argv": [
+        "E:\\Programs\\Anaconda\\python.exe",
+        "--version"
+      ],
+      "cwd": "D:\\ctf-ai\\dlp\\demo\\frida_git_guard\\tests\\.tmp-perf-fhas0h32\\repo",
+      "launch_error": false,
+      "output": "Python 3.13.5\r\n",
+      "exit_code": 0,
+      "wall_ms": 18.8639999832958
+    },
+    {
+      "argv": [
+        "E:\\Programs\\Anaconda\\python.exe",
+        "--version"
+      ],
+      "cwd": "D:\\ctf-ai\\dlp\\demo\\frida_git_guard\\tests\\.tmp-perf-fhas0h32\\repo",
+      "launch_error": false,
+      "output": "Python 3.13.5\r\n",
+      "exit_code": 0,
+      "wall_ms": 19.769599952269346
+    },
+    {
+      "argv": [
+        "E:\\Programs\\Anaconda\\python.exe",
+        "--version"
+      ],
+      "cwd": "D:\\ctf-ai\\dlp\\demo\\frida_git_guard\\tests\\.tmp-perf-fhas0h32\\repo",
+      "launch_error": false,
+      "output": "Python 3.13.5\r\n",
+      "exit_code": 0,
+      "wall_ms": 17.36860000528395
+    },
+    {
+      "argv": [
+        "git",
+        "status",
+        "--porcelain"
+      ],
+      "cwd": "D:\\ctf-ai\\dlp\\demo\\frida_git_guard\\tests\\.tmp-perf-fhas0h32\\repo",
+      "launch_error": false,
+      "output": "",
+      "exit_code": 0,
+      "wall_ms": 363.93940000562
+    },
+    {
+      "argv": [
+        "git",
+        "status",
+        "--porcelain"
+      ],
+      "cwd": "D:\\ctf-ai\\dlp\\demo\\frida_git_guard\\tests\\.tmp-perf-fhas0h32\\repo",
+      "launch_error": false,
+      "output": "",
+      "exit_code": 0,
+      "wall_ms": 410.38939997088164
+    },
+    {
+      "argv": [
+        "git",
+        "status",
+        "--porcelain"
+      ],
+      "cwd": "D:\\ctf-ai\\dlp\\demo\\frida_git_guard\\tests\\.tmp-perf-fhas0h32\\repo",
+      "launch_error": false,
+      "output": "",
+      "exit_code": 0,
+      "wall_ms": 437.62900005094707
+    },
+    {
+      "argv": [
+        "git",
+        "status",
+        "--porcelain"
+      ],
+      "cwd": "D:\\ctf-ai\\dlp\\demo\\frida_git_guard\\tests\\.tmp-perf-fhas0h32\\repo",
+      "launch_error": false,
+      "output": "",
+      "exit_code": 0,
+      "wall_ms": 378.8337000296451
+    },
+    {
+      "argv": [
+        "git",
+        "status",
+        "--porcelain"
+      ],
+      "cwd": "D:\\ctf-ai\\dlp\\demo\\frida_git_guard\\tests\\.tmp-perf-fhas0h32\\repo",
+      "launch_error": false,
+      "output": "",
+      "exit_code": 0,
+      "wall_ms": 436.925699992571
+    },
+    {
+      "argv": [
+        "git",
+        "status",
+        "--porcelain"
+      ],
+      "cwd": "D:\\ctf-ai\\dlp\\demo\\frida_git_guard\\tests\\.tmp-perf-fhas0h32\\repo",
+      "launch_error": false,
+      "output": "",
+      "exit_code": 0,
+      "wall_ms": 517.6869999850169
+    },
+    {
+      "argv": [
+        "git",
+        "status",
+        "--porcelain"
+      ],
+      "cwd": "D:\\ctf-ai\\dlp\\demo\\frida_git_guard\\tests\\.tmp-perf-fhas0h32\\repo",
+      "launch_error": false,
+      "output": "",
+      "exit_code": 0,
+      "wall_ms": 518.7669000006281
+    },
+    {
+      "argv": [
+        "git",
+        "status",
+        "--porcelain"
+      ],
+      "cwd": "D:\\ctf-ai\\dlp\\demo\\frida_git_guard\\tests\\.tmp-perf-fhas0h32\\repo",
+      "launch_error": false,
+      "output": "",
+      "exit_code": 0,
+      "wall_ms": 604.0259000146762
+    },
+    {
+      "argv": [
+        "git",
+        "rev-parse",
+        "--short",
+        "HEAD"
+      ],
+      "cwd": "D:\\ctf-ai\\dlp\\demo\\frida_git_guard\\tests\\.tmp-perf-fhas0h32\\repo",
+      "launch_error": false,
+      "output": "101ddd1\r\n",
+      "exit_code": 0,
+      "wall_ms": 561.2922000000253
+    },
+    {
+      "argv": [
+        "git",
+        "rev-parse",
+        "--short",
+        "HEAD"
+      ],
+      "cwd": "D:\\ctf-ai\\dlp\\demo\\frida_git_guard\\tests\\.tmp-perf-fhas0h32\\repo",
+      "launch_error": false,
+      "output": "101ddd1\r\n",
+      "exit_code": 0,
+      "wall_ms": 562.2984999790788
+    },
+    {
+      "argv": [
+        "git",
+        "rev-parse",
+        "--short",
+        "HEAD"
+      ],
+      "cwd": "D:\\ctf-ai\\dlp\\demo\\frida_git_guard\\tests\\.tmp-perf-fhas0h32\\repo",
+      "launch_error": false,
+      "output": "101ddd1\r\n",
+      "exit_code": 0,
+      "wall_ms": 552.0856999792159
+    },
+    {
+      "argv": [
+        "git",
+        "rev-parse",
+        "--short",
+        "HEAD"
+      ],
+      "cwd": "D:\\ctf-ai\\dlp\\demo\\frida_git_guard\\tests\\.tmp-perf-fhas0h32\\repo",
+      "launch_error": false,
+      "output": "101ddd1\r\n",
+      "exit_code": 0,
+      "wall_ms": 483.36230003042147
+    },
+    {
+      "argv": [
+        "git",
+        "rev-parse",
+        "--short",
+        "HEAD"
+      ],
+      "cwd": "D:\\ctf-ai\\dlp\\demo\\frida_git_guard\\tests\\.tmp-perf-fhas0h32\\repo",
+      "launch_error": false,
+      "output": "101ddd1\r\n",
+      "exit_code": 0,
+      "wall_ms": 398.0751000344753
+    },
+    {
+      "argv": [
+        "git",
+        "rev-parse",
+        "--short",
+        "HEAD"
+      ],
+      "cwd": "D:\\ctf-ai\\dlp\\demo\\frida_git_guard\\tests\\.tmp-perf-fhas0h32\\repo",
+      "launch_error": false,
+      "output": "101ddd1\r\n",
+      "exit_code": 0,
+      "wall_ms": 543.2939999736845
+    },
+    {
+      "argv": [
+        "git",
+        "rev-parse",
+        "--short",
+        "HEAD"
+      ],
+      "cwd": "D:\\ctf-ai\\dlp\\demo\\frida_git_guard\\tests\\.tmp-perf-fhas0h32\\repo",
+      "launch_error": false,
+      "output": "101ddd1\r\n",
+      "exit_code": 0,
+      "wall_ms": 559.3191999942064
+    },
+    {
+      "argv": [
+        "git",
+        "rev-parse",
+        "--short",
+        "HEAD"
+      ],
+      "cwd": "D:\\ctf-ai\\dlp\\demo\\frida_git_guard\\tests\\.tmp-perf-fhas0h32\\repo",
+      "launch_error": false,
+      "output": "101ddd1\r\n",
+      "exit_code": 0,
+      "wall_ms": 523.3520999900065
+    },
+    {
+      "argv": [
+        "E:\\Programs\\Anaconda\\python.exe",
+        "--version"
+      ],
+      "cwd": "D:\\ctf-ai\\dlp\\demo\\frida_git_guard\\tests\\.tmp-perf-fhas0h32\\repo",
+      "launch_error": false,
+      "output": "Python 3.13.5\r\n",
+      "exit_code": 0,
+      "wall_ms": 46.17690003942698
+    },
+    {
+      "argv": [
+        "E:\\Programs\\Anaconda\\python.exe",
+        "--version"
+      ],
+      "cwd": "D:\\ctf-ai\\dlp\\demo\\frida_git_guard\\tests\\.tmp-perf-fhas0h32\\repo",
+      "launch_error": false,
+      "output": "Python 3.13.5\r\n",
+      "exit_code": 0,
+      "wall_ms": 43.030699947848916
+    },
+    {
+      "argv": [
+        "E:\\Programs\\Anaconda\\python.exe",
+        "--version"
+      ],
+      "cwd": "D:\\ctf-ai\\dlp\\demo\\frida_git_guard\\tests\\.tmp-perf-fhas0h32\\repo",
+      "launch_error": false,
+      "output": "Python 3.13.5\r\n",
+      "exit_code": 0,
+      "wall_ms": 37.71760000381619
+    },
+    {
+      "argv": [
+        "E:\\Programs\\Anaconda\\python.exe",
+        "--version"
+      ],
+      "cwd": "D:\\ctf-ai\\dlp\\demo\\frida_git_guard\\tests\\.tmp-perf-fhas0h32\\repo",
+      "launch_error": false,
+      "output": "Python 3.13.5\r\n",
+      "exit_code": 0,
+      "wall_ms": 32.72250003647059
+    },
+    {
+      "argv": [
+        "E:\\Programs\\Anaconda\\python.exe",
+        "--version"
+      ],
+      "cwd": "D:\\ctf-ai\\dlp\\demo\\frida_git_guard\\tests\\.tmp-perf-fhas0h32\\repo",
+      "launch_error": false,
+      "output": "Python 3.13.5\r\n",
+      "exit_code": 0,
+      "wall_ms": 33.55950000695884
+    },
+    {
+      "argv": [
+        "E:\\Programs\\Anaconda\\python.exe",
+        "--version"
+      ],
+      "cwd": "D:\\ctf-ai\\dlp\\demo\\frida_git_guard\\tests\\.tmp-perf-fhas0h32\\repo",
+      "launch_error": false,
+      "output": "Python 3.13.5\r\n",
+      "exit_code": 0,
+      "wall_ms": 41.50589997880161
+    },
+    {
+      "argv": [
+        "E:\\Programs\\Anaconda\\python.exe",
+        "--version"
+      ],
+      "cwd": "D:\\ctf-ai\\dlp\\demo\\frida_git_guard\\tests\\.tmp-perf-fhas0h32\\repo",
+      "launch_error": false,
+      "output": "Python 3.13.5\r\n",
+      "exit_code": 0,
+      "wall_ms": 43.58249995857477
+    },
+    {
+      "argv": [
+        "E:\\Programs\\Anaconda\\python.exe",
+        "--version"
+      ],
+      "cwd": "D:\\ctf-ai\\dlp\\demo\\frida_git_guard\\tests\\.tmp-perf-fhas0h32\\repo",
+      "launch_error": false,
+      "output": "Python 3.13.5\r\n",
+      "exit_code": 0,
+      "wall_ms": 41.010200046002865
+    },
+    {
+      "argv": [
+        "git",
+        "status",
+        "--porcelain"
+      ],
+      "cwd": "D:\\ctf-ai\\dlp\\demo\\frida_git_guard\\tests\\.tmp-perf-fhas0h32\\repo",
+      "launch_error": false,
+      "output": "",
+      "exit_code": 0,
+      "wall_ms": 164.10170000744984
+    },
+    {
+      "argv": [
+        "git",
+        "status",
+        "--porcelain"
+      ],
+      "cwd": "D:\\ctf-ai\\dlp\\demo\\frida_git_guard\\tests\\.tmp-perf-fhas0h32\\repo",
+      "launch_error": false,
+      "output": "",
+      "exit_code": 0,
+      "wall_ms": 190.1695000124164
+    },
+    {
+      "argv": [
+        "git",
+        "status",
+        "--porcelain"
+      ],
+      "cwd": "D:\\ctf-ai\\dlp\\demo\\frida_git_guard\\tests\\.tmp-perf-fhas0h32\\repo",
+      "launch_error": false,
+      "output": "",
+      "exit_code": 0,
+      "wall_ms": 164.30860001128167
+    },
+    {
+      "argv": [
+        "git",
+        "status",
+        "--porcelain"
+      ],
+      "cwd": "D:\\ctf-ai\\dlp\\demo\\frida_git_guard\\tests\\.tmp-perf-fhas0h32\\repo",
+      "launch_error": false,
+      "output": "",
+      "exit_code": 0,
+      "wall_ms": 179.59120002342388
+    },
+    {
+      "argv": [
+        "git",
+        "status",
+        "--porcelain"
+      ],
+      "cwd": "D:\\ctf-ai\\dlp\\demo\\frida_git_guard\\tests\\.tmp-perf-fhas0h32\\repo",
+      "launch_error": false,
+      "output": "",
+      "exit_code": 0,
+      "wall_ms": 173.4340999973938
+    },
+    {
+      "argv": [
+        "git",
+        "status",
+        "--porcelain"
+      ],
+      "cwd": "D:\\ctf-ai\\dlp\\demo\\frida_git_guard\\tests\\.tmp-perf-fhas0h32\\repo",
+      "launch_error": false,
+      "output": "",
+      "exit_code": 0,
+      "wall_ms": 204.74149996880442
+    },
+    {
+      "argv": [
+        "git",
+        "status",
+        "--porcelain"
+      ],
+      "cwd": "D:\\ctf-ai\\dlp\\demo\\frida_git_guard\\tests\\.tmp-perf-fhas0h32\\repo",
+      "launch_error": false,
+      "output": "",
+      "exit_code": 0,
+      "wall_ms": 156.24370001023635
+    },
+    {
+      "argv": [
+        "git",
+        "status",
+        "--porcelain"
+      ],
+      "cwd": "D:\\ctf-ai\\dlp\\demo\\frida_git_guard\\tests\\.tmp-perf-fhas0h32\\repo",
+      "launch_error": false,
+      "output": "",
+      "exit_code": 0,
+      "wall_ms": 161.20400000363588
+    },
+    {
+      "argv": [
+        "git",
+        "rev-parse",
+        "--short",
+        "HEAD"
+      ],
+      "cwd": "D:\\ctf-ai\\dlp\\demo\\frida_git_guard\\tests\\.tmp-perf-fhas0h32\\repo",
+      "launch_error": false,
+      "output": "101ddd1\r\n",
+      "exit_code": 0,
+      "wall_ms": 188.97089996607974
+    },
+    {
+      "argv": [
+        "git",
+        "rev-parse",
+        "--short",
+        "HEAD"
+      ],
+      "cwd": "D:\\ctf-ai\\dlp\\demo\\frida_git_guard\\tests\\.tmp-perf-fhas0h32\\repo",
+      "launch_error": false,
+      "output": "101ddd1\r\n",
+      "exit_code": 0,
+      "wall_ms": 204.63290001498535
+    },
+    {
+      "argv": [
+        "git",
+        "rev-parse",
+        "--short",
+        "HEAD"
+      ],
+      "cwd": "D:\\ctf-ai\\dlp\\demo\\frida_git_guard\\tests\\.tmp-perf-fhas0h32\\repo",
+      "launch_error": false,
+      "output": "101ddd1\r\n",
+      "exit_code": 0,
+      "wall_ms": 173.7921999883838
+    },
+    {
+      "argv": [
+        "git",
+        "rev-parse",
+        "--short",
+        "HEAD"
+      ],
+      "cwd": "D:\\ctf-ai\\dlp\\demo\\frida_git_guard\\tests\\.tmp-perf-fhas0h32\\repo",
+      "launch_error": false,
+      "output": "101ddd1\r\n",
+      "exit_code": 0,
+      "wall_ms": 218.39379996526986
+    },
+    {
+      "argv": [
+        "git",
+        "rev-parse",
+        "--short",
+        "HEAD"
+      ],
+      "cwd": "D:\\ctf-ai\\dlp\\demo\\frida_git_guard\\tests\\.tmp-perf-fhas0h32\\repo",
+      "launch_error": false,
+      "output": "101ddd1\r\n",
+      "exit_code": 0,
+      "wall_ms": 174.6152999694459
+    },
+    {
+      "argv": [
+        "git",
+        "rev-parse",
+        "--short",
+        "HEAD"
+      ],
+      "cwd": "D:\\ctf-ai\\dlp\\demo\\frida_git_guard\\tests\\.tmp-perf-fhas0h32\\repo",
+      "launch_error": false,
+      "output": "101ddd1\r\n",
+      "exit_code": 0,
+      "wall_ms": 175.90440000640228
+    },
+    {
+      "argv": [
+        "git",
+        "rev-parse",
+        "--short",
+        "HEAD"
+      ],
+      "cwd": "D:\\ctf-ai\\dlp\\demo\\frida_git_guard\\tests\\.tmp-perf-fhas0h32\\repo",
+      "launch_error": false,
+      "output": "101ddd1\r\n",
+      "exit_code": 0,
+      "wall_ms": 172.63300000922754
+    },
+    {
+      "argv": [
+        "git",
+        "rev-parse",
+        "--short",
+        "HEAD"
+      ],
+      "cwd": "D:\\ctf-ai\\dlp\\demo\\frida_git_guard\\tests\\.tmp-perf-fhas0h32\\repo",
+      "launch_error": false,
+      "output": "101ddd1\r\n",
+      "exit_code": 0,
+      "wall_ms": 173.27530001057312
+    },
+    {
+      "argv": [
+        "E:\\Programs\\Anaconda\\python.exe",
+        "--version"
+      ],
+      "cwd": "D:\\ctf-ai\\dlp\\demo\\frida_git_guard\\tests\\.tmp-perf-fhas0h32\\repo",
+      "launch_error": false,
+      "output": "Python 3.13.5\r\n",
+      "exit_code": 0,
+      "wall_ms": 34.162199997808784
+    },
+    {
+      "argv": [
+        "E:\\Programs\\Anaconda\\python.exe",
+        "--version"
+      ],
+      "cwd": "D:\\ctf-ai\\dlp\\demo\\frida_git_guard\\tests\\.tmp-perf-fhas0h32\\repo",
+      "launch_error": false,
+      "output": "Python 3.13.5\r\n",
+      "exit_code": 0,
+      "wall_ms": 25.564500014297664
+    },
+    {
+      "argv": [
+        "E:\\Programs\\Anaconda\\python.exe",
+        "--version"
+      ],
+      "cwd": "D:\\ctf-ai\\dlp\\demo\\frida_git_guard\\tests\\.tmp-perf-fhas0h32\\repo",
+      "launch_error": false,
+      "output": "Python 3.13.5\r\n",
+      "exit_code": 0,
+      "wall_ms": 25.91909997863695
+    },
+    {
+      "argv": [
+        "E:\\Programs\\Anaconda\\python.exe",
+        "--version"
+      ],
+      "cwd": "D:\\ctf-ai\\dlp\\demo\\frida_git_guard\\tests\\.tmp-perf-fhas0h32\\repo",
+      "launch_error": false,
+      "output": "Python 3.13.5\r\n",
+      "exit_code": 0,
+      "wall_ms": 31.518900010269135
+    },
+    {
+      "argv": [
+        "E:\\Programs\\Anaconda\\python.exe",
+        "--version"
+      ],
+      "cwd": "D:\\ctf-ai\\dlp\\demo\\frida_git_guard\\tests\\.tmp-perf-fhas0h32\\repo",
+      "launch_error": false,
+      "output": "Python 3.13.5\r\n",
+      "exit_code": 0,
+      "wall_ms": 34.68460001749918
+    },
+    {
+      "argv": [
+        "E:\\Programs\\Anaconda\\python.exe",
+        "--version"
+      ],
+      "cwd": "D:\\ctf-ai\\dlp\\demo\\frida_git_guard\\tests\\.tmp-perf-fhas0h32\\repo",
+      "launch_error": false,
+      "output": "Python 3.13.5\r\n",
+      "exit_code": 0,
+      "wall_ms": 31.35389997623861
+    },
+    {
+      "argv": [
+        "E:\\Programs\\Anaconda\\python.exe",
+        "--version"
+      ],
+      "cwd": "D:\\ctf-ai\\dlp\\demo\\frida_git_guard\\tests\\.tmp-perf-fhas0h32\\repo",
+      "launch_error": false,
+      "output": "Python 3.13.5\r\n",
+      "exit_code": 0,
+      "wall_ms": 32.736599969211966
+    },
+    {
+      "argv": [
+        "E:\\Programs\\Anaconda\\python.exe",
+        "--version"
+      ],
+      "cwd": "D:\\ctf-ai\\dlp\\demo\\frida_git_guard\\tests\\.tmp-perf-fhas0h32\\repo",
+      "launch_error": false,
+      "output": "Python 3.13.5\r\n",
+      "exit_code": 0,
+      "wall_ms": 29.06610001809895
+    },
+    {
+      "argv": [
+        "git",
+        "status",
+        "--porcelain"
+      ],
+      "cwd": "D:\\ctf-ai\\dlp\\demo\\frida_git_guard\\tests\\.tmp-perf-fhas0h32\\repo",
+      "launch_error": false,
+      "output": "",
+      "exit_code": 0,
+      "wall_ms": 111.1879000090994
+    },
+    {
+      "argv": [
+        "git",
+        "status",
+        "--porcelain"
+      ],
+      "cwd": "D:\\ctf-ai\\dlp\\demo\\frida_git_guard\\tests\\.tmp-perf-fhas0h32\\repo",
+      "launch_error": false,
+      "output": "",
+      "exit_code": 0,
+      "wall_ms": 106.21959995478392
+    },
+    {
+      "argv": [
+        "git",
+        "status",
+        "--porcelain"
+      ],
+      "cwd": "D:\\ctf-ai\\dlp\\demo\\frida_git_guard\\tests\\.tmp-perf-fhas0h32\\repo",
+      "launch_error": false,
+      "output": "",
+      "exit_code": 0,
+      "wall_ms": 69.256899994798
+    },
+    {
+      "argv": [
+        "git",
+        "status",
+        "--porcelain"
+      ],
+      "cwd": "D:\\ctf-ai\\dlp\\demo\\frida_git_guard\\tests\\.tmp-perf-fhas0h32\\repo",
+      "launch_error": false,
+      "output": "",
+      "exit_code": 0,
+      "wall_ms": 74.49949998408556
+    },
+    {
+      "argv": [
+        "git",
+        "status",
+        "--porcelain"
+      ],
+      "cwd": "D:\\ctf-ai\\dlp\\demo\\frida_git_guard\\tests\\.tmp-perf-fhas0h32\\repo",
+      "launch_error": false,
+      "output": "",
+      "exit_code": 0,
+      "wall_ms": 76.65740000084043
+    },
+    {
+      "argv": [
+        "git",
+        "status",
+        "--porcelain"
+      ],
+      "cwd": "D:\\ctf-ai\\dlp\\demo\\frida_git_guard\\tests\\.tmp-perf-fhas0h32\\repo",
+      "launch_error": false,
+      "output": "",
+      "exit_code": 0,
+      "wall_ms": 61.10729998908937
+    },
+    {
+      "argv": [
+        "git",
+        "status",
+        "--porcelain"
+      ],
+      "cwd": "D:\\ctf-ai\\dlp\\demo\\frida_git_guard\\tests\\.tmp-perf-fhas0h32\\repo",
+      "launch_error": false,
+      "output": "",
+      "exit_code": 0,
+      "wall_ms": 68.03870003204793
+    },
+    {
+      "argv": [
+        "git",
+        "status",
+        "--porcelain"
+      ],
+      "cwd": "D:\\ctf-ai\\dlp\\demo\\frida_git_guard\\tests\\.tmp-perf-fhas0h32\\repo",
+      "launch_error": false,
+      "output": "",
+      "exit_code": 0,
+      "wall_ms": 99.98780000023544
+    },
+    {
+      "argv": [
+        "git",
+        "rev-parse",
+        "--short",
+        "HEAD"
+      ],
+      "cwd": "D:\\ctf-ai\\dlp\\demo\\frida_git_guard\\tests\\.tmp-perf-fhas0h32\\repo",
+      "launch_error": false,
+      "output": "101ddd1\r\n",
+      "exit_code": 0,
+      "wall_ms": 105.40890000993386
+    },
+    {
+      "argv": [
+        "git",
+        "rev-parse",
+        "--short",
+        "HEAD"
+      ],
+      "cwd": "D:\\ctf-ai\\dlp\\demo\\frida_git_guard\\tests\\.tmp-perf-fhas0h32\\repo",
+      "launch_error": false,
+      "output": "101ddd1\r\n",
+      "exit_code": 0,
+      "wall_ms": 86.91559999715537
+    },
+    {
+      "argv": [
+        "git",
+        "rev-parse",
+        "--short",
+        "HEAD"
+      ],
+      "cwd": "D:\\ctf-ai\\dlp\\demo\\frida_git_guard\\tests\\.tmp-perf-fhas0h32\\repo",
+      "launch_error": false,
+      "output": "101ddd1\r\n",
+      "exit_code": 0,
+      "wall_ms": 117.16820002766326
+    },
+    {
+      "argv": [
+        "git",
+        "rev-parse",
+        "--short",
+        "HEAD"
+      ],
+      "cwd": "D:\\ctf-ai\\dlp\\demo\\frida_git_guard\\tests\\.tmp-perf-fhas0h32\\repo",
+      "launch_error": false,
+      "output": "101ddd1\r\n",
+      "exit_code": 0,
+      "wall_ms": 126.22699997154996
+    },
+    {
+      "argv": [
+        "git",
+        "rev-parse",
+        "--short",
+        "HEAD"
+      ],
+      "cwd": "D:\\ctf-ai\\dlp\\demo\\frida_git_guard\\tests\\.tmp-perf-fhas0h32\\repo",
+      "launch_error": false,
+      "output": "101ddd1\r\n",
+      "exit_code": 0,
+      "wall_ms": 81.70799998333678
+    },
+    {
+      "argv": [
+        "git",
+        "rev-parse",
+        "--short",
+        "HEAD"
+      ],
+      "cwd": "D:\\ctf-ai\\dlp\\demo\\frida_git_guard\\tests\\.tmp-perf-fhas0h32\\repo",
+      "launch_error": false,
+      "output": "101ddd1\r\n",
+      "exit_code": 0,
+      "wall_ms": 99.831199971959
+    },
+    {
+      "argv": [
+        "git",
+        "rev-parse",
+        "--short",
+        "HEAD"
+      ],
+      "cwd": "D:\\ctf-ai\\dlp\\demo\\frida_git_guard\\tests\\.tmp-perf-fhas0h32\\repo",
+      "launch_error": false,
+      "output": "101ddd1\r\n",
+      "exit_code": 0,
+      "wall_ms": 109.90460001630709
+    },
+    {
+      "argv": [
+        "git",
+        "rev-parse",
+        "--short",
+        "HEAD"
+      ],
+      "cwd": "D:\\ctf-ai\\dlp\\demo\\frida_git_guard\\tests\\.tmp-perf-fhas0h32\\repo",
+      "launch_error": false,
+      "output": "101ddd1\r\n",
+      "exit_code": 0,
+      "wall_ms": 99.20340002281591
+    },
+    {
+      "argv": [
+        "E:\\Programs\\Anaconda\\python.exe",
+        "--version"
+      ],
+      "cwd": "D:\\ctf-ai\\dlp\\demo\\frida_git_guard\\tests\\.tmp-perf-fhas0h32\\repo",
+      "launch_error": false,
+      "output": "Python 3.13.5\r\n",
+      "exit_code": 0,
+      "wall_ms": 30.19810002297163
+    },
+    {
+      "argv": [
+        "E:\\Programs\\Anaconda\\python.exe",
+        "--version"
+      ],
+      "cwd": "D:\\ctf-ai\\dlp\\demo\\frida_git_guard\\tests\\.tmp-perf-fhas0h32\\repo",
+      "launch_error": false,
+      "output": "Python 3.13.5\r\n",
+      "exit_code": 0,
+      "wall_ms": 30.82039998844266
+    },
+    {
+      "argv": [
+        "E:\\Programs\\Anaconda\\python.exe",
+        "--version"
+      ],
+      "cwd": "D:\\ctf-ai\\dlp\\demo\\frida_git_guard\\tests\\.tmp-perf-fhas0h32\\repo",
+      "launch_error": false,
+      "output": "Python 3.13.5\r\n",
+      "exit_code": 0,
+      "wall_ms": 40.99469998618588
+    },
+    {
+      "argv": [
+        "E:\\Programs\\Anaconda\\python.exe",
+        "--version"
+      ],
+      "cwd": "D:\\ctf-ai\\dlp\\demo\\frida_git_guard\\tests\\.tmp-perf-fhas0h32\\repo",
+      "launch_error": false,
+      "output": "Python 3.13.5\r\n",
+      "exit_code": 0,
+      "wall_ms": 37.86689997650683
+    },
+    {
+      "argv": [
+        "E:\\Programs\\Anaconda\\python.exe",
+        "--version"
+      ],
+      "cwd": "D:\\ctf-ai\\dlp\\demo\\frida_git_guard\\tests\\.tmp-perf-fhas0h32\\repo",
+      "launch_error": false,
+      "output": "Python 3.13.5\r\n",
+      "exit_code": 0,
+      "wall_ms": 39.05640001175925
+    },
+    {
+      "argv": [
+        "E:\\Programs\\Anaconda\\python.exe",
+        "--version"
+      ],
+      "cwd": "D:\\ctf-ai\\dlp\\demo\\frida_git_guard\\tests\\.tmp-perf-fhas0h32\\repo",
+      "launch_error": false,
+      "output": "Python 3.13.5\r\n",
+      "exit_code": 0,
+      "wall_ms": 41.658799978904426
+    },
+    {
+      "argv": [
+        "E:\\Programs\\Anaconda\\python.exe",
+        "--version"
+      ],
+      "cwd": "D:\\ctf-ai\\dlp\\demo\\frida_git_guard\\tests\\.tmp-perf-fhas0h32\\repo",
+      "launch_error": false,
+      "output": "Python 3.13.5\r\n",
+      "exit_code": 0,
+      "wall_ms": 51.913000002969056
+    },
+    {
+      "argv": [
+        "E:\\Programs\\Anaconda\\python.exe",
+        "--version"
+      ],
+      "cwd": "D:\\ctf-ai\\dlp\\demo\\frida_git_guard\\tests\\.tmp-perf-fhas0h32\\repo",
+      "launch_error": false,
+      "output": "Python 3.13.5\r\n",
+      "exit_code": 0,
+      "wall_ms": 32.542800006922334
+    },
+    {
+      "argv": [
+        "E:\\Programs\\Anaconda\\python.exe",
+        "-B",
+        "-c",
+        "from pathlib import Path\nimport sys,time,json,subprocess\nsys.path.insert(0,sys.argv[1]);import guard\noriginal=subprocess.run;calls=[]\ndef trace(*args,**kw):\n r=original(*args,**kw)\n calls.append({'argv':[str(x) for x in r.args],'exit_code':r.returncode,'stdout':r.stdout.decode('utf-8','replace'),'stderr':r.stderr.decode('utf-8','replace')})\n return r\nsubprocess.run=trace\np=guard.Policy([],['flag'],True);started=time.perf_counter();result=guard.scan_history(Path(sys.argv[2]),'HEAD',p);elapsed=(time.perf_counter()-started)*1000\nprint(json.dumps({'wall_ms':elapsed,'result':result,'git_subprocess_count':len(calls),'commands':calls}))\n",
+        "D:\\ctf-ai\\dlp\\demo\\frida_git_guard\\tests\\.tmp-perf-fhas0h32\\baseline",
+        "D:\\ctf-ai\\dlp\\demo\\frida_git_guard\\tests\\.tmp-perf-fhas0h32\\repo"
+      ],
+      "cwd": "D:\\ctf-ai\\dlp\\demo\\frida_git_guard",
+      "exit_code": 0,
+      "stdout": "{\"wall_ms\": 10612.975399999414, \"result\": {\"deny\": false, \"findings\": [], \"commits_scanned\": 4, \"blobs_scanned\": 27, \"bytes_scanned\": 887, \"tree_entries\": 96}, \"git_subprocess_count\": 126, \"commands\": [{\"argv\": [\"E:\\\\Git\\\\cmd\\\\git.EXE\", \"--exec-path\"], \"exit_code\": 0, \"stdout\": \"E:/Git/mingw64/libexec/git-core\\n\", \"stderr\": \"\"}, {\"argv\": [\"E:\\\\Git\\\\mingw64\\\\bin\\\\git.exe\", \"-C\", \"D:\\\\ctf-ai\\\\dlp\\\\demo\\\\frida_git_guard\\\\tests\\\\.tmp-perf-fhas0h32\\\\repo\", \"rev-parse\", \"--show-toplevel\"], \"exit_code\": 0, \"stdout\": \"D:/ctf-ai/dlp/demo/frida_git_guard/tests/.tmp-perf-fhas0h32/repo\\n\", \"stderr\": \"\"}, {\"argv\": [\"E:\\\\Git\\\\cmd\\\\git.EXE\", \"--exec-path\"], \"exit_code\": 0, \"stdout\": \"E:/Git/mingw64/libexec/git-core\\n\", \"stderr\": \"\"}, {\"argv\": [\"E:\\\\Git\\\\mingw64\\\\bin\\\\git.exe\", \"-C\", \"D:\\\\ctf-ai\\\\dlp\\\\demo\\\\frida_git_guard\\\\tests\\\\.tmp-perf-fhas0h32\\\\repo\", \"replace\", \"-l\"], \"exit_code\": 0, \"stdout\": \"\", \"stderr\": \"\"}, {\"argv\": [\"E:\\\\Git\\\\cmd\\\\git.EXE\", \"--exec-path\"], \"exit_code\": 0, \"stdout\": \"E:/Git/mingw64/libexec/git-core\\n\", \"stderr\": \"\"}, {\"argv\": [\"E:\\\\Git\\\\mingw64\\\\bin\\\\git.exe\", \"-C\", \"D:\\\\ctf-ai\\\\dlp\\\\demo\\\\frida_git_guard\\\\tests\\\\.tmp-perf-fhas0h32\\\\repo\", \"rev-parse\", \"--git-path\", \"info/grafts\"], \"exit_code\": 0, \"stdout\": \".git/info/grafts\\n\", \"stderr\": \"\"}, {\"argv\": [\"E:\\\\Git\\\\cmd\\\\git.EXE\", \"--exec-path\"], \"exit_code\": 0, \"stdout\": \"E:/Git/mingw64/libexec/git-core\\n\", \"stderr\": \"\"}, {\"argv\": [\"E:\\\\Git\\\\mingw64\\\\bin\\\\git.exe\", \"-C\", \"D:\\\\ctf-ai\\\\dlp\\\\demo\\\\frida_git_guard\\\\tests\\\\.tmp-perf-fhas0h32\\\\repo\", \"rev-parse\", \"--is-shallow-repository\"], \"exit_code\": 0, \"stdout\": \"false\\n\", \"stderr\": \"\"}, {\"argv\": [\"E:\\\\Git\\\\cmd\\\\git.EXE\", \"--exec-path\"], \"exit_code\": 0, \"stdout\": \"E:/Git/mingw64/libexec/git-core\\n\", \"stderr\": \"\"}, {\"argv\": [\"E:\\\\Git\\\\mingw64\\\\bin\\\\git.exe\", \"-C\", \"D:\\\\ctf-ai\\\\dlp\\\\demo\\\\frida_git_guard\\\\tests\\\\.tmp-perf-fhas0h32\\\\repo\", \"rev-list\", \"--max-count\", \"1001\", \"HEAD\"], \"exit_code\": 0, \"stdout\": \"101ddd1b0c399be9e784b76455d38c3ad569eb77\\n1b140a3200f89b7cc47b1da5e58cf30a27e74e5a\\nda5f5d967c80b08e11f68b41efec0798b6753ac7\\n607f0ce41e01214786443079c7742720063d6b03\\n\", \"stderr\": \"\"}, {\"argv\": [\"E:\\\\Git\\\\cmd\\\\git.EXE\", \"--exec-path\"], \"exit_code\": 0, \"stdout\": \"E:/Git/mingw64/libexec/git-core\\n\", \"stderr\": \"\"}, {\"argv\": [\"E:\\\\Git\\\\mingw64\\\\bin\\\\git.exe\", \"-C\", \"D:\\\\ctf-ai\\\\dlp\\\\demo\\\\frida_git_guard\\\\tests\\\\.tmp-perf-fhas0h32\\\\repo\", \"ls-tree\", \"-r\", \"-z\", \"101ddd1b0c399be9e784b76455d38c3ad569eb77\"], \"exit_code\": 0, \"stdout\": \"100644 blob 7a72c7d299a6e8bc244d9508cb22a65f08f45936\\tfile-0.txt\\u0000100644 blob 4124d4153025f5bbb582a12e29b1dad6a69f6b28\\tfile-1.txt\\u0000100644 blob 010a0eba928a9ec7ea3a8d88851b3985d959cea5\\tfile-10.txt\\u0000100644 blob 0b6f88539042faddb71f6b2ce6802f912565a60d\\tfile-11.txt\\u0000100644 blob ab7ffac4c1cc965f52f324fab3f2d1f749ee52d6\\tfile-12.txt\\u0000100644 blob 206dda33fd521c673d865e93b9247167f2f073d3\\tfile-13.txt\\u0000100644 blob 632602d422a3839b0de4943169d76be391ca785c\\tfile-14.txt\\u0000100644 blob 86a24c08c7d33d278e54d00814d63aabbb912f86\\tfile-15.txt\\u0000100644 blob 794d59375b602628f816121c05943a64e05610b2\\tfile-16.txt\\u0000100644 blob 71baf7c50d08b6bedbd817ad0babff47a61ed37a\\tfile-17.txt\\u0000100644 blob f8c70b4267e083371a5fa1cb079a895e76a1bd08\\tfile-18.txt\\u0000100644 blob 342f4dd0d4529cd7a1171812d353498ca12fd754\\tfile-19.txt\\u0000100644 blob ebd01a123a4cab21b4436ba95cbc1220663686be\\tfile-2.txt\\u0000100644 blob bb52f9862c8840ae77d725f166b899668f9061cc\\tfile-20.txt\\u0000100644 blob e476ff45ce855951e3c5c55e3c7a4ca609272f2f\\tfile-21.txt\\u0000100644 blob 0ec63a305bf45eecfd73f1111a9ebb985a1217cf\\tfile-22.txt\\u0000100644 blob ff5a6d9ea1a84b0a503b0870395f0995a36ba8bc\\tfile-23.txt\\u0000100644 blob 6882aea65ef3ea0ccc9fa99dbdba3dee761cdaab\\tfile-3.txt\\u0000100644 blob 1e8233126de567813a108ac669e2ed3953b7dd30\\tfile-4.txt\\u0000100644 blob cebe218daad98a86ddfaaa86d9df0039a0d1b130\\tfile-5.txt\\u0000100644 blob 57cef937c81486223003f8526674ca730bbfc0c7\\tfile-6.txt\\u0000100644 blob c231657ee146214e1c667bd47a1162f427c60024\\tfile-7.txt\\u0000100644 blob 23506dfbaddd81f61c1d69bb409195cdd34dc133\\tfile-8.txt\\u0000100644 blob c7a9a1056600701a09885ac9d413bad8ee58f778\\tfile-9.txt\\u0000\", \"stderr\": \"\"}, {\"argv\": [\"E:\\\\Git\\\\cmd\\\\git.EXE\", \"--exec-path\"], \"exit_code\": 0, \"stdout\": \"E:/Git/mingw64/libexec/git-core\\n\", \"stderr\": \"\"}, {\"argv\": [\"E:\\\\Git\\\\mingw64\\\\bin\\\\git.exe\", \"-C\", \"D:\\\\ctf-ai\\\\dlp\\\\demo\\\\frida_git_guard\\\\tests\\\\.tmp-perf-fhas0h32\\\\repo\", \"cat-file\", \"-s\", \"7a72c7d299a6e8bc244d9508cb22a65f08f45936\"], \"exit_code\": 0, \"stdout\": \"35\\n\", \"stderr\": \"\"}, {\"argv\": [\"E:\\\\Git\\\\cmd\\\\git.EXE\", \"--exec-path\"], \"exit_code\": 0, \"stdout\": \"E:/Git/mingw64/libexec/git-core\\n\", \"stderr\": \"\"}, {\"argv\": [\"E:\\\\Git\\\\mingw64\\\\bin\\\\git.exe\", \"-C\", \"D:\\\\ctf-ai\\\\dlp\\\\demo\\\\frida_git_guard\\\\tests\\\\.tmp-perf-fhas0h32\\\\repo\", \"cat-file\", \"blob\", \"7a72c7d299a6e8bc244d9508cb22a65f08f45936\"], \"exit_code\": 0, \"stdout\": \"changed ordinary benchmark data 0\\r\\n\", \"stderr\": \"\"}, {\"argv\": [\"E:\\\\Git\\\\cmd\\\\git.EXE\", \"--exec-path\"], \"exit_code\": 0, \"stdout\": \"E:/Git/mingw64/libexec/git-core\\n\", \"stderr\": \"\"}, {\"argv\": [\"E:\\\\Git\\\\mingw64\\\\bin\\\\git.exe\", \"-C\", \"D:\\\\ctf-ai\\\\dlp\\\\demo\\\\frida_git_guard\\\\tests\\\\.tmp-perf-fhas0h32\\\\repo\", \"cat-file\", \"-s\", \"4124d4153025f5bbb582a12e29b1dad6a69f6b28\"], \"exit_code\": 0, \"stdout\": \"35\\n\", \"stderr\": \"\"}, {\"argv\": [\"E:\\\\Git\\\\cmd\\\\git.EXE\", \"--exec-path\"], \"exit_code\": 0, \"stdout\": \"E:/Git/mingw64/libexec/git-core\\n\", \"stderr\": \"\"}, {\"argv\": [\"E:\\\\Git\\\\mingw64\\\\bin\\\\git.exe\", \"-C\", \"D:\\\\ctf-ai\\\\dlp\\\\demo\\\\frida_git_guard\\\\tests\\\\.tmp-perf-fhas0h32\\\\repo\", \"cat-file\", \"blob\", \"4124d4153025f5bbb582a12e29b1dad6a69f6b28\"], \"exit_code\": 0, \"stdout\": \"changed ordinary benchmark data 1\\r\\n\", \"stderr\": \"\"}, {\"argv\": [\"E:\\\\Git\\\\cmd\\\\git.EXE\", \"--exec-path\"], \"exit_code\": 0, \"stdout\": \"E:/Git/mingw64/libexec/git-core\\n\", \"stderr\": \"\"}, {\"argv\": [\"E:\\\\Git\\\\mingw64\\\\bin\\\\git.exe\", \"-C\", \"D:\\\\ctf-ai\\\\dlp\\\\demo\\\\frida_git_guard\\\\tests\\\\.tmp-perf-fhas0h32\\\\repo\", \"cat-file\", \"-s\", \"010a0eba928a9ec7ea3a8d88851b3985d959cea5\"], \"exit_code\": 0, \"stdout\": \"33\\n\", \"stderr\": \"\"}, {\"argv\": [\"E:\\\\Git\\\\cmd\\\\git.EXE\", \"--exec-path\"], \"exit_code\": 0, \"stdout\": \"E:/Git/mingw64/libexec/git-core\\n\", \"stderr\": \"\"}, {\"argv\": [\"E:\\\\Git\\\\mingw64\\\\bin\\\\git.exe\", \"-C\", \"D:\\\\ctf-ai\\\\dlp\\\\demo\\\\frida_git_guard\\\\tests\\\\.tmp-perf-fhas0h32\\\\repo\", \"cat-file\", \"blob\", \"010a0eba928a9ec7ea3a8d88851b3985d959cea5\"], \"exit_code\": 0, \"stdout\": \"ordinary benchmark data item 10\\r\\n\", \"stderr\": \"\"}, {\"argv\": [\"E:\\\\Git\\\\cmd\\\\git.EXE\", \"--exec-path\"], \"exit_code\": 0, \"stdout\": \"E:/Git/mingw64/libexec/git-core\\n\", \"stderr\": \"\"}, {\"argv\": [\"E:\\\\Git\\\\mingw64\\\\bin\\\\git.exe\", \"-C\", \"D:\\\\ctf-ai\\\\dlp\\\\demo\\\\frida_git_guard\\\\tests\\\\.tmp-perf-fhas0h32\\\\repo\", \"cat-file\", \"-s\", \"0b6f88539042faddb71f6b2ce6802f912565a60d\"], \"exit_code\": 0, \"stdout\": \"33\\n\", \"stderr\": \"\"}, {\"argv\": [\"E:\\\\Git\\\\cmd\\\\git.EXE\", \"--exec-path\"], \"exit_code\": 0, \"stdout\": \"E:/Git/mingw64/libexec/git-core\\n\", \"stderr\": \"\"}, {\"argv\": [\"E:\\\\Git\\\\mingw64\\\\bin\\\\git.exe\", \"-C\", \"D:\\\\ctf-ai\\\\dlp\\\\demo\\\\frida_git_guard\\\\tests\\\\.tmp-perf-fhas0h32\\\\repo\", \"cat-file\", \"blob\", \"0b6f88539042faddb71f6b2ce6802f912565a60d\"], \"exit_code\": 0, \"stdout\": \"ordinary benchmark data item 11\\r\\n\", \"stderr\": \"\"}, {\"argv\": [\"E:\\\\Git\\\\cmd\\\\git.EXE\", \"--exec-path\"], \"exit_code\": 0, \"stdout\": \"E:/Git/mingw64/libexec/git-core\\n\", \"stderr\": \"\"}, {\"argv\": [\"E:\\\\Git\\\\mingw64\\\\bin\\\\git.exe\", \"-C\", \"D:\\\\ctf-ai\\\\dlp\\\\demo\\\\frida_git_guard\\\\tests\\\\.tmp-perf-fhas0h32\\\\repo\", \"cat-file\", \"-s\", \"ab7ffac4c1cc965f52f324fab3f2d1f749ee52d6\"], \"exit_code\": 0, \"stdout\": \"33\\n\", \"stderr\": \"\"}, {\"argv\": [\"E:\\\\Git\\\\cmd\\\\git.EXE\", \"--exec-path\"], \"exit_code\": 0, \"stdout\": \"E:/Git/mingw64/libexec/git-core\\n\", \"stderr\": \"\"}, {\"argv\": [\"E:\\\\Git\\\\mingw64\\\\bin\\\\git.exe\", \"-C\", \"D:\\\\ctf-ai\\\\dlp\\\\demo\\\\frida_git_guard\\\\tests\\\\.tmp-perf-fhas0h32\\\\repo\", \"cat-file\", \"blob\", \"ab7ffac4c1cc965f52f324fab3f2d1f749ee52d6\"], \"exit_code\": 0, \"stdout\": \"ordinary benchmark data item 12\\r\\n\", \"stderr\": \"\"}, {\"argv\": [\"E:\\\\Git\\\\cmd\\\\git.EXE\", \"--exec-path\"], \"exit_code\": 0, \"stdout\": \"E:/Git/mingw64/libexec/git-core\\n\", \"stderr\": \"\"}, {\"argv\": [\"E:\\\\Git\\\\mingw64\\\\bin\\\\git.exe\", \"-C\", \"D:\\\\ctf-ai\\\\dlp\\\\demo\\\\frida_git_guard\\\\tests\\\\.tmp-perf-fhas0h32\\\\repo\", \"cat-file\", \"-s\", \"206dda33fd521c673d865e93b9247167f2f073d3\"], \"exit_code\": 0, \"stdout\": \"33\\n\", \"stderr\": \"\"}, {\"argv\": [\"E:\\\\Git\\\\cmd\\\\git.EXE\", \"--exec-path\"], \"exit_code\": 0, \"stdout\": \"E:/Git/mingw64/libexec/git-core\\n\", \"stderr\": \"\"}, {\"argv\": [\"E:\\\\Git\\\\mingw64\\\\bin\\\\git.exe\", \"-C\", \"D:\\\\ctf-ai\\\\dlp\\\\demo\\\\frida_git_guard\\\\tests\\\\.tmp-perf-fhas0h32\\\\repo\", \"cat-file\", \"blob\", \"206dda33fd521c673d865e93b9247167f2f073d3\"], \"exit_code\": 0, \"stdout\": \"ordinary benchmark data item 13\\r\\n\", \"stderr\": \"\"}, {\"argv\": [\"E:\\\\Git\\\\cmd\\\\git.EXE\", \"--exec-path\"], \"exit_code\": 0, \"stdout\": \"E:/Git/mingw64/libexec/git-core\\n\", \"stderr\": \"\"}, {\"argv\": [\"E:\\\\Git\\\\mingw64\\\\bin\\\\git.exe\", \"-C\", \"D:\\\\ctf-ai\\\\dlp\\\\demo\\\\frida_git_guard\\\\tests\\\\.tmp-perf-fhas0h32\\\\repo\", \"cat-file\", \"-s\", \"632602d422a3839b0de4943169d76be391ca785c\"], \"exit_code\": 0, \"stdout\": \"33\\n\", \"stderr\": \"\"}, {\"argv\": [\"E:\\\\Git\\\\cmd\\\\git.EXE\", \"--exec-path\"], \"exit_code\": 0, \"stdout\": \"E:/Git/mingw64/libexec/git-core\\n\", \"stderr\": \"\"}, {\"argv\": [\"E:\\\\Git\\\\mingw64\\\\bin\\\\git.exe\", \"-C\", \"D:\\\\ctf-ai\\\\dlp\\\\demo\\\\frida_git_guard\\\\tests\\\\.tmp-perf-fhas0h32\\\\repo\", \"cat-file\", \"blob\", \"632602d422a3839b0de4943169d76be391ca785c\"], \"exit_code\": 0, \"stdout\": \"ordinary benchmark data item 14\\r\\n\", \"stderr\": \"\"}, {\"argv\": [\"E:\\\\Git\\\\cmd\\\\git.EXE\", \"--exec-path\"], \"exit_code\": 0, \"stdout\": \"E:/Git/mingw64/libexec/git-core\\n\", \"stderr\": \"\"}, {\"argv\": [\"E:\\\\Git\\\\mingw64\\\\bin\\\\git.exe\", \"-C\", \"D:\\\\ctf-ai\\\\dlp\\\\demo\\\\frida_git_guard\\\\tests\\\\.tmp-perf-fhas0h32\\\\repo\", \"cat-file\", \"-s\", \"86a24c08c7d33d278e54d00814d63aabbb912f86\"], \"exit_code\": 0, \"stdout\": \"33\\n\", \"stderr\": \"\"}, {\"argv\": [\"E:\\\\Git\\\\cmd\\\\git.EXE\", \"--exec-path\"], \"exit_code\": 0, \"stdout\": \"E:/Git/mingw64/libexec/git-core\\n\", \"stderr\": \"\"}, {\"argv\": [\"E:\\\\Git\\\\mingw64\\\\bin\\\\git.exe\", \"-C\", \"D:\\\\ctf-ai\\\\dlp\\\\demo\\\\frida_git_guard\\\\tests\\\\.tmp-perf-fhas0h32\\\\repo\", \"cat-file\", \"blob\", \"86a24c08c7d33d278e54d00814d63aabbb912f86\"], \"exit_code\": 0, \"stdout\": \"ordinary benchmark data item 15\\r\\n\", \"stderr\": \"\"}, {\"argv\": [\"E:\\\\Git\\\\cmd\\\\git.EXE\", \"--exec-path\"], \"exit_code\": 0, \"stdout\": \"E:/Git/mingw64/libexec/git-core\\n\", \"stderr\": \"\"}, {\"argv\": [\"E:\\\\Git\\\\mingw64\\\\bin\\\\git.exe\", \"-C\", \"D:\\\\ctf-ai\\\\dlp\\\\demo\\\\frida_git_guard\\\\tests\\\\.tmp-perf-fhas0h32\\\\repo\", \"cat-file\", \"-s\", \"794d59375b602628f816121c05943a64e05610b2\"], \"exit_code\": 0, \"stdout\": \"33\\n\", \"stderr\": \"\"}, {\"argv\": [\"E:\\\\Git\\\\cmd\\\\git.EXE\", \"--exec-path\"], \"exit_code\": 0, \"stdout\": \"E:/Git/mingw64/libexec/git-core\\n\", \"stderr\": \"\"}, {\"argv\": [\"E:\\\\Git\\\\mingw64\\\\bin\\\\git.exe\", \"-C\", \"D:\\\\ctf-ai\\\\dlp\\\\demo\\\\frida_git_guard\\\\tests\\\\.tmp-perf-fhas0h32\\\\repo\", \"cat-file\", \"blob\", \"794d59375b602628f816121c05943a64e05610b2\"], \"exit_code\": 0, \"stdout\": \"ordinary benchmark data item 16\\r\\n\", \"stderr\": \"\"}, {\"argv\": [\"E:\\\\Git\\\\cmd\\\\git.EXE\", \"--exec-path\"], \"exit_code\": 0, \"stdout\": \"E:/Git/mingw64/libexec/git-core\\n\", \"stderr\": \"\"}, {\"argv\": [\"E:\\\\Git\\\\mingw64\\\\bin\\\\git.exe\", \"-C\", \"D:\\\\ctf-ai\\\\dlp\\\\demo\\\\frida_git_guard\\\\tests\\\\.tmp-perf-fhas0h32\\\\repo\", \"cat-file\", \"-s\", \"71baf7c50d08b6bedbd817ad0babff47a61ed37a\"], \"exit_code\": 0, \"stdout\": \"33\\n\", \"stderr\": \"\"}, {\"argv\": [\"E:\\\\Git\\\\cmd\\\\git.EXE\", \"--exec-path\"], \"exit_code\": 0, \"stdout\": \"E:/Git/mingw64/libexec/git-core\\n\", \"stderr\": \"\"}, {\"argv\": [\"E:\\\\Git\\\\mingw64\\\\bin\\\\git.exe\", \"-C\", \"D:\\\\ctf-ai\\\\dlp\\\\demo\\\\frida_git_guard\\\\tests\\\\.tmp-perf-fhas0h32\\\\repo\", \"cat-file\", \"blob\", \"71baf7c50d08b6bedbd817ad0babff47a61ed37a\"], \"exit_code\": 0, \"stdout\": \"ordinary benchmark data item 17\\r\\n\", \"stderr\": \"\"}, {\"argv\": [\"E:\\\\Git\\\\cmd\\\\git.EXE\", \"--exec-path\"], \"exit_code\": 0, \"stdout\": \"E:/Git/mingw64/libexec/git-core\\n\", \"stderr\": \"\"}, {\"argv\": [\"E:\\\\Git\\\\mingw64\\\\bin\\\\git.exe\", \"-C\", \"D:\\\\ctf-ai\\\\dlp\\\\demo\\\\frida_git_guard\\\\tests\\\\.tmp-perf-fhas0h32\\\\repo\", \"cat-file\", \"-s\", \"f8c70b4267e083371a5fa1cb079a895e76a1bd08\"], \"exit_code\": 0, \"stdout\": \"33\\n\", \"stderr\": \"\"}, {\"argv\": [\"E:\\\\Git\\\\cmd\\\\git.EXE\", \"--exec-path\"], \"exit_code\": 0, \"stdout\": \"E:/Git/mingw64/libexec/git-core\\n\", \"stderr\": \"\"}, {\"argv\": [\"E:\\\\Git\\\\mingw64\\\\bin\\\\git.exe\", \"-C\", \"D:\\\\ctf-ai\\\\dlp\\\\demo\\\\frida_git_guard\\\\tests\\\\.tmp-perf-fhas0h32\\\\repo\", \"cat-file\", \"blob\", \"f8c70b4267e083371a5fa1cb079a895e76a1bd08\"], \"exit_code\": 0, \"stdout\": \"ordinary benchmark data item 18\\r\\n\", \"stderr\": \"\"}, {\"argv\": [\"E:\\\\Git\\\\cmd\\\\git.EXE\", \"--exec-path\"], \"exit_code\": 0, \"stdout\": \"E:/Git/mingw64/libexec/git-core\\n\", \"stderr\": \"\"}, {\"argv\": [\"E:\\\\Git\\\\mingw64\\\\bin\\\\git.exe\", \"-C\", \"D:\\\\ctf-ai\\\\dlp\\\\demo\\\\frida_git_guard\\\\tests\\\\.tmp-perf-fhas0h32\\\\repo\", \"cat-file\", \"-s\", \"342f4dd0d4529cd7a1171812d353498ca12fd754\"], \"exit_code\": 0, \"stdout\": \"33\\n\", \"stderr\": \"\"}, {\"argv\": [\"E:\\\\Git\\\\cmd\\\\git.EXE\", \"--exec-path\"], \"exit_code\": 0, \"stdout\": \"E:/Git/mingw64/libexec/git-core\\n\", \"stderr\": \"\"}, {\"argv\": [\"E:\\\\Git\\\\mingw64\\\\bin\\\\git.exe\", \"-C\", \"D:\\\\ctf-ai\\\\dlp\\\\demo\\\\frida_git_guard\\\\tests\\\\.tmp-perf-fhas0h32\\\\repo\", \"cat-file\", \"blob\", \"342f4dd0d4529cd7a1171812d353498ca12fd754\"], \"exit_code\": 0, \"stdout\": \"ordinary benchmark data item 19\\r\\n\", \"stderr\": \"\"}, {\"argv\": [\"E:\\\\Git\\\\cmd\\\\git.EXE\", \"--exec-path\"], \"exit_code\": 0, \"stdout\": \"E:/Git/mingw64/libexec/git-core\\n\", \"stderr\": \"\"}, {\"argv\": [\"E:\\\\Git\\\\mingw64\\\\bin\\\\git.exe\", \"-C\", \"D:\\\\ctf-ai\\\\dlp\\\\demo\\\\frida_git_guard\\\\tests\\\\.tmp-perf-fhas0h32\\\\repo\", \"cat-file\", \"-s\", \"ebd01a123a4cab21b4436ba95cbc1220663686be\"], \"exit_code\": 0, \"stdout\": \"35\\n\", \"stderr\": \"\"}, {\"argv\": [\"E:\\\\Git\\\\cmd\\\\git.EXE\", \"--exec-path\"], \"exit_code\": 0, \"stdout\": \"E:/Git/mingw64/libexec/git-core\\n\", \"stderr\": \"\"}, {\"argv\": [\"E:\\\\Git\\\\mingw64\\\\bin\\\\git.exe\", \"-C\", \"D:\\\\ctf-ai\\\\dlp\\\\demo\\\\frida_git_guard\\\\tests\\\\.tmp-perf-fhas0h32\\\\repo\", \"cat-file\", \"blob\", \"ebd01a123a4cab21b4436ba95cbc1220663686be\"], \"exit_code\": 0, \"stdout\": \"changed ordinary benchmark data 2\\r\\n\", \"stderr\": \"\"}, {\"argv\": [\"E:\\\\Git\\\\cmd\\\\git.EXE\", \"--exec-path\"], \"exit_code\": 0, \"stdout\": \"E:/Git/mingw64/libexec/git-core\\n\", \"stderr\": \"\"}, {\"argv\": [\"E:\\\\Git\\\\mingw64\\\\bin\\\\git.exe\", \"-C\", \"D:\\\\ctf-ai\\\\dlp\\\\demo\\\\frida_git_guard\\\\tests\\\\.tmp-perf-fhas0h32\\\\repo\", \"cat-file\", \"-s\", \"bb52f9862c8840ae77d725f166b899668f9061cc\"], \"exit_code\": 0, \"stdout\": \"33\\n\", \"stderr\": \"\"}, {\"argv\": [\"E:\\\\Git\\\\cmd\\\\git.EXE\", \"--exec-path\"], \"exit_code\": 0, \"stdout\": \"E:/Git/mingw64/libexec/git-core\\n\", \"stderr\": \"\"}, {\"argv\": [\"E:\\\\Git\\\\mingw64\\\\bin\\\\git.exe\", \"-C\", \"D:\\\\ctf-ai\\\\dlp\\\\demo\\\\frida_git_guard\\\\tests\\\\.tmp-perf-fhas0h32\\\\repo\", \"cat-file\", \"blob\", \"bb52f9862c8840ae77d725f166b899668f9061cc\"], \"exit_code\": 0, \"stdout\": \"ordinary benchmark data item 20\\r\\n\", \"stderr\": \"\"}, {\"argv\": [\"E:\\\\Git\\\\cmd\\\\git.EXE\", \"--exec-path\"], \"exit_code\": 0, \"stdout\": \"E:/Git/mingw64/libexec/git-core\\n\", \"stderr\": \"\"}, {\"argv\": [\"E:\\\\Git\\\\mingw64\\\\bin\\\\git.exe\", \"-C\", \"D:\\\\ctf-ai\\\\dlp\\\\demo\\\\frida_git_guard\\\\tests\\\\.tmp-perf-fhas0h32\\\\repo\", \"cat-file\", \"-s\", \"e476ff45ce855951e3c5c55e3c7a4ca609272f2f\"], \"exit_code\": 0, \"stdout\": \"33\\n\", \"stderr\": \"\"}, {\"argv\": [\"E:\\\\Git\\\\cmd\\\\git.EXE\", \"--exec-path\"], \"exit_code\": 0, \"stdout\": \"E:/Git/mingw64/libexec/git-core\\n\", \"stderr\": \"\"}, {\"argv\": [\"E:\\\\Git\\\\mingw64\\\\bin\\\\git.exe\", \"-C\", \"D:\\\\ctf-ai\\\\dlp\\\\demo\\\\frida_git_guard\\\\tests\\\\.tmp-perf-fhas0h32\\\\repo\", \"cat-file\", \"blob\", \"e476ff45ce855951e3c5c55e3c7a4ca609272f2f\"], \"exit_code\": 0, \"stdout\": \"ordinary benchmark data item 21\\r\\n\", \"stderr\": \"\"}, {\"argv\": [\"E:\\\\Git\\\\cmd\\\\git.EXE\", \"--exec-path\"], \"exit_code\": 0, \"stdout\": \"E:/Git/mingw64/libexec/git-core\\n\", \"stderr\": \"\"}, {\"argv\": [\"E:\\\\Git\\\\mingw64\\\\bin\\\\git.exe\", \"-C\", \"D:\\\\ctf-ai\\\\dlp\\\\demo\\\\frida_git_guard\\\\tests\\\\.tmp-perf-fhas0h32\\\\repo\", \"cat-file\", \"-s\", \"0ec63a305bf45eecfd73f1111a9ebb985a1217cf\"], \"exit_code\": 0, \"stdout\": \"33\\n\", \"stderr\": \"\"}, {\"argv\": [\"E:\\\\Git\\\\cmd\\\\git.EXE\", \"--exec-path\"], \"exit_code\": 0, \"stdout\": \"E:/Git/mingw64/libexec/git-core\\n\", \"stderr\": \"\"}, {\"argv\": [\"E:\\\\Git\\\\mingw64\\\\bin\\\\git.exe\", \"-C\", \"D:\\\\ctf-ai\\\\dlp\\\\demo\\\\frida_git_guard\\\\tests\\\\.tmp-perf-fhas0h32\\\\repo\", \"cat-file\", \"blob\", \"0ec63a305bf45eecfd73f1111a9ebb985a1217cf\"], \"exit_code\": 0, \"stdout\": \"ordinary benchmark data item 22\\r\\n\", \"stderr\": \"\"}, {\"argv\": [\"E:\\\\Git\\\\cmd\\\\git.EXE\", \"--exec-path\"], \"exit_code\": 0, \"stdout\": \"E:/Git/mingw64/libexec/git-core\\n\", \"stderr\": \"\"}, {\"argv\": [\"E:\\\\Git\\\\mingw64\\\\bin\\\\git.exe\", \"-C\", \"D:\\\\ctf-ai\\\\dlp\\\\demo\\\\frida_git_guard\\\\tests\\\\.tmp-perf-fhas0h32\\\\repo\", \"cat-file\", \"-s\", \"ff5a6d9ea1a84b0a503b0870395f0995a36ba8bc\"], \"exit_code\": 0, \"stdout\": \"33\\n\", \"stderr\": \"\"}, {\"argv\": [\"E:\\\\Git\\\\cmd\\\\git.EXE\", \"--exec-path\"], \"exit_code\": 0, \"stdout\": \"E:/Git/mingw64/libexec/git-core\\n\", \"stderr\": \"\"}, {\"argv\": [\"E:\\\\Git\\\\mingw64\\\\bin\\\\git.exe\", \"-C\", \"D:\\\\ctf-ai\\\\dlp\\\\demo\\\\frida_git_guard\\\\tests\\\\.tmp-perf-fhas0h32\\\\repo\", \"cat-file\", \"blob\", \"ff5a6d9ea1a84b0a503b0870395f0995a36ba8bc\"], \"exit_code\": 0, \"stdout\": \"ordinary benchmark data item 23\\r\\n\", \"stderr\": \"\"}, {\"argv\": [\"E:\\\\Git\\\\cmd\\\\git.EXE\", \"--exec-path\"], \"exit_code\": 0, \"stdout\": \"E:/Git/mingw64/libexec/git-core\\n\", \"stderr\": \"\"}, {\"argv\": [\"E:\\\\Git\\\\mingw64\\\\bin\\\\git.exe\", \"-C\", \"D:\\\\ctf-ai\\\\dlp\\\\demo\\\\frida_git_guard\\\\tests\\\\.tmp-perf-fhas0h32\\\\repo\", \"cat-file\", \"-s\", \"6882aea65ef3ea0ccc9fa99dbdba3dee761cdaab\"], \"exit_code\": 0, \"stdout\": \"32\\n\", \"stderr\": \"\"}, {\"argv\": [\"E:\\\\Git\\\\cmd\\\\git.EXE\", \"--exec-path\"], \"exit_code\": 0, \"stdout\": \"E:/Git/mingw64/libexec/git-core\\n\", \"stderr\": \"\"}, {\"argv\": [\"E:\\\\Git\\\\mingw64\\\\bin\\\\git.exe\", \"-C\", \"D:\\\\ctf-ai\\\\dlp\\\\demo\\\\frida_git_guard\\\\tests\\\\.tmp-perf-fhas0h32\\\\repo\", \"cat-file\", \"blob\", \"6882aea65ef3ea0ccc9fa99dbdba3dee761cdaab\"], \"exit_code\": 0, \"stdout\": \"ordinary benchmark data item 3\\r\\n\", \"stderr\": \"\"}, {\"argv\": [\"E:\\\\Git\\\\cmd\\\\git.EXE\", \"--exec-path\"], \"exit_code\": 0, \"stdout\": \"E:/Git/mingw64/libexec/git-core\\n\", \"stderr\": \"\"}, {\"argv\": [\"E:\\\\Git\\\\mingw64\\\\bin\\\\git.exe\", \"-C\", \"D:\\\\ctf-ai\\\\dlp\\\\demo\\\\frida_git_guard\\\\tests\\\\.tmp-perf-fhas0h32\\\\repo\", \"cat-file\", \"-s\", \"1e8233126de567813a108ac669e2ed3953b7dd30\"], \"exit_code\": 0, \"stdout\": \"32\\n\", \"stderr\": \"\"}, {\"argv\": [\"E:\\\\Git\\\\cmd\\\\git.EXE\", \"--exec-path\"], \"exit_code\": 0, \"stdout\": \"E:/Git/mingw64/libexec/git-core\\n\", \"stderr\": \"\"}, {\"argv\": [\"E:\\\\Git\\\\mingw64\\\\bin\\\\git.exe\", \"-C\", \"D:\\\\ctf-ai\\\\dlp\\\\demo\\\\frida_git_guard\\\\tests\\\\.tmp-perf-fhas0h32\\\\repo\", \"cat-file\", \"blob\", \"1e8233126de567813a108ac669e2ed3953b7dd30\"], \"exit_code\": 0, \"stdout\": \"ordinary benchmark data item 4\\r\\n\", \"stderr\": \"\"}, {\"argv\": [\"E:\\\\Git\\\\cmd\\\\git.EXE\", \"--exec-path\"], \"exit_code\": 0, \"stdout\": \"E:/Git/mingw64/libexec/git-core\\n\", \"stderr\": \"\"}, {\"argv\": [\"E:\\\\Git\\\\mingw64\\\\bin\\\\git.exe\", \"-C\", \"D:\\\\ctf-ai\\\\dlp\\\\demo\\\\frida_git_guard\\\\tests\\\\.tmp-perf-fhas0h32\\\\repo\", \"cat-file\", \"-s\", \"cebe218daad98a86ddfaaa86d9df0039a0d1b130\"], \"exit_code\": 0, \"stdout\": \"32\\n\", \"stderr\": \"\"}, {\"argv\": [\"E:\\\\Git\\\\cmd\\\\git.EXE\", \"--exec-path\"], \"exit_code\": 0, \"stdout\": \"E:/Git/mingw64/libexec/git-core\\n\", \"stderr\": \"\"}, {\"argv\": [\"E:\\\\Git\\\\mingw64\\\\bin\\\\git.exe\", \"-C\", \"D:\\\\ctf-ai\\\\dlp\\\\demo\\\\frida_git_guard\\\\tests\\\\.tmp-perf-fhas0h32\\\\repo\", \"cat-file\", \"blob\", \"cebe218daad98a86ddfaaa86d9df0039a0d1b130\"], \"exit_code\": 0, \"stdout\": \"ordinary benchmark data item 5\\r\\n\", \"stderr\": \"\"}, {\"argv\": [\"E:\\\\Git\\\\cmd\\\\git.EXE\", \"--exec-path\"], \"exit_code\": 0, \"stdout\": \"E:/Git/mingw64/libexec/git-core\\n\", \"stderr\": \"\"}, {\"argv\": [\"E:\\\\Git\\\\mingw64\\\\bin\\\\git.exe\", \"-C\", \"D:\\\\ctf-ai\\\\dlp\\\\demo\\\\frida_git_guard\\\\tests\\\\.tmp-perf-fhas0h32\\\\repo\", \"cat-file\", \"-s\", \"57cef937c81486223003f8526674ca730bbfc0c7\"], \"exit_code\": 0, \"stdout\": \"32\\n\", \"stderr\": \"\"}, {\"argv\": [\"E:\\\\Git\\\\cmd\\\\git.EXE\", \"--exec-path\"], \"exit_code\": 0, \"stdout\": \"E:/Git/mingw64/libexec/git-core\\n\", \"stderr\": \"\"}, {\"argv\": [\"E:\\\\Git\\\\mingw64\\\\bin\\\\git.exe\", \"-C\", \"D:\\\\ctf-ai\\\\dlp\\\\demo\\\\frida_git_guard\\\\tests\\\\.tmp-perf-fhas0h32\\\\repo\", \"cat-file\", \"blob\", \"57cef937c81486223003f8526674ca730bbfc0c7\"], \"exit_code\": 0, \"stdout\": \"ordinary benchmark data item 6\\r\\n\", \"stderr\": \"\"}, {\"argv\": [\"E:\\\\Git\\\\cmd\\\\git.EXE\", \"--exec-path\"], \"exit_code\": 0, \"stdout\": \"E:/Git/mingw64/libexec/git-core\\n\", \"stderr\": \"\"}, {\"argv\": [\"E:\\\\Git\\\\mingw64\\\\bin\\\\git.exe\", \"-C\", \"D:\\\\ctf-ai\\\\dlp\\\\demo\\\\frida_git_guard\\\\tests\\\\.tmp-perf-fhas0h32\\\\repo\", \"cat-file\", \"-s\", \"c231657ee146214e1c667bd47a1162f427c60024\"], \"exit_code\": 0, \"stdout\": \"32\\n\", \"stderr\": \"\"}, {\"argv\": [\"E:\\\\Git\\\\cmd\\\\git.EXE\", \"--exec-path\"], \"exit_code\": 0, \"stdout\": \"E:/Git/mingw64/libexec/git-core\\n\", \"stderr\": \"\"}, {\"argv\": [\"E:\\\\Git\\\\mingw64\\\\bin\\\\git.exe\", \"-C\", \"D:\\\\ctf-ai\\\\dlp\\\\demo\\\\frida_git_guard\\\\tests\\\\.tmp-perf-fhas0h32\\\\repo\", \"cat-file\", \"blob\", \"c231657ee146214e1c667bd47a1162f427c60024\"], \"exit_code\": 0, \"stdout\": \"ordinary benchmark data item 7\\r\\n\", \"stderr\": \"\"}, {\"argv\": [\"E:\\\\Git\\\\cmd\\\\git.EXE\", \"--exec-path\"], \"exit_code\": 0, \"stdout\": \"E:/Git/mingw64/libexec/git-core\\n\", \"stderr\": \"\"}, {\"argv\": [\"E:\\\\Git\\\\mingw64\\\\bin\\\\git.exe\", \"-C\", \"D:\\\\ctf-ai\\\\dlp\\\\demo\\\\frida_git_guard\\\\tests\\\\.tmp-perf-fhas0h32\\\\repo\", \"cat-file\", \"-s\", \"23506dfbaddd81f61c1d69bb409195cdd34dc133\"], \"exit_code\": 0, \"stdout\": \"32\\n\", \"stderr\": \"\"}, {\"argv\": [\"E:\\\\Git\\\\cmd\\\\git.EXE\", \"--exec-path\"], \"exit_code\": 0, \"stdout\": \"E:/Git/mingw64/libexec/git-core\\n\", \"stderr\": \"\"}, {\"argv\": [\"E:\\\\Git\\\\mingw64\\\\bin\\\\git.exe\", \"-C\", \"D:\\\\ctf-ai\\\\dlp\\\\demo\\\\frida_git_guard\\\\tests\\\\.tmp-perf-fhas0h32\\\\repo\", \"cat-file\", \"blob\", \"23506dfbaddd81f61c1d69bb409195cdd34dc133\"], \"exit_code\": 0, \"stdout\": \"ordinary benchmark data item 8\\r\\n\", \"stderr\": \"\"}, {\"argv\": [\"E:\\\\Git\\\\cmd\\\\git.EXE\", \"--exec-path\"], \"exit_code\": 0, \"stdout\": \"E:/Git/mingw64/libexec/git-core\\n\", \"stderr\": \"\"}, {\"argv\": [\"E:\\\\Git\\\\mingw64\\\\bin\\\\git.exe\", \"-C\", \"D:\\\\ctf-ai\\\\dlp\\\\demo\\\\frida_git_guard\\\\tests\\\\.tmp-perf-fhas0h32\\\\repo\", \"cat-file\", \"-s\", \"c7a9a1056600701a09885ac9d413bad8ee58f778\"], \"exit_code\": 0, \"stdout\": \"32\\n\", \"stderr\": \"\"}, {\"argv\": [\"E:\\\\Git\\\\cmd\\\\git.EXE\", \"--exec-path\"], \"exit_code\": 0, \"stdout\": \"E:/Git/mingw64/libexec/git-core\\n\", \"stderr\": \"\"}, {\"argv\": [\"E:\\\\Git\\\\mingw64\\\\bin\\\\git.exe\", \"-C\", \"D:\\\\ctf-ai\\\\dlp\\\\demo\\\\frida_git_guard\\\\tests\\\\.tmp-perf-fhas0h32\\\\repo\", \"cat-file\", \"blob\", \"c7a9a1056600701a09885ac9d413bad8ee58f778\"], \"exit_code\": 0, \"stdout\": \"ordinary benchmark data item 9\\r\\n\", \"stderr\": \"\"}, {\"argv\": [\"E:\\\\Git\\\\cmd\\\\git.EXE\", \"--exec-path\"], \"exit_code\": 0, \"stdout\": \"E:/Git/mingw64/libexec/git-core\\n\", \"stderr\": \"\"}, {\"argv\": [\"E:\\\\Git\\\\mingw64\\\\bin\\\\git.exe\", \"-C\", \"D:\\\\ctf-ai\\\\dlp\\\\demo\\\\frida_git_guard\\\\tests\\\\.tmp-perf-fhas0h32\\\\repo\", \"ls-tree\", \"-r\", \"-z\", \"1b140a3200f89b7cc47b1da5e58cf30a27e74e5a\"], \"exit_code\": 0, \"stdout\": \"100644 blob 7a72c7d299a6e8bc244d9508cb22a65f08f45936\\tfile-0.txt\\u0000100644 blob 4124d4153025f5bbb582a12e29b1dad6a69f6b28\\tfile-1.txt\\u0000100644 blob 010a0eba928a9ec7ea3a8d88851b3985d959cea5\\tfile-10.txt\\u0000100644 blob 0b6f88539042faddb71f6b2ce6802f912565a60d\\tfile-11.txt\\u0000100644 blob ab7ffac4c1cc965f52f324fab3f2d1f749ee52d6\\tfile-12.txt\\u0000100644 blob 206dda33fd521c673d865e93b9247167f2f073d3\\tfile-13.txt\\u0000100644 blob 632602d422a3839b0de4943169d76be391ca785c\\tfile-14.txt\\u0000100644 blob 86a24c08c7d33d278e54d00814d63aabbb912f86\\tfile-15.txt\\u0000100644 blob 794d59375b602628f816121c05943a64e05610b2\\tfile-16.txt\\u0000100644 blob 71baf7c50d08b6bedbd817ad0babff47a61ed37a\\tfile-17.txt\\u0000100644 blob f8c70b4267e083371a5fa1cb079a895e76a1bd08\\tfile-18.txt\\u0000100644 blob 342f4dd0d4529cd7a1171812d353498ca12fd754\\tfile-19.txt\\u0000100644 blob 2447b0d5283efff539dff65420e7396eca735ce8\\tfile-2.txt\\u0000100644 blob bb52f9862c8840ae77d725f166b899668f9061cc\\tfile-20.txt\\u0000100644 blob e476ff45ce855951e3c5c55e3c7a4ca609272f2f\\tfile-21.txt\\u0000100644 blob 0ec63a305bf45eecfd73f1111a9ebb985a1217cf\\tfile-22.txt\\u0000100644 blob ff5a6d9ea1a84b0a503b0870395f0995a36ba8bc\\tfile-23.txt\\u0000100644 blob 6882aea65ef3ea0ccc9fa99dbdba3dee761cdaab\\tfile-3.txt\\u0000100644 blob 1e8233126de567813a108ac669e2ed3953b7dd30\\tfile-4.txt\\u0000100644 blob cebe218daad98a86ddfaaa86d9df0039a0d1b130\\tfile-5.txt\\u0000100644 blob 57cef937c81486223003f8526674ca730bbfc0c7\\tfile-6.txt\\u0000100644 blob c231657ee146214e1c667bd47a1162f427c60024\\tfile-7.txt\\u0000100644 blob 23506dfbaddd81f61c1d69bb409195cdd34dc133\\tfile-8.txt\\u0000100644 blob c7a9a1056600701a09885ac9d413bad8ee58f778\\tfile-9.txt\\u0000\", \"stderr\": \"\"}, {\"argv\": [\"E:\\\\Git\\\\cmd\\\\git.EXE\", \"--exec-path\"], \"exit_code\": 0, \"stdout\": \"E:/Git/mingw64/libexec/git-core\\n\", \"stderr\": \"\"}, {\"argv\": [\"E:\\\\Git\\\\mingw64\\\\bin\\\\git.exe\", \"-C\", \"D:\\\\ctf-ai\\\\dlp\\\\demo\\\\frida_git_guard\\\\tests\\\\.tmp-perf-fhas0h32\\\\repo\", \"cat-file\", \"-s\", \"2447b0d5283efff539dff65420e7396eca735ce8\"], \"exit_code\": 0, \"stdout\": \"32\\n\", \"stderr\": \"\"}, {\"argv\": [\"E:\\\\Git\\\\cmd\\\\git.EXE\", \"--exec-path\"], \"exit_code\": 0, \"stdout\": \"E:/Git/mingw64/libexec/git-core\\n\", \"stderr\": \"\"}, {\"argv\": [\"E:\\\\Git\\\\mingw64\\\\bin\\\\git.exe\", \"-C\", \"D:\\\\ctf-ai\\\\dlp\\\\demo\\\\frida_git_guard\\\\tests\\\\.tmp-perf-fhas0h32\\\\repo\", \"cat-file\", \"blob\", \"2447b0d5283efff539dff65420e7396eca735ce8\"], \"exit_code\": 0, \"stdout\": \"ordinary benchmark data item 2\\r\\n\", \"stderr\": \"\"}, {\"argv\": [\"E:\\\\Git\\\\cmd\\\\git.EXE\", \"--exec-path\"], \"exit_code\": 0, \"stdout\": \"E:/Git/mingw64/libexec/git-core\\n\", \"stderr\": \"\"}, {\"argv\": [\"E:\\\\Git\\\\mingw64\\\\bin\\\\git.exe\", \"-C\", \"D:\\\\ctf-ai\\\\dlp\\\\demo\\\\frida_git_guard\\\\tests\\\\.tmp-perf-fhas0h32\\\\repo\", \"ls-tree\", \"-r\", \"-z\", \"da5f5d967c80b08e11f68b41efec0798b6753ac7\"], \"exit_code\": 0, \"stdout\": \"100644 blob 7a72c7d299a6e8bc244d9508cb22a65f08f45936\\tfile-0.txt\\u0000100644 blob c4e5f1b74eac6ba59226d98895dfee5c985529d4\\tfile-1.txt\\u0000100644 blob 010a0eba928a9ec7ea3a8d88851b3985d959cea5\\tfile-10.txt\\u0000100644 blob 0b6f88539042faddb71f6b2ce6802f912565a60d\\tfile-11.txt\\u0000100644 blob ab7ffac4c1cc965f52f324fab3f2d1f749ee52d6\\tfile-12.txt\\u0000100644 blob 206dda33fd521c673d865e93b9247167f2f073d3\\tfile-13.txt\\u0000100644 blob 632602d422a3839b0de4943169d76be391ca785c\\tfile-14.txt\\u0000100644 blob 86a24c08c7d33d278e54d00814d63aabbb912f86\\tfile-15.txt\\u0000100644 blob 794d59375b602628f816121c05943a64e05610b2\\tfile-16.txt\\u0000100644 blob 71baf7c50d08b6bedbd817ad0babff47a61ed37a\\tfile-17.txt\\u0000100644 blob f8c70b4267e083371a5fa1cb079a895e76a1bd08\\tfile-18.txt\\u0000100644 blob 342f4dd0d4529cd7a1171812d353498ca12fd754\\tfile-19.txt\\u0000100644 blob 2447b0d5283efff539dff65420e7396eca735ce8\\tfile-2.txt\\u0000100644 blob bb52f9862c8840ae77d725f166b899668f9061cc\\tfile-20.txt\\u0000100644 blob e476ff45ce855951e3c5c55e3c7a4ca609272f2f\\tfile-21.txt\\u0000100644 blob 0ec63a305bf45eecfd73f1111a9ebb985a1217cf\\tfile-22.txt\\u0000100644 blob ff5a6d9ea1a84b0a503b0870395f0995a36ba8bc\\tfile-23.txt\\u0000100644 blob 6882aea65ef3ea0ccc9fa99dbdba3dee761cdaab\\tfile-3.txt\\u0000100644 blob 1e8233126de567813a108ac669e2ed3953b7dd30\\tfile-4.txt\\u0000100644 blob cebe218daad98a86ddfaaa86d9df0039a0d1b130\\tfile-5.txt\\u0000100644 blob 57cef937c81486223003f8526674ca730bbfc0c7\\tfile-6.txt\\u0000100644 blob c231657ee146214e1c667bd47a1162f427c60024\\tfile-7.txt\\u0000100644 blob 23506dfbaddd81f61c1d69bb409195cdd34dc133\\tfile-8.txt\\u0000100644 blob c7a9a1056600701a09885ac9d413bad8ee58f778\\tfile-9.txt\\u0000\", \"stderr\": \"\"}, {\"argv\": [\"E:\\\\Git\\\\cmd\\\\git.EXE\", \"--exec-path\"], \"exit_code\": 0, \"stdout\": \"E:/Git/mingw64/libexec/git-core\\n\", \"stderr\": \"\"}, {\"argv\": [\"E:\\\\Git\\\\mingw64\\\\bin\\\\git.exe\", \"-C\", \"D:\\\\ctf-ai\\\\dlp\\\\demo\\\\frida_git_guard\\\\tests\\\\.tmp-perf-fhas0h32\\\\repo\", \"cat-file\", \"-s\", \"c4e5f1b74eac6ba59226d98895dfee5c985529d4\"], \"exit_code\": 0, \"stdout\": \"32\\n\", \"stderr\": \"\"}, {\"argv\": [\"E:\\\\Git\\\\cmd\\\\git.EXE\", \"--exec-path\"], \"exit_code\": 0, \"stdout\": \"E:/Git/mingw64/libexec/git-core\\n\", \"stderr\": \"\"}, {\"argv\": [\"E:\\\\Git\\\\mingw64\\\\bin\\\\git.exe\", \"-C\", \"D:\\\\ctf-ai\\\\dlp\\\\demo\\\\frida_git_guard\\\\tests\\\\.tmp-perf-fhas0h32\\\\repo\", \"cat-file\", \"blob\", \"c4e5f1b74eac6ba59226d98895dfee5c985529d4\"], \"exit_code\": 0, \"stdout\": \"ordinary benchmark data item 1\\r\\n\", \"stderr\": \"\"}, {\"argv\": [\"E:\\\\Git\\\\cmd\\\\git.EXE\", \"--exec-path\"], \"exit_code\": 0, \"stdout\": \"E:/Git/mingw64/libexec/git-core\\n\", \"stderr\": \"\"}, {\"argv\": [\"E:\\\\Git\\\\mingw64\\\\bin\\\\git.exe\", \"-C\", \"D:\\\\ctf-ai\\\\dlp\\\\demo\\\\frida_git_guard\\\\tests\\\\.tmp-perf-fhas0h32\\\\repo\", \"ls-tree\", \"-r\", \"-z\", \"607f0ce41e01214786443079c7742720063d6b03\"], \"exit_code\": 0, \"stdout\": \"100644 blob d773a9e4cbd1b9cb013da2817eca4b67e722839f\\tfile-0.txt\\u0000100644 blob c4e5f1b74eac6ba59226d98895dfee5c985529d4\\tfile-1.txt\\u0000100644 blob 010a0eba928a9ec7ea3a8d88851b3985d959cea5\\tfile-10.txt\\u0000100644 blob 0b6f88539042faddb71f6b2ce6802f912565a60d\\tfile-11.txt\\u0000100644 blob ab7ffac4c1cc965f52f324fab3f2d1f749ee52d6\\tfile-12.txt\\u0000100644 blob 206dda33fd521c673d865e93b9247167f2f073d3\\tfile-13.txt\\u0000100644 blob 632602d422a3839b0de4943169d76be391ca785c\\tfile-14.txt\\u0000100644 blob 86a24c08c7d33d278e54d00814d63aabbb912f86\\tfile-15.txt\\u0000100644 blob 794d59375b602628f816121c05943a64e05610b2\\tfile-16.txt\\u0000100644 blob 71baf7c50d08b6bedbd817ad0babff47a61ed37a\\tfile-17.txt\\u0000100644 blob f8c70b4267e083371a5fa1cb079a895e76a1bd08\\tfile-18.txt\\u0000100644 blob 342f4dd0d4529cd7a1171812d353498ca12fd754\\tfile-19.txt\\u0000100644 blob 2447b0d5283efff539dff65420e7396eca735ce8\\tfile-2.txt\\u0000100644 blob bb52f9862c8840ae77d725f166b899668f9061cc\\tfile-20.txt\\u0000100644 blob e476ff45ce855951e3c5c55e3c7a4ca609272f2f\\tfile-21.txt\\u0000100644 blob 0ec63a305bf45eecfd73f1111a9ebb985a1217cf\\tfile-22.txt\\u0000100644 blob ff5a6d9ea1a84b0a503b0870395f0995a36ba8bc\\tfile-23.txt\\u0000100644 blob 6882aea65ef3ea0ccc9fa99dbdba3dee761cdaab\\tfile-3.txt\\u0000100644 blob 1e8233126de567813a108ac669e2ed3953b7dd30\\tfile-4.txt\\u0000100644 blob cebe218daad98a86ddfaaa86d9df0039a0d1b130\\tfile-5.txt\\u0000100644 blob 57cef937c81486223003f8526674ca730bbfc0c7\\tfile-6.txt\\u0000100644 blob c231657ee146214e1c667bd47a1162f427c60024\\tfile-7.txt\\u0000100644 blob 23506dfbaddd81f61c1d69bb409195cdd34dc133\\tfile-8.txt\\u0000100644 blob c7a9a1056600701a09885ac9d413bad8ee58f778\\tfile-9.txt\\u0000\", \"stderr\": \"\"}, {\"argv\": [\"E:\\\\Git\\\\cmd\\\\git.EXE\", \"--exec-path\"], \"exit_code\": 0, \"stdout\": \"E:/Git/mingw64/libexec/git-core\\n\", \"stderr\": \"\"}, {\"argv\": [\"E:\\\\Git\\\\mingw64\\\\bin\\\\git.exe\", \"-C\", \"D:\\\\ctf-ai\\\\dlp\\\\demo\\\\frida_git_guard\\\\tests\\\\.tmp-perf-fhas0h32\\\\repo\", \"cat-file\", \"-s\", \"d773a9e4cbd1b9cb013da2817eca4b67e722839f\"], \"exit_code\": 0, \"stdout\": \"32\\n\", \"stderr\": \"\"}, {\"argv\": [\"E:\\\\Git\\\\cmd\\\\git.EXE\", \"--exec-path\"], \"exit_code\": 0, \"stdout\": \"E:/Git/mingw64/libexec/git-core\\n\", \"stderr\": \"\"}, {\"argv\": [\"E:\\\\Git\\\\mingw64\\\\bin\\\\git.exe\", \"-C\", \"D:\\\\ctf-ai\\\\dlp\\\\demo\\\\frida_git_guard\\\\tests\\\\.tmp-perf-fhas0h32\\\\repo\", \"cat-file\", \"blob\", \"d773a9e4cbd1b9cb013da2817eca4b67e722839f\"], \"exit_code\": 0, \"stdout\": \"ordinary benchmark data item 0\\r\\n\", \"stderr\": \"\"}]}\r\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "E:\\Programs\\Anaconda\\python.exe",
+        "-B",
+        "-c",
+        "from pathlib import Path\nimport sys,time,json,subprocess\nsys.path.insert(0,sys.argv[1]);import guard\noriginal=subprocess.run;calls=[]\ndef trace(*args,**kw):\n r=original(*args,**kw)\n calls.append({'argv':[str(x) for x in r.args],'exit_code':r.returncode,'stdout':r.stdout.decode('utf-8','replace'),'stderr':r.stderr.decode('utf-8','replace')})\n return r\nsubprocess.run=trace\np=guard.Policy([],['flag'],True);started=time.perf_counter();result=guard.scan_history(Path(sys.argv[2]),'HEAD',p);elapsed=(time.perf_counter()-started)*1000\nprint(json.dumps({'wall_ms':elapsed,'result':result,'git_subprocess_count':len(calls),'commands':calls}))\n",
+        "D:\\ctf-ai\\dlp\\demo\\frida_git_guard",
+        "D:\\ctf-ai\\dlp\\demo\\frida_git_guard\\tests\\.tmp-perf-fhas0h32\\repo"
+      ],
+      "cwd": "D:\\ctf-ai\\dlp\\demo\\frida_git_guard",
+      "exit_code": 0,
+      "stdout": "{\"wall_ms\": 571.7378000263125, \"result\": {\"deny\": false, \"findings\": [], \"commits_scanned\": 4, \"blobs_scanned\": 27, \"bytes_scanned\": 887, \"tree_entries\": 96}, \"git_subprocess_count\": 12, \"commands\": [{\"argv\": [\"E:\\\\Git\\\\cmd\\\\git.EXE\", \"--exec-path\"], \"exit_code\": 0, \"stdout\": \"E:/Git/mingw64/libexec/git-core\\n\", \"stderr\": \"\"}, {\"argv\": [\"E:\\\\Git\\\\mingw64\\\\bin\\\\git.exe\", \"-C\", \"D:\\\\ctf-ai\\\\dlp\\\\demo\\\\frida_git_guard\\\\tests\\\\.tmp-perf-fhas0h32\\\\repo\", \"rev-parse\", \"--show-toplevel\"], \"exit_code\": 0, \"stdout\": \"D:/ctf-ai/dlp/demo/frida_git_guard/tests/.tmp-perf-fhas0h32/repo\\n\", \"stderr\": \"\"}, {\"argv\": [\"E:\\\\Git\\\\mingw64\\\\bin\\\\git.exe\", \"-C\", \"D:\\\\ctf-ai\\\\dlp\\\\demo\\\\frida_git_guard\\\\tests\\\\.tmp-perf-fhas0h32\\\\repo\", \"replace\", \"-l\"], \"exit_code\": 0, \"stdout\": \"\", \"stderr\": \"\"}, {\"argv\": [\"E:\\\\Git\\\\mingw64\\\\bin\\\\git.exe\", \"-C\", \"D:\\\\ctf-ai\\\\dlp\\\\demo\\\\frida_git_guard\\\\tests\\\\.tmp-perf-fhas0h32\\\\repo\", \"rev-parse\", \"--git-path\", \"info/grafts\"], \"exit_code\": 0, \"stdout\": \".git/info/grafts\\n\", \"stderr\": \"\"}, {\"argv\": [\"E:\\\\Git\\\\mingw64\\\\bin\\\\git.exe\", \"-C\", \"D:\\\\ctf-ai\\\\dlp\\\\demo\\\\frida_git_guard\\\\tests\\\\.tmp-perf-fhas0h32\\\\repo\", \"rev-parse\", \"--is-shallow-repository\"], \"exit_code\": 0, \"stdout\": \"false\\n\", \"stderr\": \"\"}, {\"argv\": [\"E:\\\\Git\\\\mingw64\\\\bin\\\\git.exe\", \"-C\", \"D:\\\\ctf-ai\\\\dlp\\\\demo\\\\frida_git_guard\\\\tests\\\\.tmp-perf-fhas0h32\\\\repo\", \"rev-list\", \"--max-count\", \"1001\", \"HEAD\"], \"exit_code\": 0, \"stdout\": \"101ddd1b0c399be9e784b76455d38c3ad569eb77\\n1b140a3200f89b7cc47b1da5e58cf30a27e74e5a\\nda5f5d967c80b08e11f68b41efec0798b6753ac7\\n607f0ce41e01214786443079c7742720063d6b03\\n\", \"stderr\": \"\"}, {\"argv\": [\"E:\\\\Git\\\\mingw64\\\\bin\\\\git.exe\", \"-C\", \"D:\\\\ctf-ai\\\\dlp\\\\demo\\\\frida_git_guard\\\\tests\\\\.tmp-perf-fhas0h32\\\\repo\", \"ls-tree\", \"-r\", \"-z\", \"101ddd1b0c399be9e784b76455d38c3ad569eb77\"], \"exit_code\": 0, \"stdout\": \"100644 blob 7a72c7d299a6e8bc244d9508cb22a65f08f45936\\tfile-0.txt\\u0000100644 blob 4124d4153025f5bbb582a12e29b1dad6a69f6b28\\tfile-1.txt\\u0000100644 blob 010a0eba928a9ec7ea3a8d88851b3985d959cea5\\tfile-10.txt\\u0000100644 blob 0b6f88539042faddb71f6b2ce6802f912565a60d\\tfile-11.txt\\u0000100644 blob ab7ffac4c1cc965f52f324fab3f2d1f749ee52d6\\tfile-12.txt\\u0000100644 blob 206dda33fd521c673d865e93b9247167f2f073d3\\tfile-13.txt\\u0000100644 blob 632602d422a3839b0de4943169d76be391ca785c\\tfile-14.txt\\u0000100644 blob 86a24c08c7d33d278e54d00814d63aabbb912f86\\tfile-15.txt\\u0000100644 blob 794d59375b602628f816121c05943a64e05610b2\\tfile-16.txt\\u0000100644 blob 71baf7c50d08b6bedbd817ad0babff47a61ed37a\\tfile-17.txt\\u0000100644 blob f8c70b4267e083371a5fa1cb079a895e76a1bd08\\tfile-18.txt\\u0000100644 blob 342f4dd0d4529cd7a1171812d353498ca12fd754\\tfile-19.txt\\u0000100644 blob ebd01a123a4cab21b4436ba95cbc1220663686be\\tfile-2.txt\\u0000100644 blob bb52f9862c8840ae77d725f166b899668f9061cc\\tfile-20.txt\\u0000100644 blob e476ff45ce855951e3c5c55e3c7a4ca609272f2f\\tfile-21.txt\\u0000100644 blob 0ec63a305bf45eecfd73f1111a9ebb985a1217cf\\tfile-22.txt\\u0000100644 blob ff5a6d9ea1a84b0a503b0870395f0995a36ba8bc\\tfile-23.txt\\u0000100644 blob 6882aea65ef3ea0ccc9fa99dbdba3dee761cdaab\\tfile-3.txt\\u0000100644 blob 1e8233126de567813a108ac669e2ed3953b7dd30\\tfile-4.txt\\u0000100644 blob cebe218daad98a86ddfaaa86d9df0039a0d1b130\\tfile-5.txt\\u0000100644 blob 57cef937c81486223003f8526674ca730bbfc0c7\\tfile-6.txt\\u0000100644 blob c231657ee146214e1c667bd47a1162f427c60024\\tfile-7.txt\\u0000100644 blob 23506dfbaddd81f61c1d69bb409195cdd34dc133\\tfile-8.txt\\u0000100644 blob c7a9a1056600701a09885ac9d413bad8ee58f778\\tfile-9.txt\\u0000\", \"stderr\": \"\"}, {\"argv\": [\"E:\\\\Git\\\\mingw64\\\\bin\\\\git.exe\", \"-C\", \"D:\\\\ctf-ai\\\\dlp\\\\demo\\\\frida_git_guard\\\\tests\\\\.tmp-perf-fhas0h32\\\\repo\", \"ls-tree\", \"-r\", \"-z\", \"1b140a3200f89b7cc47b1da5e58cf30a27e74e5a\"], \"exit_code\": 0, \"stdout\": \"100644 blob 7a72c7d299a6e8bc244d9508cb22a65f08f45936\\tfile-0.txt\\u0000100644 blob 4124d4153025f5bbb582a12e29b1dad6a69f6b28\\tfile-1.txt\\u0000100644 blob 010a0eba928a9ec7ea3a8d88851b3985d959cea5\\tfile-10.txt\\u0000100644 blob 0b6f88539042faddb71f6b2ce6802f912565a60d\\tfile-11.txt\\u0000100644 blob ab7ffac4c1cc965f52f324fab3f2d1f749ee52d6\\tfile-12.txt\\u0000100644 blob 206dda33fd521c673d865e93b9247167f2f073d3\\tfile-13.txt\\u0000100644 blob 632602d422a3839b0de4943169d76be391ca785c\\tfile-14.txt\\u0000100644 blob 86a24c08c7d33d278e54d00814d63aabbb912f86\\tfile-15.txt\\u0000100644 blob 794d59375b602628f816121c05943a64e05610b2\\tfile-16.txt\\u0000100644 blob 71baf7c50d08b6bedbd817ad0babff47a61ed37a\\tfile-17.txt\\u0000100644 blob f8c70b4267e083371a5fa1cb079a895e76a1bd08\\tfile-18.txt\\u0000100644 blob 342f4dd0d4529cd7a1171812d353498ca12fd754\\tfile-19.txt\\u0000100644 blob 2447b0d5283efff539dff65420e7396eca735ce8\\tfile-2.txt\\u0000100644 blob bb52f9862c8840ae77d725f166b899668f9061cc\\tfile-20.txt\\u0000100644 blob e476ff45ce855951e3c5c55e3c7a4ca609272f2f\\tfile-21.txt\\u0000100644 blob 0ec63a305bf45eecfd73f1111a9ebb985a1217cf\\tfile-22.txt\\u0000100644 blob ff5a6d9ea1a84b0a503b0870395f0995a36ba8bc\\tfile-23.txt\\u0000100644 blob 6882aea65ef3ea0ccc9fa99dbdba3dee761cdaab\\tfile-3.txt\\u0000100644 blob 1e8233126de567813a108ac669e2ed3953b7dd30\\tfile-4.txt\\u0000100644 blob cebe218daad98a86ddfaaa86d9df0039a0d1b130\\tfile-5.txt\\u0000100644 blob 57cef937c81486223003f8526674ca730bbfc0c7\\tfile-6.txt\\u0000100644 blob c231657ee146214e1c667bd47a1162f427c60024\\tfile-7.txt\\u0000100644 blob 23506dfbaddd81f61c1d69bb409195cdd34dc133\\tfile-8.txt\\u0000100644 blob c7a9a1056600701a09885ac9d413bad8ee58f778\\tfile-9.txt\\u0000\", \"stderr\": \"\"}, {\"argv\": [\"E:\\\\Git\\\\mingw64\\\\bin\\\\git.exe\", \"-C\", \"D:\\\\ctf-ai\\\\dlp\\\\demo\\\\frida_git_guard\\\\tests\\\\.tmp-perf-fhas0h32\\\\repo\", \"ls-tree\", \"-r\", \"-z\", \"da5f5d967c80b08e11f68b41efec0798b6753ac7\"], \"exit_code\": 0, \"stdout\": \"100644 blob 7a72c7d299a6e8bc244d9508cb22a65f08f45936\\tfile-0.txt\\u0000100644 blob c4e5f1b74eac6ba59226d98895dfee5c985529d4\\tfile-1.txt\\u0000100644 blob 010a0eba928a9ec7ea3a8d88851b3985d959cea5\\tfile-10.txt\\u0000100644 blob 0b6f88539042faddb71f6b2ce6802f912565a60d\\tfile-11.txt\\u0000100644 blob ab7ffac4c1cc965f52f324fab3f2d1f749ee52d6\\tfile-12.txt\\u0000100644 blob 206dda33fd521c673d865e93b9247167f2f073d3\\tfile-13.txt\\u0000100644 blob 632602d422a3839b0de4943169d76be391ca785c\\tfile-14.txt\\u0000100644 blob 86a24c08c7d33d278e54d00814d63aabbb912f86\\tfile-15.txt\\u0000100644 blob 794d59375b602628f816121c05943a64e05610b2\\tfile-16.txt\\u0000100644 blob 71baf7c50d08b6bedbd817ad0babff47a61ed37a\\tfile-17.txt\\u0000100644 blob f8c70b4267e083371a5fa1cb079a895e76a1bd08\\tfile-18.txt\\u0000100644 blob 342f4dd0d4529cd7a1171812d353498ca12fd754\\tfile-19.txt\\u0000100644 blob 2447b0d5283efff539dff65420e7396eca735ce8\\tfile-2.txt\\u0000100644 blob bb52f9862c8840ae77d725f166b899668f9061cc\\tfile-20.txt\\u0000100644 blob e476ff45ce855951e3c5c55e3c7a4ca609272f2f\\tfile-21.txt\\u0000100644 blob 0ec63a305bf45eecfd73f1111a9ebb985a1217cf\\tfile-22.txt\\u0000100644 blob ff5a6d9ea1a84b0a503b0870395f0995a36ba8bc\\tfile-23.txt\\u0000100644 blob 6882aea65ef3ea0ccc9fa99dbdba3dee761cdaab\\tfile-3.txt\\u0000100644 blob 1e8233126de567813a108ac669e2ed3953b7dd30\\tfile-4.txt\\u0000100644 blob cebe218daad98a86ddfaaa86d9df0039a0d1b130\\tfile-5.txt\\u0000100644 blob 57cef937c81486223003f8526674ca730bbfc0c7\\tfile-6.txt\\u0000100644 blob c231657ee146214e1c667bd47a1162f427c60024\\tfile-7.txt\\u0000100644 blob 23506dfbaddd81f61c1d69bb409195cdd34dc133\\tfile-8.txt\\u0000100644 blob c7a9a1056600701a09885ac9d413bad8ee58f778\\tfile-9.txt\\u0000\", \"stderr\": \"\"}, {\"argv\": [\"E:\\\\Git\\\\mingw64\\\\bin\\\\git.exe\", \"-C\", \"D:\\\\ctf-ai\\\\dlp\\\\demo\\\\frida_git_guard\\\\tests\\\\.tmp-perf-fhas0h32\\\\repo\", \"ls-tree\", \"-r\", \"-z\", \"607f0ce41e01214786443079c7742720063d6b03\"], \"exit_code\": 0, \"stdout\": \"100644 blob d773a9e4cbd1b9cb013da2817eca4b67e722839f\\tfile-0.txt\\u0000100644 blob c4e5f1b74eac6ba59226d98895dfee5c985529d4\\tfile-1.txt\\u0000100644 blob 010a0eba928a9ec7ea3a8d88851b3985d959cea5\\tfile-10.txt\\u0000100644 blob 0b6f88539042faddb71f6b2ce6802f912565a60d\\tfile-11.txt\\u0000100644 blob ab7ffac4c1cc965f52f324fab3f2d1f749ee52d6\\tfile-12.txt\\u0000100644 blob 206dda33fd521c673d865e93b9247167f2f073d3\\tfile-13.txt\\u0000100644 blob 632602d422a3839b0de4943169d76be391ca785c\\tfile-14.txt\\u0000100644 blob 86a24c08c7d33d278e54d00814d63aabbb912f86\\tfile-15.txt\\u0000100644 blob 794d59375b602628f816121c05943a64e05610b2\\tfile-16.txt\\u0000100644 blob 71baf7c50d08b6bedbd817ad0babff47a61ed37a\\tfile-17.txt\\u0000100644 blob f8c70b4267e083371a5fa1cb079a895e76a1bd08\\tfile-18.txt\\u0000100644 blob 342f4dd0d4529cd7a1171812d353498ca12fd754\\tfile-19.txt\\u0000100644 blob 2447b0d5283efff539dff65420e7396eca735ce8\\tfile-2.txt\\u0000100644 blob bb52f9862c8840ae77d725f166b899668f9061cc\\tfile-20.txt\\u0000100644 blob e476ff45ce855951e3c5c55e3c7a4ca609272f2f\\tfile-21.txt\\u0000100644 blob 0ec63a305bf45eecfd73f1111a9ebb985a1217cf\\tfile-22.txt\\u0000100644 blob ff5a6d9ea1a84b0a503b0870395f0995a36ba8bc\\tfile-23.txt\\u0000100644 blob 6882aea65ef3ea0ccc9fa99dbdba3dee761cdaab\\tfile-3.txt\\u0000100644 blob 1e8233126de567813a108ac669e2ed3953b7dd30\\tfile-4.txt\\u0000100644 blob cebe218daad98a86ddfaaa86d9df0039a0d1b130\\tfile-5.txt\\u0000100644 blob 57cef937c81486223003f8526674ca730bbfc0c7\\tfile-6.txt\\u0000100644 blob c231657ee146214e1c667bd47a1162f427c60024\\tfile-7.txt\\u0000100644 blob 23506dfbaddd81f61c1d69bb409195cdd34dc133\\tfile-8.txt\\u0000100644 blob c7a9a1056600701a09885ac9d413bad8ee58f778\\tfile-9.txt\\u0000\", \"stderr\": \"\"}, {\"argv\": [\"E:\\\\Git\\\\mingw64\\\\bin\\\\git.exe\", \"-C\", \"D:\\\\ctf-ai\\\\dlp\\\\demo\\\\frida_git_guard\\\\tests\\\\.tmp-perf-fhas0h32\\\\repo\", \"cat-file\", \"--batch-check\"], \"exit_code\": 0, \"stdout\": \"7a72c7d299a6e8bc244d9508cb22a65f08f45936 blob 35\\n4124d4153025f5bbb582a12e29b1dad6a69f6b28 blob 35\\n010a0eba928a9ec7ea3a8d88851b3985d959cea5 blob 33\\n0b6f88539042faddb71f6b2ce6802f912565a60d blob 33\\nab7ffac4c1cc965f52f324fab3f2d1f749ee52d6 blob 33\\n206dda33fd521c673d865e93b9247167f2f073d3 blob 33\\n632602d422a3839b0de4943169d76be391ca785c blob 33\\n86a24c08c7d33d278e54d00814d63aabbb912f86 blob 33\\n794d59375b602628f816121c05943a64e05610b2 blob 33\\n71baf7c50d08b6bedbd817ad0babff47a61ed37a blob 33\\nf8c70b4267e083371a5fa1cb079a895e76a1bd08 blob 33\\n342f4dd0d4529cd7a1171812d353498ca12fd754 blob 33\\nebd01a123a4cab21b4436ba95cbc1220663686be blob 35\\nbb52f9862c8840ae77d725f166b899668f9061cc blob 33\\ne476ff45ce855951e3c5c55e3c7a4ca609272f2f blob 33\\n0ec63a305bf45eecfd73f1111a9ebb985a1217cf blob 33\\nff5a6d9ea1a84b0a503b0870395f0995a36ba8bc blob 33\\n6882aea65ef3ea0ccc9fa99dbdba3dee761cdaab blob 32\\n1e8233126de567813a108ac669e2ed3953b7dd30 blob 32\\ncebe218daad98a86ddfaaa86d9df0039a0d1b130 blob 32\\n57cef937c81486223003f8526674ca730bbfc0c7 blob 32\\nc231657ee146214e1c667bd47a1162f427c60024 blob 32\\n23506dfbaddd81f61c1d69bb409195cdd34dc133 blob 32\\nc7a9a1056600701a09885ac9d413bad8ee58f778 blob 32\\n2447b0d5283efff539dff65420e7396eca735ce8 blob 32\\nc4e5f1b74eac6ba59226d98895dfee5c985529d4 blob 32\\nd773a9e4cbd1b9cb013da2817eca4b67e722839f blob 32\\n\", \"stderr\": \"\"}, {\"argv\": [\"E:\\\\Git\\\\mingw64\\\\bin\\\\git.exe\", \"-C\", \"D:\\\\ctf-ai\\\\dlp\\\\demo\\\\frida_git_guard\\\\tests\\\\.tmp-perf-fhas0h32\\\\repo\", \"cat-file\", \"--batch\"], \"exit_code\": 0, \"stdout\": \"7a72c7d299a6e8bc244d9508cb22a65f08f45936 blob 35\\nchanged ordinary benchmark data 0\\r\\n\\n4124d4153025f5bbb582a12e29b1dad6a69f6b28 blob 35\\nchanged ordinary benchmark data 1\\r\\n\\n010a0eba928a9ec7ea3a8d88851b3985d959cea5 blob 33\\nordinary benchmark data item 10\\r\\n\\n0b6f88539042faddb71f6b2ce6802f912565a60d blob 33\\nordinary benchmark data item 11\\r\\n\\nab7ffac4c1cc965f52f324fab3f2d1f749ee52d6 blob 33\\nordinary benchmark data item 12\\r\\n\\n206dda33fd521c673d865e93b9247167f2f073d3 blob 33\\nordinary benchmark data item 13\\r\\n\\n632602d422a3839b0de4943169d76be391ca785c blob 33\\nordinary benchmark data item 14\\r\\n\\n86a24c08c7d33d278e54d00814d63aabbb912f86 blob 33\\nordinary benchmark data item 15\\r\\n\\n794d59375b602628f816121c05943a64e05610b2 blob 33\\nordinary benchmark data item 16\\r\\n\\n71baf7c50d08b6bedbd817ad0babff47a61ed37a blob 33\\nordinary benchmark data item 17\\r\\n\\nf8c70b4267e083371a5fa1cb079a895e76a1bd08 blob 33\\nordinary benchmark data item 18\\r\\n\\n342f4dd0d4529cd7a1171812d353498ca12fd754 blob 33\\nordinary benchmark data item 19\\r\\n\\nebd01a123a4cab21b4436ba95cbc1220663686be blob 35\\nchanged ordinary benchmark data 2\\r\\n\\nbb52f9862c8840ae77d725f166b899668f9061cc blob 33\\nordinary benchmark data item 20\\r\\n\\ne476ff45ce855951e3c5c55e3c7a4ca609272f2f blob 33\\nordinary benchmark data item 21\\r\\n\\n0ec63a305bf45eecfd73f1111a9ebb985a1217cf blob 33\\nordinary benchmark data item 22\\r\\n\\nff5a6d9ea1a84b0a503b0870395f0995a36ba8bc blob 33\\nordinary benchmark data item 23\\r\\n\\n6882aea65ef3ea0ccc9fa99dbdba3dee761cdaab blob 32\\nordinary benchmark data item 3\\r\\n\\n1e8233126de567813a108ac669e2ed3953b7dd30 blob 32\\nordinary benchmark data item 4\\r\\n\\ncebe218daad98a86ddfaaa86d9df0039a0d1b130 blob 32\\nordinary benchmark data item 5\\r\\n\\n57cef937c81486223003f8526674ca730bbfc0c7 blob 32\\nordinary benchmark data item 6\\r\\n\\nc231657ee146214e1c667bd47a1162f427c60024 blob 32\\nordinary benchmark data item 7\\r\\n\\n23506dfbaddd81f61c1d69bb409195cdd34dc133 blob 32\\nordinary benchmark data item 8\\r\\n\\nc7a9a1056600701a09885ac9d413bad8ee58f778 blob 32\\nordinary benchmark data item 9\\r\\n\\n2447b0d5283efff539dff65420e7396eca735ce8 blob 32\\nordinary benchmark data item 2\\r\\n\\nc4e5f1b74eac6ba59226d98895dfee5c985529d4 blob 32\\nordinary benchmark data item 1\\r\\n\\nd773a9e4cbd1b9cb013da2817eca4b67e722839f blob 32\\nordinary benchmark data item 0\\r\\n\\n\", \"stderr\": \"\"}]}\r\n",
+      "stderr": ""
+    }
+  ],
+  "backend_logs": [
+    "{\"event\": \"MONITOR\", \"pid\": 27640, \"process\": \"pwsh.exe\"}\n{\"event\": \"READY\", \"monitors\": 1, \"config\": \"D:\\\\ctf-ai\\\\dlp\\\\demo\\\\frida_git_guard\\\\tests\\\\.tmp-perf-fhas0h32\\\\policy.json\"}\n{\"event\": \"CHILD\", \"pid\": 30524, \"parent_pid\": 27640, \"process\": \"git.exe\"}\n{\"event\": \"MONITOR\", \"pid\": 30524, \"process\": \"git.exe\"}\n{\"event\": \"CHILD\", \"pid\": 52664, \"parent_pid\": 30524, \"process\": \"git.exe\"}\n{\"event\": \"MONITOR\", \"pid\": 52664, \"process\": \"git.exe\"}\n{\"event\": \"CHILD\", \"pid\": 72916, \"parent_pid\": 27640, \"process\": \"git.exe\"}\n{\"event\": \"MONITOR\", \"pid\": 72916, \"process\": \"git.exe\"}\n{\"event\": \"CHILD\", \"pid\": 76288, \"parent_pid\": 72916, \"process\": \"git.exe\"}\n{\"event\": \"MONITOR\", \"pid\": 76288, \"process\": \"git.exe\"}\n{\"event\": \"CHILD\", \"pid\": 61028, \"parent_pid\": 27640, \"process\": \"git.exe\"}\n{\"event\": \"MONITOR\", \"pid\": 61028, \"process\": \"git.exe\"}\n{\"event\": \"CHILD\", \"pid\": 72232, \"parent_pid\": 61028, \"process\": \"git.exe\"}\n{\"event\": \"MONITOR\", \"pid\": 72232, \"process\": \"git.exe\"}\n{\"event\": \"CHILD\", \"pid\": 27628, \"parent_pid\": 27640, \"process\": \"git.exe\"}\n{\"event\": \"MONITOR\", \"pid\": 27628, \"process\": \"git.exe\"}\n{\"event\": \"CHILD\", \"pid\": 40320, \"parent_pid\": 27628, \"process\": \"git.exe\"}\n{\"event\": \"MONITOR\", \"pid\": 40320, \"process\": \"git.exe\"}\n{\"event\": \"CHILD\", \"pid\": 78268, \"parent_pid\": 27640, \"process\": \"git.exe\"}\n{\"event\": \"MONITOR\", \"pid\": 78268, \"process\": \"git.exe\"}\n{\"event\": \"CHILD\", \"pid\": 69352, \"parent_pid\": 78268, \"process\": \"git.exe\"}\n{\"event\": \"MONITOR\", \"pid\": 69352, \"process\": \"git.exe\"}\n{\"event\": \"CHILD\", \"pid\": 63492, \"parent_pid\": 27640, \"process\": \"git.exe\"}\n{\"event\": \"MONITOR\", \"pid\": 63492, \"process\": \"git.exe\"}\n{\"event\": \"CHILD\", \"pid\": 34688, \"parent_pid\": 63492, \"process\": \"git.exe\"}\n{\"event\": \"MONITOR\", \"pid\": 34688, \"process\": \"git.exe\"}\n{\"event\": \"CHILD\", \"pid\": 49276, \"parent_pid\": 27640, \"process\": \"git.exe\"}\n{\"event\": \"MONITOR\", \"pid\": 49276, \"process\": \"git.exe\"}\n{\"event\": \"CHILD\", \"pid\": 20816, \"parent_pid\": 49276, \"process\": \"git.exe\"}\n{\"event\": \"MONITOR\", \"pid\": 20816, \"process\": \"git.exe\"}\n{\"event\": \"CHILD\", \"pid\": 76316, \"parent_pid\": 27640, \"process\": \"git.exe\"}\n{\"event\": \"MONITOR\", \"pid\": 76316, \"process\": \"git.exe\"}\n{\"event\": \"CHILD\", \"pid\": 6264, \"parent_pid\": 76316, \"process\": \"git.exe\"}\n{\"event\": \"MONITOR\", \"pid\": 6264, \"process\": \"git.exe\"}\n{\"event\": \"CHILD\", \"pid\": 35100, \"parent_pid\": 27640, \"process\": \"git.exe\"}\n{\"event\": \"MONITOR\", \"pid\": 35100, \"process\": \"git.exe\"}\n{\"event\": \"CHILD\", \"pid\": 74620, \"parent_pid\": 35100, \"process\": \"git.exe\"}\n{\"event\": \"MONITOR\", \"pid\": 74620, \"process\": \"git.exe\"}\n{\"event\": \"CHILD\", \"pid\": 44436, \"parent_pid\": 27640, \"process\": \"git.exe\"}\n{\"event\": \"MONITOR\", \"pid\": 44436, \"process\": \"git.exe\"}\n{\"event\": \"CHILD\", \"pid\": 65616, \"parent_pid\": 44436, \"process\": \"git.exe\"}\n{\"event\": \"MONITOR\", \"pid\": 65616, \"process\": \"git.exe\"}\n{\"event\": \"CHILD\", \"pid\": 41848, \"parent_pid\": 27640, \"process\": \"git.exe\"}\n{\"event\": \"MONITOR\", \"pid\": 41848, \"process\": \"git.exe\"}\n{\"event\": \"CHILD\", \"pid\": 47160, \"parent_pid\": 41848, \"process\": \"git.exe\"}\n{\"event\": \"MONITOR\", \"pid\": 47160, \"process\": \"git.exe\"}\n{\"event\": \"CHILD\", \"pid\": 77340, \"parent_pid\": 27640, \"process\": \"git.exe\"}\n{\"event\": \"MONITOR\", \"pid\": 77340, \"process\": \"git.exe\"}\n{\"event\": \"CHILD\", \"pid\": 76216, \"parent_pid\": 77340, \"process\": \"git.exe\"}\n{\"event\": \"MONITOR\", \"pid\": 76216, \"process\": \"git.exe\"}\n{\"event\": \"CHILD\", \"pid\": 18560, \"parent_pid\": 27640, \"process\": \"git.exe\"}\n{\"event\": \"MONITOR\", \"pid\": 18560, \"process\": \"git.exe\"}\n{\"event\": \"CHILD\", \"pid\": 43588, \"parent_pid\": 18560, \"process\": \"git.exe\"}\n{\"event\": \"MONITOR\", \"pid\": 43588, \"process\": \"git.exe\"}\n{\"event\": \"CHILD\", \"pid\": 30252, \"parent_pid\": 27640, \"process\": \"git.exe\"}\n{\"event\": \"MONITOR\", \"pid\": 30252, \"process\": \"git.exe\"}\n{\"event\": \"CHILD\", \"pid\": 68832, \"parent_pid\": 30252, \"process\": \"git.exe\"}\n{\"event\": \"MONITOR\", \"pid\": 68832, \"process\": \"git.exe\"}\n{\"event\": \"CHILD\", \"pid\": 67132, \"parent_pid\": 27640, \"process\": \"git.exe\"}\n{\"event\": \"MONITOR\", \"pid\": 67132, \"process\": \"git.exe\"}\n{\"event\": \"CHILD\", \"pid\": 70344, \"parent_pid\": 67132, \"process\": \"git.exe\"}\n{\"event\": \"MONITOR\", \"pid\": 70344, \"process\": \"git.exe\"}\n{\"event\": \"CHILD\", \"pid\": 78360, \"parent_pid\": 27640, \"process\": \"git.exe\"}\n{\"event\": \"MONITOR\", \"pid\": 78360, \"process\": \"git.exe\"}\n{\"event\": \"CHILD\", \"pid\": 63472, \"parent_pid\": 78360, \"process\": \"git.exe\"}\n{\"event\": \"MONITOR\", \"pid\": 63472, \"process\": \"git.exe\"}\n{\"event\": \"CHILD\", \"pid\": 46364, \"parent_pid\": 27640, \"process\": \"python.exe\"}\n{\"event\": \"CHILD\", \"pid\": 63504, \"parent_pid\": 27640, \"process\": \"python.exe\"}\n{\"event\": \"CHILD\", \"pid\": 32492, \"parent_pid\": 27640, \"process\": \"python.exe\"}\n{\"event\": \"CHILD\", \"pid\": 76912, \"parent_pid\": 27640, \"process\": \"python.exe\"}\n{\"event\": \"CHILD\", \"pid\": 29840, \"parent_pid\": 27640, \"process\": \"python.exe\"}\n{\"event\": \"CHILD\", \"pid\": 65292, \"parent_pid\": 27640, \"process\": \"python.exe\"}\n{\"event\": \"CHILD\", \"pid\": 16848, \"parent_pid\": 27640, \"process\": \"python.exe\"}\n{\"event\": \"CHILD\", \"pid\": 70352, \"parent_pid\": 27640, \"process\": \"python.exe\"}\n{\"event\": \"STOPPED\"}\n",
+    "{\"event\": \"MONITOR\", \"pid\": 27640, \"process\": \"pwsh.exe\"}\n{\"event\": \"READY\", \"monitors\": 1, \"config\": \"D:\\\\ctf-ai\\\\dlp\\\\demo\\\\frida_git_guard\\\\tests\\\\.tmp-perf-fhas0h32\\\\policy.json\", \"coverage\": \"monitored terminals and descendants only\", \"unprotected_pids\": []}\n{\"event\": \"MONITOR\", \"pid\": 74020, \"process\": \"git.exe\"}\n{\"event\": \"MONITOR\", \"pid\": 78592, \"process\": \"git.exe\"}\n{\"event\": \"MONITOR\", \"pid\": 34724, \"process\": \"git.exe\"}\n{\"event\": \"MONITOR\", \"pid\": 16052, \"process\": \"git.exe\"}\n{\"event\": \"MONITOR\", \"pid\": 71896, \"process\": \"git.exe\"}\n{\"event\": \"MONITOR\", \"pid\": 25768, \"process\": \"git.exe\"}\n{\"event\": \"MONITOR\", \"pid\": 16456, \"process\": \"git.exe\"}\n{\"event\": \"MONITOR\", \"pid\": 28280, \"process\": \"git.exe\"}\n{\"event\": \"MONITOR\", \"pid\": 78124, \"process\": \"git.exe\"}\n{\"event\": \"MONITOR\", \"pid\": 69028, \"process\": \"git.exe\"}\n{\"event\": \"MONITOR\", \"pid\": 60840, \"process\": \"git.exe\"}\n{\"event\": \"MONITOR\", \"pid\": 75760, \"process\": \"git.exe\"}\n{\"event\": \"MONITOR\", \"pid\": 52244, \"process\": \"git.exe\"}\n{\"event\": \"MONITOR\", \"pid\": 74168, \"process\": \"git.exe\"}\n{\"event\": \"MONITOR\", \"pid\": 61416, \"process\": \"git.exe\"}\n{\"event\": \"MONITOR\", \"pid\": 77748, \"process\": \"git.exe\"}\n{\"event\": \"MONITOR\", \"pid\": 52044, \"process\": \"git.exe\"}\n{\"event\": \"MONITOR\", \"pid\": 66872, \"process\": \"git.exe\"}\n{\"event\": \"MONITOR\", \"pid\": 65128, \"process\": \"git.exe\"}\n{\"event\": \"MONITOR\", \"pid\": 9112, \"process\": \"git.exe\"}\n{\"event\": \"MONITOR\", \"pid\": 74376, \"process\": \"git.exe\"}\n{\"event\": \"MONITOR\", \"pid\": 66288, \"process\": \"git.exe\"}\n{\"event\": \"MONITOR\", \"pid\": 75828, \"process\": \"git.exe\"}\n{\"event\": \"MONITOR\", \"pid\": 33996, \"process\": \"git.exe\"}\n{\"event\": \"MONITOR\", \"pid\": 24044, \"process\": \"git.exe\"}\n{\"event\": \"MONITOR\", \"pid\": 77836, \"process\": \"git.exe\"}\n{\"event\": \"MONITOR\", \"pid\": 29036, \"process\": \"git.exe\"}\n{\"event\": \"MONITOR\", \"pid\": 47904, \"process\": \"git.exe\"}\n{\"event\": \"MONITOR\", \"pid\": 18084, \"process\": \"git.exe\"}\n{\"event\": \"MONITOR\", \"pid\": 24632, \"process\": \"git.exe\"}\n{\"event\": \"MONITOR\", \"pid\": 77212, \"process\": \"git.exe\"}\n{\"event\": \"MONITOR\", \"pid\": 37512, \"process\": \"git.exe\"}\n{\"event\": \"STOPPED\"}\n"
+  ],
+  "repo_config_sha256_unchanged": "751b803dae3d5bf16841f2cef28d120a17f811d0ff85862e09cd436cd4442850",
+  "git_binary_sha256_unchanged": "1a0043555d254618f2d56c936c3d9a1fbfb878bc878416a133c346bc7835eda9",
+  "source_sha256": {
+    "backend.py": "19ee546904468b5f000a4fb29ee17dd22bcfefd218be75825589b01ac3a3cceb",
+    "guard.py": "64fde9d41048e322d5f31c527f3bf68225a87d10a0660604a19d854c15a88625",
+    "watch_agent.js": "f1686d0127567e7935e91fe68e5bc86cff401af3b3a70d56d86362e04d5b5f90",
+    "launcher_agent.js": "374eb92c5ffc4a36b7afb9b57d8be9f021a6a097b4db5a10f3b001f72863a3af",
+    "config.json": "eb9b7777cdf21cdf2dbe7b69c8ec92979354314859fdbaf9e24a630e19b99010"
+  }
+}

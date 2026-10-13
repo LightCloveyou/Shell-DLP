@@ -30,14 +30,14 @@ python -m pip install -r .\demo\frida_git_guard\requirements.txt
 python .\demo\frida_git_guard\backend.py
 ```
 
-看到 `READY` 和对应终端的 `MONITOR` 后，在该终端照常运行：
+看到对应终端 PID 的 `MONITOR` 后，在该终端照常运行：
 
 ```powershell
 cd D:\your-project
 git push origin main
 ```
 
-沿用现有 HTTPS/SSH 登录和代理配置。推送时应出现 `GIT_PUSH`，随后 `DENY`（拦截）或 `ALLOW`（放行）；只有 `MONITOR` 不代表该次推送已检查。仅保护已接入的终端及子进程；扫描所有本地引用的历史，可能保守拦截未推送分支。
+沿用现有 HTTPS/SSH 登录和代理配置。推送时应出现 `GIT_PUSH`，随后 `DENY`（拦截）或 `ALLOW`（放行）；`READY` 不代表所有终端均受保护；`UNPROTECTED_TERMINAL` 表示该终端尚未接入。仅保护已接入的终端及子进程；扫描所有本地引用的历史，可能保守拦截未推送分支。
 
 ## 停止
 

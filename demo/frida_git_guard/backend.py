@@ -11,14 +11,37 @@ import signal
 import subprocess
 import threading
 import time
+from functools import lru_cache
 
 import frida
 import guard
 
 ROOT = Path(__file__).resolve().parent
+TERMINAL_PROCESSES = {'powershell.exe', 'pwsh.exe', 'cmd.exe', 'bash.exe', 'sh.exe'}
 DEFAULT_PROCESSES = {'powershell.exe', 'pwsh.exe', 'cmd.exe', 'bash.exe', 'sh.exe',
                      'windowsterminal.exe', 'explorer.exe', 'code.exe', 'devenv.exe',
                      'idea64.exe', 'sourcetree.exe', 'tortoisegitproc.exe'}
+
+
+INFO_AGENT = r"""
+const k = Process.getModuleByName('kernel32.dll');
+const shell = Module.load('shell32.dll');
+const command = new NativeFunction(k.getExportByName('GetCommandLineW'), 'pointer', []);
+const parse = new NativeFunction(shell.getExportByName('CommandLineToArgvW'), 'pointer', ['pointer', 'pointer']);
+const free = new NativeFunction(k.getExportByName('LocalFree'), 'pointer', ['pointer']);
+rpc.exports = {info() {
+ const count = Memory.alloc(4), p = parse(command(), count), argv = [];
+ for (let i=0; i<count.readS32(); i++) argv.push(p.add(i*Process.pointerSize).readPointer().readUtf16String());
+ free(p); return {pid:Process.id,cwd:Process.getCurrentDir(),argv};
+}};
+"""
+
+
+@lru_cache(maxsize=1)
+def git_builtins():
+    result = subprocess.run([guard.git_executable(), '--list-cmds=builtins'],
+                            capture_output=True, check=True, timeout=15)
+    return frozenset(result.stdout.decode().splitlines())
 
 
 @dataclass
@@ -53,6 +76,8 @@ def git_command(info: dict) -> tuple[list[str], list[str] | None]:
     for _ in range(10):
         if command == 'push':
             return prefix, rest
+        if command in git_builtins():
+            return prefix, None
         alias = subprocess.run([guard.git_executable(), *prefix, 'config', '--get', f'alias.{command}'],
                                cwd=info['cwd'], capture_output=True, timeout=15)
         if alias.returncode != 0:
@@ -98,7 +123,7 @@ def scan_push(info: dict, prefix: list[str], push_args: list[str], policy: guard
         resolved = query('rev-parse', '--verify', '--end-of-options', source, check=False)
         if resolved.returncode == 0:
             sources.append(resolved.stdout.decode().strip())
-    findings, objects = [], set()
+    findings, objects, commit_roots = [], set(), []
     for oid in dict.fromkeys(sources):
         resolved = guard.git(repo, 'rev-parse', '--verify', oid + '^{}').stdout.decode().strip()
         if resolved in objects:
@@ -106,7 +131,7 @@ def scan_push(info: dict, prefix: list[str], push_args: list[str], policy: guard
         objects.add(resolved)
         kind = guard.git(repo, 'cat-file', '-t', resolved).stdout.strip()
         if kind == b'commit':
-            findings.extend(guard.scan_history(repo, resolved, policy, repo_root)['findings'])
+            commit_roots.append(resolved)
         elif kind == b'tree':
             tree = guard.git(repo, 'ls-tree', '-r', '-z', resolved).stdout
             for entry in tree.split(b'\0'):
@@ -121,6 +146,8 @@ def scan_push(info: dict, prefix: list[str], push_args: list[str], policy: guard
                     findings.extend(scan_blob(repo, blob.decode(), label, policy))
         elif kind == b'blob':
             findings.extend(scan_blob(repo, resolved, '(tag/ref blob)', policy))
+    if commit_roots and not findings:
+        findings.extend(guard.scan_history(repo, commit_roots, policy, repo_root)['findings'])
     return {'deny': bool(findings), 'repo': str(repo), 'findings': findings,
             'policy_scope': 'all local refs + HEAD + explicit push sources (conservative)'}
 
@@ -146,7 +173,12 @@ class Backend:
         self.stopping = threading.Event()
         self.excluded = {os.getpid()}
         self.failed = {}
-        self.active_cancel = None
+        self.active_cancels = set()
+        self.cancellation_lock = threading.Lock()
+        self.attach_locks = {}
+        self.fast_resumes = queue.Queue()
+        self.workers = []
+        git_builtins()  # Resolve Git installation/builtins once, before gating launches.
         self.device.on('child-added', self.child_added)
 
     def log(self, kind, **fields):
@@ -154,30 +186,39 @@ class Backend:
 
     def child_added(self, child):
         self.pending.add(child.pid)
-        self.events.put(('child', child))
+        name = Path(child.path or child.identifier or '').name.lower()
+        if name == 'git.exe' or name in self.names:
+            self.events.put(('child', child))
+        else:
+            self.fast_resumes.put(child.pid)
 
     def request_stop(self):
         self.stopping.set()
-        cancel = self.active_cancel
-        if cancel is not None:
+        with self.cancellation_lock:
+            cancels = list(self.active_cancels)
+        for cancel in cancels:
             cancel.cancel()
 
     def attach(self, pid, name):
-        if pid in self.sessions or pid in self.excluded or self.stopping.is_set():
-            return
-        if name.lower() != 'git.exe' and time.monotonic() < self.failed.get(pid, 0):
-            return
-        cancel = frida.Cancellable()
-        self.active_cancel = cancel
-        deadline = threading.Timer(5, cancel.cancel)
-        deadline.daemon = True
-        deadline.start()
-        try:
-            with cancel:
-                self._attach(pid, name)
-        finally:
-            deadline.cancel()
-            self.active_cancel = None
+        lock = self.attach_locks.setdefault(pid, threading.Lock())
+        with lock:
+            if pid in self.sessions or pid in self.excluded or self.stopping.is_set():
+                return
+            if name.lower() != 'git.exe' and time.monotonic() < self.failed.get(pid, 0):
+                return
+            cancel = frida.Cancellable()
+            with self.cancellation_lock:
+                self.active_cancels.add(cancel)
+            deadline = threading.Timer(5, cancel.cancel)
+            deadline.daemon = True
+            deadline.start()
+            try:
+                with cancel:
+                    self._attach(pid, name)
+            finally:
+                deadline.cancel()
+                with self.cancellation_lock:
+                    self.active_cancels.discard(cancel)
 
     def _attach(self, pid, name):
         if pid in self.sessions or pid in self.excluded:
@@ -188,12 +229,22 @@ class Backend:
             session.on('detached', lambda *args: self.events.put(('detached', pid)))
             script, info, prefix, push_args = None, None, [], None
             if name.lower() == 'git.exe':
-                script = session.create_script((ROOT / 'watch_agent.js').read_text(encoding='utf-8'))
+                probe = session.create_script(INFO_AGENT)
+                probe.load()
+                try:
+                    info = probe.exports_sync.info()
+                finally:
+                    probe.unload()
+                prefix, push_args = git_command(info)
+                if push_args is not None:
+                    script = session.create_script((ROOT / 'watch_agent.js').read_text(encoding='utf-8'))
+                    script.on('message', lambda message, data: self.events.put(('message', (pid, message))))
+                    script.load()
+                    script.exports_sync.configure(True)
+            else:
+                script = session.create_script((ROOT / 'launcher_agent.js').read_text(encoding='utf-8'))
                 script.on('message', lambda message, data: self.events.put(('message', (pid, message))))
                 script.load()
-                info = script.exports_sync.info()
-                prefix, push_args = git_command(info)
-                script.exports_sync.configure(push_args is not None)
             session.enable_child_gating()
             self.sessions[pid] = Watched(session, script, info, prefix, push_args)
             self.failed.pop(pid, None)
@@ -210,24 +261,55 @@ class Backend:
                         session.detach()
                 except (frida.InvalidOperationError, frida.ProcessNotFoundError):
                     pass
-            self.failed[pid] = time.monotonic() + 60
-            if not self.stopping.is_set():
-                self.log('ATTACH_ERROR', pid=pid, process=name, error=str(exc), retry_seconds=60)
+            first_failure = pid not in self.failed
+            retry = 10 if name.lower() in TERMINAL_PROCESSES else 300
+            self.failed[pid] = time.monotonic() + retry
+            if first_failure and not self.stopping.is_set():
+                self.log('ATTACH_ERROR', pid=pid, process=name, error=str(exc), retry_seconds=retry)
+                if name.lower() in TERMINAL_PROCESSES:
+                    self.log('UNPROTECTED_TERMINAL', pid=pid, process=name)
             raise
 
-    def discover(self):
+    def discover(self, desktop=False):
         for proc in self.device.enumerate_processes():
             if self.stopping.is_set():
                 break
-            if (self.pids and proc.pid in self.pids) or (not self.pids and proc.name.lower() in self.names):
+            eligible = ((self.pids and proc.pid in self.pids)
+                        or (not self.pids and proc.name.lower() in self.names
+                            and ((proc.name.lower() not in TERMINAL_PROCESSES) == desktop)))
+            if eligible:
                 try:
                     self.attach(proc.pid, proc.name)
                 except Exception:
                     pass
 
+    def resume_child(self, pid):
+        try:
+            self.device.resume(pid)
+        except (frida.ProcessNotFoundError, frida.InvalidOperationError):
+            pass
+        finally:
+            self.pending.discard(pid)
+
+    def resume_worker(self):
+        while not self.stopping.is_set():
+            try:
+                pid = self.fast_resumes.get(timeout=0.1)
+            except queue.Empty:
+                continue
+            self.resume_child(pid)
+
+    def discover_worker(self, desktop):
+        while not self.stopping.is_set():
+            try:
+                self.discover(desktop)
+            except Exception as exc:
+                if not self.stopping.is_set():
+                    self.log('DISCOVERY_ERROR', error=str(exc))
+            self.stopping.wait(2 if desktop else 1)
+
     def handle_child(self, child):
         name = Path(child.path or child.identifier or '').name.lower()
-        self.log('CHILD', pid=child.pid, parent_pid=child.parent_pid, process=name)
         try:
             if name == 'git.exe' or name in self.names:
                 self.attach(child.pid, name)
@@ -237,11 +319,7 @@ class Backend:
                 self.device.kill(child.pid)
                 self.log('BLOCKED_ATTACH_FAILURE', pid=child.pid, error=str(exc))
         finally:
-            try:
-                self.device.resume(child.pid)
-            except (frida.ProcessNotFoundError, frida.InvalidOperationError):
-                pass
-            self.pending.discard(child.pid)
+            self.resume_child(child.pid)
 
     def handle_message(self, pid, message):
         watched = self.sessions.get(pid)
@@ -251,26 +329,46 @@ class Backend:
             self.log('AGENT_ERROR', pid=pid, error=message.get('description', message['type']))
             return
         data = message['payload']
-        if data['type'] == 'check':
+        if data['type'] in {'check', 'launch-check'}:
+            started = time.perf_counter()
             try:
                 self.policy.refresh()
-                policy = scan_push(watched.info, watched.prefix, watched.push_args, self.policy)
+                if data['type'] == 'launch-check':
+                    info = data['info']
+                    prefix, push_args = git_command(info)
+                    if push_args is None:
+                        raise ValueError('Launcher push arguments changed')
+                    self.log('GIT_PUSH', pid=pid, cwd=info['cwd'], argv=info['argv'], stage='launcher-before-create')
+                    policy = scan_push(info, prefix, push_args, self.policy)
+                else:
+                    policy = scan_push(watched.info, watched.prefix, watched.push_args, self.policy)
             except Exception as exc:
                 policy = {'deny': True, 'findings': [{'rule': 'scan-error'}], 'error': str(exc)}
-            watched.script.post({'type': 'decision', 'payload': {'deny': policy['deny']}})
-            self.log('DENY' if policy['deny'] else 'ALLOW', pid=pid, **policy)
+            response_type = 'decision-' + data['id'] if data['type'] == 'launch-check' else 'decision'
+            watched.script.post({'type': response_type, 'payload': {'deny': policy['deny']}})
+            self.log('DENY' if policy['deny'] else 'ALLOW', pid=pid, scan_ms=round((time.perf_counter()-started)*1000,1), **policy)
+        elif data['type'] == 'launcher-error':
+            self.log('AGENT_ERROR', **data)
         elif data['type'] == 'blocked':
             self.log('NATIVE_BLOCK', **data)
 
     def run(self):
         try:
+            resumer = threading.Thread(target=self.resume_worker, daemon=True, name='fast-resume')
+            self.workers.append(resumer)
+            resumer.start()
             self.discover()
             if self.stopping.is_set():
                 return
             if not self.sessions:
                 raise RuntimeError('No terminal attached; run at the same/elevated privilege as the terminal')
-            self.log('READY', monitors=len(self.sessions), config=str(self.config_path.absolute()))
-            next_discovery = time.monotonic() + 1
+            self.log('READY', monitors=len(self.sessions), config=str(self.config_path.absolute()),
+                     coverage='monitored terminals and descendants only', unprotected_pids=list(self.failed))
+            if not self.pids:
+                for desktop in (False, True):
+                    worker = threading.Thread(target=self.discover_worker, args=(desktop,), daemon=True)
+                    self.workers.append(worker)
+                    worker.start()
             while not self.stopping.is_set():
                 try:
                     kind, item = self.events.get(timeout=0.2)
@@ -282,14 +380,14 @@ class Backend:
                     self.handle_message(*item)
                 elif kind == 'detached':
                     self.sessions.pop(item, None)
-                if not self.pids and self.events.empty() and time.monotonic() >= next_discovery:
-                    self.discover()
-                    next_discovery = time.monotonic() + 1
+
         finally:
             self.stop()
 
     def stop(self):
-        self.stopping.set()
+        self.request_stop()
+        for worker in self.workers:
+            worker.join(timeout=6)
         for pid, watched in list(self.sessions.items()):
             try:
                 if watched.script:

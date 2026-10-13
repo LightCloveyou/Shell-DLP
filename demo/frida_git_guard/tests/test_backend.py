@@ -128,8 +128,12 @@ def main():
         client_file.write_text('''import json,subprocess,sys
 print("READY",flush=True)
 for line in sys.stdin:
- p=subprocess.run(json.loads(line),capture_output=True)
- print(json.dumps({"exit_code":p.returncode,"stdout":p.stdout.decode("utf-8","replace"),"stderr":p.stderr.decode("utf-8","replace")}),flush=True)
+ try:
+  p=subprocess.run(json.loads(line),capture_output=True)
+  response={"exit_code":p.returncode,"stdout":p.stdout.decode("utf-8","replace"),"stderr":p.stderr.decode("utf-8","replace")}
+ except OSError as e:
+  response={"exit_code":None,"stdout":"","stderr":str(e),"launch_error":True}
+ print(json.dumps(response),flush=True)
 ''')
         client = subprocess.Popen([sys.executable, '-B', client_file], stdin=subprocess.PIPE,
                                   stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
