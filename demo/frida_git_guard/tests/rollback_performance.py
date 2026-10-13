@@ -17,7 +17,7 @@ def main():
    if hashlib.sha256(data).hexdigest()!=expected:raise ValueError('Baseline hash mismatch')
    dest.parent.mkdir(parents=True,exist_ok=True);dest.write_bytes(data)
    if hashlib.sha256(dest.read_bytes()).hexdigest()!=expected:raise ValueError('Restored hash mismatch')
- for name in ['launcher_agent.js','tests/test_performance.py']:
+ for name in ['launcher_agent.js','tests/test_performance.py','tests/test_shutdown.py']:
   dest=(target/name).resolve()
   if not dest.is_relative_to(target):raise ValueError('Added file leaves target')
   if dest.exists():dest.unlink()

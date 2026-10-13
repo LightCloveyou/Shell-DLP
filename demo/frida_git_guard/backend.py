@@ -178,6 +178,9 @@ class Backend:
         self.attach_locks = {}
         self.fast_resumes = queue.Queue()
         self.workers = []
+        self.inflight_decisions = {}
+        self.decision_lock = threading.Lock()
+        self.shutdown_complete = threading.Event()
         git_builtins()  # Resolve Git installation/builtins once, before gating launches.
         self.device.on('child-added', self.child_added)
 
@@ -204,6 +207,28 @@ class Backend:
             cancels = list(self.active_cancels)
         for cancel in cancels:
             cancel.cancel()
+        # Release CreateProcess callbacks that are synchronously waiting for a
+        # decision.  Otherwise script unloading can wait forever during Ctrl+C.
+        with self.decision_lock:
+            decisions = list(self.inflight_decisions.values())
+            self.inflight_decisions.clear()
+        for script, response_type in decisions:
+            try:
+                script.post({'type': response_type, 'payload': {'deny': True}})
+            except frida.InvalidOperationError:
+                pass
+
+    def queue_message(self, pid, script, message):
+        if message.get('type') == 'send':
+            data = message.get('payload', {})
+            if data.get('type') == 'launch-check':
+                response_type = 'decision-' + data['id']
+                with self.decision_lock:
+                    self.inflight_decisions[(pid, response_type)] = (script, response_type)
+            elif data.get('type') == 'check':
+                with self.decision_lock:
+                    self.inflight_decisions[(pid, 'decision')] = (script, 'decision')
+        self.events.put(('message', (pid, message)))
 
     def attach(self, pid, name):
         lock = self.attach_locks.setdefault(pid, threading.Lock())
@@ -244,12 +269,12 @@ class Backend:
                 prefix, push_args = git_command(info)
                 if push_args is not None:
                     script = session.create_script((ROOT / 'watch_agent.js').read_text(encoding='utf-8'))
-                    script.on('message', lambda message, data: self.events.put(('message', (pid, message))))
+                    script.on('message', lambda message, data: self.queue_message(pid, script, message))
                     script.load()
                     script.exports_sync.configure(True)
             else:
                 script = session.create_script((ROOT / 'launcher_agent.js').read_text(encoding='utf-8'))
-                script.on('message', lambda message, data: self.events.put(('message', (pid, message))))
+                script.on('message', lambda message, data: self.queue_message(pid, script, message))
                 script.load()
             session.enable_child_gating()
             self.sessions[pid] = Watched(session, script, info, prefix, push_args)
@@ -341,6 +366,8 @@ class Backend:
                     if push_args is None:
                         watched.script.post({'type': 'decision-' + data['id'],
                                              'payload': {'deny': False}})
+                        with self.decision_lock:
+                            self.inflight_decisions.pop((pid, 'decision-' + data['id']), None)
                         return
                     self.policy.refresh()
                     self.log('GIT_PUSH', pid=pid, cwd=info['cwd'], argv=info['argv'], stage='launcher-before-create')
@@ -352,6 +379,8 @@ class Backend:
                 policy = {'deny': True, 'findings': [{'rule': 'scan-error'}], 'error': str(exc)}
             response_type = 'decision-' + data['id'] if data['type'] == 'launch-check' else 'decision'
             watched.script.post({'type': response_type, 'payload': {'deny': policy['deny']}})
+            with self.decision_lock:
+                self.inflight_decisions.pop((pid, response_type), None)
             self.log('DENY' if policy['deny'] else 'ALLOW', pid=pid, scan_ms=round((time.perf_counter()-started)*1000,1), **policy)
         elif data['type'] == 'launcher-error':
             self.log('AGENT_ERROR', **data)
@@ -392,28 +421,45 @@ class Backend:
 
     def stop(self):
         self.request_stop()
-        for worker in self.workers:
-            worker.join(timeout=6)
-        for pid, watched in list(self.sessions.items()):
-            try:
-                if watched.script:
-                    # Release an in-flight decision before unloading its script.
-                    watched.script.post({'type': 'decision', 'payload': {'deny': True}})
-                watched.session.disable_child_gating()
-                if watched.script:
-                    watched.script.unload()
-                watched.session.detach()
-            except (frida.ProcessNotFoundError, frida.InvalidOperationError):
-                pass
-        self.sessions.clear()
+        self.log('STOPPING', stage='resume-children', pending_children=len(self.pending),
+                 sessions=len(self.sessions))
+        # Resume suspended children before potentially slow Frida teardown.
         for pid in list(self.pending):
             try:
                 self.device.resume(pid)
             except (frida.ProcessNotFoundError, frida.InvalidOperationError):
                 pass
         self.pending.clear()
-        self.device.off('child-added', self.child_added)
-        self.log('STOPPED')
+
+        # Session teardown is independent.  Run it concurrently so many stale
+        # terminals or GUI processes do not make Ctrl+C wait once per session.
+        def close_session(watched):
+            try:
+                watched.session.disable_child_gating()
+                if watched.script:
+                    watched.script.unload()
+                watched.session.detach()
+            except Exception:
+                pass
+
+        closers = [threading.Thread(target=close_session, args=(watched,), daemon=True)
+                   for watched in list(self.sessions.values())]
+        self.log('STOPPING', stage='detach-sessions', sessions=len(closers))
+        for closer in closers:
+            closer.start()
+        deadline = time.monotonic() + 3
+        for closer in closers:
+            closer.join(max(0, deadline - time.monotonic()))
+        self.sessions.clear()
+        for worker in self.workers:
+            worker.join(timeout=max(0, deadline - time.monotonic()))
+        try:
+            self.device.off('child-added', self.child_added)
+        except Exception:
+            pass
+        unfinished = sum(closer.is_alive() for closer in closers)
+        self.log('STOPPED', unfinished_sessions=unfinished)
+        self.shutdown_complete.set()
 
 
 def main():
@@ -427,10 +473,39 @@ def main():
     except Exception as exc:
         print(f'[CONFIG_ERROR] {exc}', flush=True)
         return 2
-    signal.signal(signal.SIGINT, lambda *args: backend.request_stop())
-    signal.signal(signal.SIGTERM, lambda *args: backend.request_stop())
+    watchdog_lock = threading.Lock()
+    watchdog_started = False
+
+    def begin_stop(*_):
+        nonlocal watchdog_started
+        backend.request_stop()
+        with watchdog_lock:
+            if watchdog_started:
+                return
+            watchdog_started = True
+        backend.log('STOP_REQUESTED', sessions=len(backend.sessions),
+                    pending_children=len(backend.pending))
+
+        def force_exit():
+            for elapsed in range(1, 16):
+                if backend.shutdown_complete.wait(1):
+                    return
+                with backend.cancellation_lock:
+                    active_attaches = len(backend.active_cancels)
+                with backend.decision_lock:
+                    inflight_decisions = len(backend.inflight_decisions)
+                backend.log('STOPPING', stage='waiting', elapsed_seconds=elapsed,
+                            sessions=len(backend.sessions), pending_children=len(backend.pending),
+                            active_attaches=active_attaches,
+                            inflight_decisions=inflight_decisions)
+            backend.log('FORCE_STOP', timeout_seconds=15)
+            os._exit(0)
+        threading.Thread(target=force_exit, daemon=True, name='stop-watchdog').start()
+
+    signal.signal(signal.SIGINT, begin_stop)
+    signal.signal(signal.SIGTERM, begin_stop)
     if hasattr(signal, 'SIGBREAK'):
-        signal.signal(signal.SIGBREAK, lambda *args: backend.request_stop())
+        signal.signal(signal.SIGBREAK, begin_stop)
     # Win32 console callbacks run on a separate thread: cancel a blocked native
     # attach immediately instead of waiting for Python's main-thread SIGINT.
     console_handler = None
@@ -439,7 +514,7 @@ def main():
         callback_type = ctypes.WINFUNCTYPE(ctypes.c_int, ctypes.c_uint32)
         def on_console_event(event):
             if event in (0, 1):
-                backend.request_stop()
+                begin_stop()
                 return 1
             return 0
         console_handler = callback_type(on_console_event)

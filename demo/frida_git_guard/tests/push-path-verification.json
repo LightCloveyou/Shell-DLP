@@ -6,75 +6,75 @@
       "passed": true,
       "exit_code": 0,
       "before_tip": "",
-      "after_tip": "a3f3c17e570b1cd39ad646eb070556011fa93169",
+      "after_tip": "2ad10a1e130e3f04aa5a002ab0e058c40a9dfc1a",
       "https_requests": 2,
-      "backend_log": "{\"event\": \"MONITOR\", \"pid\": 62228, \"process\": \"git.exe\"}\n{\"event\": \"ALLOW\", \"pid\": 62228, \"deny\": false, \"repo\": \"D:\\\\ctf-ai\\\\dlp\\\\demo\\\\frida_git_guard\\\\tests\\\\.tmp-paths-iyp2qq4m\\\\baseline-repo\\\\.git\", \"findings\": [], \"policy_scope\": \"all local refs + HEAD + explicit push sources (conservative)\"}\n{\"event\": \"MONITOR\", \"pid\": 69352, \"process\": \"git.exe\"}\n{\"event\": \"ALLOW\", \"pid\": 69352, \"deny\": false, \"repo\": \"D:\\\\ctf-ai\\\\dlp\\\\demo\\\\frida_git_guard\\\\tests\\\\.tmp-paths-iyp2qq4m\\\\baseline-repo\\\\.git\", \"findings\": [], \"policy_scope\": \"all local refs + HEAD + explicit push sources (conservative)\"}\n{\"event\": \"MONITOR\", \"pid\": 62504, \"process\": \"git.exe\"}\n",
+      "backend_log": "{\"event\": \"MONITOR\", \"pid\": 41872, \"process\": \"git.exe\"}\n{\"event\": \"ALLOW\", \"pid\": 41872, \"deny\": false, \"repo\": \"D:\\\\ctf-ai\\\\dlp\\\\demo\\\\frida_git_guard\\\\tests\\\\.tmp-paths-j66sb3q2\\\\baseline-repo\\\\.git\", \"findings\": [], \"policy_scope\": \"all local refs + HEAD + explicit push sources (conservative)\"}\n{\"event\": \"MONITOR\", \"pid\": 46044, \"process\": \"git.exe\"}\n{\"event\": \"ALLOW\", \"pid\": 46044, \"deny\": false, \"repo\": \"D:\\\\ctf-ai\\\\dlp\\\\demo\\\\frida_git_guard\\\\tests\\\\.tmp-paths-j66sb3q2\\\\baseline-repo\\\\.git\", \"findings\": [], \"policy_scope\": \"all local refs + HEAD + explicit push sources (conservative)\"}\n{\"event\": \"MONITOR\", \"pid\": 63912, \"process\": \"git.exe\"}\n",
       "baseline_leak": false
     },
     {
       "name": "baseline-absolute-path-deleted-history-leak-reproduced",
       "passed": true,
       "exit_code": 0,
-      "before_tip": "a3f3c17e570b1cd39ad646eb070556011fa93169",
-      "after_tip": "3c280354f88e14f72d943fc3b5d301dfca13b96d",
+      "before_tip": "2ad10a1e130e3f04aa5a002ab0e058c40a9dfc1a",
+      "after_tip": "3b54a7637442da5151253a142d2cc673b725c576",
       "https_requests": 2,
-      "backend_log": "{\"event\": \"MONITOR\", \"pid\": 39552, \"process\": \"git.exe\"}\n{\"event\": \"ALLOW\", \"pid\": 39552, \"deny\": false, \"repo\": \"D:\\\\ctf-ai\\\\dlp\\\\demo\\\\frida_git_guard\\\\tests\\\\.tmp-paths-iyp2qq4m\\\\baseline-repo\\\\.git\", \"findings\": [], \"policy_scope\": \"all local refs + HEAD + explicit push sources (conservative)\"}\n{\"event\": \"MONITOR\", \"pid\": 71292, \"process\": \"git.exe\"}\n{\"event\": \"ALLOW\", \"pid\": 71292, \"deny\": false, \"repo\": \"D:\\\\ctf-ai\\\\dlp\\\\demo\\\\frida_git_guard\\\\tests\\\\.tmp-paths-iyp2qq4m\\\\baseline-repo\\\\.git\", \"findings\": [], \"policy_scope\": \"all local refs + HEAD + explicit push sources (conservative)\"}\n{\"event\": \"MONITOR\", \"pid\": 8872, \"process\": \"git.exe\"}\n",
+      "backend_log": "{\"event\": \"MONITOR\", \"pid\": 60088, \"process\": \"git.exe\"}\n{\"event\": \"ALLOW\", \"pid\": 60088, \"deny\": false, \"repo\": \"D:\\\\ctf-ai\\\\dlp\\\\demo\\\\frida_git_guard\\\\tests\\\\.tmp-paths-j66sb3q2\\\\baseline-repo\\\\.git\", \"findings\": [], \"policy_scope\": \"all local refs + HEAD + explicit push sources (conservative)\"}\n{\"event\": \"MONITOR\", \"pid\": 9032, \"process\": \"git.exe\"}\n{\"event\": \"ALLOW\", \"pid\": 9032, \"deny\": false, \"repo\": \"D:\\\\ctf-ai\\\\dlp\\\\demo\\\\frida_git_guard\\\\tests\\\\.tmp-paths-j66sb3q2\\\\baseline-repo\\\\.git\", \"findings\": [], \"policy_scope\": \"all local refs + HEAD + explicit push sources (conservative)\"}\n{\"event\": \"MONITOR\", \"pid\": 32840, \"process\": \"git.exe\"}\n",
       "baseline_leak": true
     },
     {
       "name": "baseline-stop",
       "passed": true,
       "exit_code": 0,
-      "seconds": 0.3270819999743253
+      "seconds": 0.3325998999644071
     },
     {
       "name": "modified-normal-pwsh-https-clean-allow",
       "passed": true,
       "exit_code": 0,
       "before_tip": "",
-      "after_tip": "948a60c56e96c6b195d738a33993913a2461ddcd",
+      "after_tip": "13b0200408b8033b11078fd0b5388abf02cf8e96",
       "https_requests": 2,
-      "backend_log": "{\"event\": \"GIT_PUSH\", \"pid\": 64444, \"cwd\": \"D:\\\\ctf-ai\\\\dlp\\\\demo\\\\frida_git_guard\\\\tests\\\\.tmp-paths-iyp2qq4m\\\\modified-repo\", \"argv\": [\"E:\\\\Git\\\\cmd\\\\git.exe\", \"push\", \"-u\", \"origin\", \"main\"], \"stage\": \"launcher-before-create\"}\n{\"event\": \"ALLOW\", \"pid\": 64444, \"scan_ms\": 523.6, \"deny\": false, \"repo\": \"D:\\\\ctf-ai\\\\dlp\\\\demo\\\\frida_git_guard\\\\tests\\\\.tmp-paths-iyp2qq4m\\\\modified-repo\\\\.git\", \"findings\": [], \"policy_scope\": \"all local refs + HEAD + explicit push sources (conservative)\"}\n",
+      "backend_log": "{\"event\": \"GIT_PUSH\", \"pid\": 62828, \"cwd\": \"D:\\\\ctf-ai\\\\dlp\\\\demo\\\\frida_git_guard\\\\tests\\\\.tmp-paths-j66sb3q2\\\\modified-repo\", \"argv\": [\"E:\\\\Git\\\\cmd\\\\git.exe\", \"push\", \"-u\", \"origin\", \"main\"], \"stage\": \"launcher-before-create\"}\n{\"event\": \"ALLOW\", \"pid\": 62828, \"scan_ms\": 410.9, \"deny\": false, \"repo\": \"D:\\\\ctf-ai\\\\dlp\\\\demo\\\\frida_git_guard\\\\tests\\\\.tmp-paths-j66sb3q2\\\\modified-repo\\\\.git\", \"findings\": [], \"policy_scope\": \"all local refs + HEAD + explicit push sources (conservative)\"}\n",
       "baseline_leak": false
     },
     {
       "name": "absolute-path-existing-file-block",
       "passed": true,
       "exit_code": 1,
-      "before_tip": "948a60c56e96c6b195d738a33993913a2461ddcd",
-      "after_tip": "948a60c56e96c6b195d738a33993913a2461ddcd",
+      "before_tip": "13b0200408b8033b11078fd0b5388abf02cf8e96",
+      "after_tip": "13b0200408b8033b11078fd0b5388abf02cf8e96",
       "https_requests": 0,
-      "backend_log": "{\"event\": \"GIT_PUSH\", \"pid\": 64444, \"cwd\": \"D:\\\\ctf-ai\\\\dlp\\\\demo\\\\frida_git_guard\\\\tests\\\\.tmp-paths-iyp2qq4m\\\\modified-repo\", \"argv\": [\"E:\\\\Git\\\\cmd\\\\git.exe\", \"push\", \"-u\", \"origin\", \"main\"], \"stage\": \"launcher-before-create\"}\n{\"event\": \"DENY\", \"pid\": 64444, \"scan_ms\": 709.2, \"deny\": true, \"repo\": \"D:\\\\ctf-ai\\\\dlp\\\\demo\\\\frida_git_guard\\\\tests\\\\.tmp-paths-iyp2qq4m\\\\modified-repo\\\\.git\", \"findings\": [{\"path\": \"demo/frida_git_guard/flag\", \"blob\": \"574b07c29e9175bd82effe2f6ffe065e75f66bfd\", \"rule\": \"sensitive-path\", \"commit\": \"89ce1c8b9807349dbd1656e24ad3ec5c9e6bd440\"}], \"policy_scope\": \"all local refs + HEAD + explicit push sources (conservative)\"}\n{\"event\": \"NATIVE_BLOCK\", \"type\": \"blocked\", \"pid\": 64444, \"api\": \"CreateProcessW\", \"stage\": \"launcher-before-create\", \"win32_error\": 5, \"native_return\": 0}\n",
+      "backend_log": "{\"event\": \"GIT_PUSH\", \"pid\": 62828, \"cwd\": \"D:\\\\ctf-ai\\\\dlp\\\\demo\\\\frida_git_guard\\\\tests\\\\.tmp-paths-j66sb3q2\\\\modified-repo\", \"argv\": [\"E:\\\\Git\\\\cmd\\\\git.exe\", \"push\", \"-u\", \"origin\", \"main\"], \"stage\": \"launcher-before-create\"}\n{\"event\": \"DENY\", \"pid\": 62828, \"scan_ms\": 477.7, \"deny\": true, \"repo\": \"D:\\\\ctf-ai\\\\dlp\\\\demo\\\\frida_git_guard\\\\tests\\\\.tmp-paths-j66sb3q2\\\\modified-repo\\\\.git\", \"findings\": [{\"path\": \"demo/frida_git_guard/flag\", \"blob\": \"574b07c29e9175bd82effe2f6ffe065e75f66bfd\", \"rule\": \"sensitive-path\", \"commit\": \"6a3a3162cc394f99183430993741d235136790c6\"}], \"policy_scope\": \"all local refs + HEAD + explicit push sources (conservative)\"}\n{\"event\": \"NATIVE_BLOCK\", \"type\": \"blocked\", \"pid\": 62828, \"api\": \"CreateProcessW\", \"stage\": \"launcher-before-create\", \"win32_error\": 5, \"native_return\": 0}\n",
       "baseline_leak": false
     },
     {
       "name": "ctrl-c-stop-existing-file-backend",
       "passed": true,
       "exit_code": 0,
-      "seconds": 0.32385649997740984
+      "seconds": 0.291485299996566
     },
     {
       "name": "absolute-path-deleted-history-after-restart-block",
       "passed": true,
       "exit_code": 1,
-      "before_tip": "948a60c56e96c6b195d738a33993913a2461ddcd",
-      "after_tip": "948a60c56e96c6b195d738a33993913a2461ddcd",
+      "before_tip": "13b0200408b8033b11078fd0b5388abf02cf8e96",
+      "after_tip": "13b0200408b8033b11078fd0b5388abf02cf8e96",
       "https_requests": 0,
-      "backend_log": "{\"event\": \"GIT_PUSH\", \"pid\": 64444, \"cwd\": \"D:\\\\ctf-ai\\\\dlp\\\\demo\\\\frida_git_guard\\\\tests\\\\.tmp-paths-iyp2qq4m\\\\modified-repo\", \"argv\": [\"E:\\\\Git\\\\cmd\\\\git.exe\", \"push\", \"-u\", \"origin\", \"main\"], \"stage\": \"launcher-before-create\"}\n{\"event\": \"DENY\", \"pid\": 64444, \"scan_ms\": 1010.1, \"deny\": true, \"repo\": \"D:\\\\ctf-ai\\\\dlp\\\\demo\\\\frida_git_guard\\\\tests\\\\.tmp-paths-iyp2qq4m\\\\modified-repo\\\\.git\", \"findings\": [{\"path\": \"demo/frida_git_guard/flag\", \"blob\": \"574b07c29e9175bd82effe2f6ffe065e75f66bfd\", \"rule\": \"sensitive-path\", \"commit\": \"89ce1c8b9807349dbd1656e24ad3ec5c9e6bd440\"}], \"policy_scope\": \"all local refs + HEAD + explicit push sources (conservative)\"}\n{\"event\": \"NATIVE_BLOCK\", \"type\": \"blocked\", \"pid\": 64444, \"api\": \"CreateProcessW\", \"stage\": \"launcher-before-create\", \"win32_error\": 5, \"native_return\": 0}\n",
+      "backend_log": "{\"event\": \"GIT_PUSH\", \"pid\": 62828, \"cwd\": \"D:\\\\ctf-ai\\\\dlp\\\\demo\\\\frida_git_guard\\\\tests\\\\.tmp-paths-j66sb3q2\\\\modified-repo\", \"argv\": [\"E:\\\\Git\\\\cmd\\\\git.exe\", \"push\", \"-u\", \"origin\", \"main\"], \"stage\": \"launcher-before-create\"}\n{\"event\": \"DENY\", \"pid\": 62828, \"scan_ms\": 643.2, \"deny\": true, \"repo\": \"D:\\\\ctf-ai\\\\dlp\\\\demo\\\\frida_git_guard\\\\tests\\\\.tmp-paths-j66sb3q2\\\\modified-repo\\\\.git\", \"findings\": [{\"path\": \"demo/frida_git_guard/flag\", \"blob\": \"574b07c29e9175bd82effe2f6ffe065e75f66bfd\", \"rule\": \"sensitive-path\", \"commit\": \"6a3a3162cc394f99183430993741d235136790c6\"}], \"policy_scope\": \"all local refs + HEAD + explicit push sources (conservative)\"}\n{\"event\": \"NATIVE_BLOCK\", \"type\": \"blocked\", \"pid\": 62828, \"api\": \"CreateProcessW\", \"stage\": \"launcher-before-create\", \"win32_error\": 5, \"native_return\": 0}\n",
       "baseline_leak": false
     },
     {
       "name": "ctrl-c-stop-deleted-file-backend",
       "passed": true,
       "exit_code": 0,
-      "seconds": 0.3944257000111975
+      "seconds": 0.29556009999942034
     },
     {
       "name": "backend-exit-restores-normal-https-push",
       "passed": true,
       "exit_code": 0,
-      "before_tip": "948a60c56e96c6b195d738a33993913a2461ddcd",
-      "after_tip": "cd92e1904c9a5718b33b58e3c40ba9692d5abc9f",
+      "before_tip": "13b0200408b8033b11078fd0b5388abf02cf8e96",
+      "after_tip": "536c82d0340982837a408273ac73cfce01e1e96a",
       "https_requests": 2,
       "backend_log": "",
       "baseline_leak": false
@@ -94,9 +94,9 @@
         "rsa:2048",
         "-nodes",
         "-keyout",
-        "D:\\ctf-ai\\dlp\\demo\\frida_git_guard\\tests\\.tmp-paths-iyp2qq4m\\key.pem",
+        "D:\\ctf-ai\\dlp\\demo\\frida_git_guard\\tests\\.tmp-paths-j66sb3q2\\key.pem",
         "-out",
-        "D:\\ctf-ai\\dlp\\demo\\frida_git_guard\\tests\\.tmp-paths-iyp2qq4m\\cert.pem",
+        "D:\\ctf-ai\\dlp\\demo\\frida_git_guard\\tests\\.tmp-paths-j66sb3q2\\cert.pem",
         "-days",
         "1",
         "-subj",
@@ -107,40 +107,40 @@
       "cwd": "D:\\ctf-ai\\dlp\\demo\\frida_git_guard",
       "exit_code": 0,
       "stdout": "",
-      "stderr": "...+.......+.....+.......+..+....+......+.........+.....+++++++++++++++++++++++++++++++++++++++*........+..+.+++++++++++++++++++++++++++++++++++++++*..+..+..........+......+..+......+.+......+..+............+......+....+...+........+....+...+........+...++++++\n....+..................+++++++++++++++++++++++++++++++++++++++*...+...+.....+...+..........+..+.......+.........+..+++++++++++++++++++++++++++++++++++++++*.+....+.....+...+............+..........+...+..+...+.........+....+..............+...+.......+..+.+..+......+....+..+................+...+......+...+...........+....+......+.....+....+..+.+........+......+.+........+....+.....+..........+...+............+..+.+............+........+...+...............+.+...+...+..+...............+.+......+...+..+.........+..........+.........+..+....+..+.......+..................+...+.....+.......+..+......+.......+...+.....+............+...+....+..+.........+.......+.....+....+.....+................+.....+....+........+.......+.....+.+..+.+......+...............+...........+.........+...+.......+...+..+...................+.....+......+....+...........+.+.....+...+.........+...+..........+.....+.........+......+....+...+..+....+.................+....+...+...+..+.+......+...........+...............+.........+.+...+..+..........+...+..............+.+...............+......+.....+.+..+.......++++++\n-----\n"
+      "stderr": ".....+.................+.+..+.........+....+++++++++++++++++++++++++++++++++++++++*.+....+...+++++++++++++++++++++++++++++++++++++++*....+......+.....+.+.........+.....+............++++++\n.......+++++++++++++++++++++++++++++++++++++++*.......+++++++++++++++++++++++++++++++++++++++*...+..+......+..........+...+..+...+.......+.................+.+..............+...+............+.......+.....+....+..+.......+..+...++++++\n-----\n"
     },
     {
       "argv": [
         "E:\\Git\\mingw64\\bin\\git.exe",
         "-C",
-        "D:\\ctf-ai\\dlp\\demo\\frida_git_guard\\tests\\.tmp-paths-iyp2qq4m\\baseline-repo",
+        "D:\\ctf-ai\\dlp\\demo\\frida_git_guard\\tests\\.tmp-paths-j66sb3q2\\baseline-repo",
         "init",
         "-b",
         "main"
       ],
       "cwd": "D:\\ctf-ai\\dlp\\demo\\frida_git_guard",
       "exit_code": 0,
-      "stdout": "Initialized empty Git repository in D:/ctf-ai/dlp/demo/frida_git_guard/tests/.tmp-paths-iyp2qq4m/baseline-repo/.git/\n",
+      "stdout": "Initialized empty Git repository in D:/ctf-ai/dlp/demo/frida_git_guard/tests/.tmp-paths-j66sb3q2/baseline-repo/.git/\n",
       "stderr": ""
     },
     {
       "argv": [
         "E:\\Git\\mingw64\\bin\\git.exe",
         "-C",
-        "D:\\ctf-ai\\dlp\\demo\\frida_git_guard\\tests\\.tmp-paths-iyp2qq4m\\baseline.git",
+        "D:\\ctf-ai\\dlp\\demo\\frida_git_guard\\tests\\.tmp-paths-j66sb3q2\\baseline.git",
         "init",
         "--bare"
       ],
       "cwd": "D:\\ctf-ai\\dlp\\demo\\frida_git_guard",
       "exit_code": 0,
-      "stdout": "Initialized empty Git repository in D:/ctf-ai/dlp/demo/frida_git_guard/tests/.tmp-paths-iyp2qq4m/baseline.git/\n",
+      "stdout": "Initialized empty Git repository in D:/ctf-ai/dlp/demo/frida_git_guard/tests/.tmp-paths-j66sb3q2/baseline.git/\n",
       "stderr": ""
     },
     {
       "argv": [
         "E:\\Git\\mingw64\\bin\\git.exe",
         "-C",
-        "D:\\ctf-ai\\dlp\\demo\\frida_git_guard\\tests\\.tmp-paths-iyp2qq4m\\baseline.git",
+        "D:\\ctf-ai\\dlp\\demo\\frida_git_guard\\tests\\.tmp-paths-j66sb3q2\\baseline.git",
         "config",
         "http.receivepack",
         "true"
@@ -154,7 +154,7 @@
       "argv": [
         "E:\\Git\\mingw64\\bin\\git.exe",
         "-C",
-        "D:\\ctf-ai\\dlp\\demo\\frida_git_guard\\tests\\.tmp-paths-iyp2qq4m\\baseline-repo",
+        "D:\\ctf-ai\\dlp\\demo\\frida_git_guard\\tests\\.tmp-paths-j66sb3q2\\baseline-repo",
         "config",
         "user.name",
         "Fixture"
@@ -168,7 +168,7 @@
       "argv": [
         "E:\\Git\\mingw64\\bin\\git.exe",
         "-C",
-        "D:\\ctf-ai\\dlp\\demo\\frida_git_guard\\tests\\.tmp-paths-iyp2qq4m\\baseline-repo",
+        "D:\\ctf-ai\\dlp\\demo\\frida_git_guard\\tests\\.tmp-paths-j66sb3q2\\baseline-repo",
         "config",
         "user.email",
         "fixture@example.invalid"
@@ -182,7 +182,7 @@
       "argv": [
         "E:\\Git\\mingw64\\bin\\git.exe",
         "-C",
-        "D:\\ctf-ai\\dlp\\demo\\frida_git_guard\\tests\\.tmp-paths-iyp2qq4m\\baseline-repo",
+        "D:\\ctf-ai\\dlp\\demo\\frida_git_guard\\tests\\.tmp-paths-j66sb3q2\\baseline-repo",
         "config",
         "commit.gpgsign",
         "false"
@@ -196,10 +196,10 @@
       "argv": [
         "E:\\Git\\mingw64\\bin\\git.exe",
         "-C",
-        "D:\\ctf-ai\\dlp\\demo\\frida_git_guard\\tests\\.tmp-paths-iyp2qq4m\\baseline-repo",
+        "D:\\ctf-ai\\dlp\\demo\\frida_git_guard\\tests\\.tmp-paths-j66sb3q2\\baseline-repo",
         "config",
         "http.sslCAInfo",
-        "D:\\ctf-ai\\dlp\\demo\\frida_git_guard\\tests\\.tmp-paths-iyp2qq4m\\cert.pem"
+        "D:\\ctf-ai\\dlp\\demo\\frida_git_guard\\tests\\.tmp-paths-j66sb3q2\\cert.pem"
       ],
       "cwd": "D:\\ctf-ai\\dlp\\demo\\frida_git_guard",
       "exit_code": 0,
@@ -210,7 +210,7 @@
       "argv": [
         "E:\\Git\\mingw64\\bin\\git.exe",
         "-C",
-        "D:\\ctf-ai\\dlp\\demo\\frida_git_guard\\tests\\.tmp-paths-iyp2qq4m\\baseline-repo",
+        "D:\\ctf-ai\\dlp\\demo\\frida_git_guard\\tests\\.tmp-paths-j66sb3q2\\baseline-repo",
         "config",
         "http.sslVerify",
         "true"
@@ -224,7 +224,7 @@
       "argv": [
         "E:\\Git\\mingw64\\bin\\git.exe",
         "-C",
-        "D:\\ctf-ai\\dlp\\demo\\frida_git_guard\\tests\\.tmp-paths-iyp2qq4m\\baseline-repo",
+        "D:\\ctf-ai\\dlp\\demo\\frida_git_guard\\tests\\.tmp-paths-j66sb3q2\\baseline-repo",
         "config",
         "http.schannelUseSSLCAInfo",
         "true"
@@ -238,11 +238,11 @@
       "argv": [
         "E:\\Git\\mingw64\\bin\\git.exe",
         "-C",
-        "D:\\ctf-ai\\dlp\\demo\\frida_git_guard\\tests\\.tmp-paths-iyp2qq4m\\baseline-repo",
+        "D:\\ctf-ai\\dlp\\demo\\frida_git_guard\\tests\\.tmp-paths-j66sb3q2\\baseline-repo",
         "remote",
         "add",
         "origin",
-        "https://localhost:21833/baseline.git"
+        "https://localhost:10134/baseline.git"
       ],
       "cwd": "D:\\ctf-ai\\dlp\\demo\\frida_git_guard",
       "exit_code": 0,
@@ -253,7 +253,7 @@
       "argv": [
         "E:\\Git\\mingw64\\bin\\git.exe",
         "-C",
-        "D:\\ctf-ai\\dlp\\demo\\frida_git_guard\\tests\\.tmp-paths-iyp2qq4m\\baseline-repo",
+        "D:\\ctf-ai\\dlp\\demo\\frida_git_guard\\tests\\.tmp-paths-j66sb3q2\\baseline-repo",
         "add",
         "."
       ],
@@ -266,21 +266,21 @@
       "argv": [
         "E:\\Git\\mingw64\\bin\\git.exe",
         "-C",
-        "D:\\ctf-ai\\dlp\\demo\\frida_git_guard\\tests\\.tmp-paths-iyp2qq4m\\baseline-repo",
+        "D:\\ctf-ai\\dlp\\demo\\frida_git_guard\\tests\\.tmp-paths-j66sb3q2\\baseline-repo",
         "commit",
         "-m",
         "clean"
       ],
       "cwd": "D:\\ctf-ai\\dlp\\demo\\frida_git_guard",
       "exit_code": 0,
-      "stdout": "[main (root-commit) a3f3c17] clean\n 1 file changed, 1 insertion(+)\n create mode 100644 ordinary.txt\n",
+      "stdout": "[main (root-commit) 2ad10a1] clean\n 1 file changed, 1 insertion(+)\n create mode 100644 ordinary.txt\n",
       "stderr": ""
     },
     {
       "argv": [
         "E:\\Git\\mingw64\\bin\\git.exe",
         "-C",
-        "D:\\ctf-ai\\dlp\\demo\\frida_git_guard\\tests\\.tmp-paths-iyp2qq4m\\baseline-repo",
+        "D:\\ctf-ai\\dlp\\demo\\frida_git_guard\\tests\\.tmp-paths-j66sb3q2\\baseline-repo",
         "config",
         "--local",
         "--null",
@@ -288,14 +288,14 @@
       ],
       "cwd": "D:\\ctf-ai\\dlp\\demo\\frida_git_guard",
       "exit_code": 0,
-      "stdout": "core.repositoryformatversion\n0\u0000core.filemode\nfalse\u0000core.bare\nfalse\u0000core.logallrefupdates\ntrue\u0000core.symlinks\nfalse\u0000core.ignorecase\ntrue\u0000user.name\nFixture\u0000user.email\nfixture@example.invalid\u0000commit.gpgsign\nfalse\u0000http.sslcainfo\nD:\\ctf-ai\\dlp\\demo\\frida_git_guard\\tests\\.tmp-paths-iyp2qq4m\\cert.pem\u0000http.sslverify\ntrue\u0000http.schannelusesslcainfo\ntrue\u0000remote.origin.url\nhttps://localhost:21833/baseline.git\u0000remote.origin.fetch\n+refs/heads/*:refs/remotes/origin/*\u0000",
+      "stdout": "core.repositoryformatversion\n0\u0000core.filemode\nfalse\u0000core.bare\nfalse\u0000core.logallrefupdates\ntrue\u0000core.symlinks\nfalse\u0000core.ignorecase\ntrue\u0000user.name\nFixture\u0000user.email\nfixture@example.invalid\u0000commit.gpgsign\nfalse\u0000http.sslcainfo\nD:\\ctf-ai\\dlp\\demo\\frida_git_guard\\tests\\.tmp-paths-j66sb3q2\\cert.pem\u0000http.sslverify\ntrue\u0000http.schannelusesslcainfo\ntrue\u0000remote.origin.url\nhttps://localhost:10134/baseline.git\u0000remote.origin.fetch\n+refs/heads/*:refs/remotes/origin/*\u0000",
       "stderr": ""
     },
     {
       "argv": [
         "E:\\Git\\mingw64\\bin\\git.exe",
         "-C",
-        "D:\\ctf-ai\\dlp\\demo\\frida_git_guard\\tests\\.tmp-paths-iyp2qq4m\\baseline.git",
+        "D:\\ctf-ai\\dlp\\demo\\frida_git_guard\\tests\\.tmp-paths-j66sb3q2\\baseline.git",
         "rev-parse",
         "--verify",
         "refs/heads/main"
@@ -313,30 +313,30 @@
         "origin",
         "main"
       ],
-      "cwd": "D:\\ctf-ai\\dlp\\demo\\frida_git_guard\\tests\\.tmp-paths-iyp2qq4m\\baseline-repo",
-      "output": "To https://localhost:21833/baseline.git\r\n * [new branch]      main -> main\r\nbranch 'main' set up to track 'origin/main'.\r\n",
+      "cwd": "D:\\ctf-ai\\dlp\\demo\\frida_git_guard\\tests\\.tmp-paths-j66sb3q2\\baseline-repo",
+      "exit_code": 0,
       "launch_error": false,
-      "exit_code": 0
+      "output": "To https://localhost:10134/baseline.git\r\n * [new branch]      main -> main\r\nbranch 'main' set up to track 'origin/main'.\r\n"
     },
     {
       "argv": [
         "E:\\Git\\mingw64\\bin\\git.exe",
         "-C",
-        "D:\\ctf-ai\\dlp\\demo\\frida_git_guard\\tests\\.tmp-paths-iyp2qq4m\\baseline.git",
+        "D:\\ctf-ai\\dlp\\demo\\frida_git_guard\\tests\\.tmp-paths-j66sb3q2\\baseline.git",
         "rev-parse",
         "--verify",
         "refs/heads/main"
       ],
       "cwd": "D:\\ctf-ai\\dlp\\demo\\frida_git_guard",
       "exit_code": 0,
-      "stdout": "a3f3c17e570b1cd39ad646eb070556011fa93169\n",
+      "stdout": "2ad10a1e130e3f04aa5a002ab0e058c40a9dfc1a\n",
       "stderr": ""
     },
     {
       "argv": [
         "E:\\Git\\mingw64\\bin\\git.exe",
         "-C",
-        "D:\\ctf-ai\\dlp\\demo\\frida_git_guard\\tests\\.tmp-paths-iyp2qq4m\\baseline-repo",
+        "D:\\ctf-ai\\dlp\\demo\\frida_git_guard\\tests\\.tmp-paths-j66sb3q2\\baseline-repo",
         "config",
         "--local",
         "--null",
@@ -344,14 +344,14 @@
       ],
       "cwd": "D:\\ctf-ai\\dlp\\demo\\frida_git_guard",
       "exit_code": 0,
-      "stdout": "core.repositoryformatversion\n0\u0000core.filemode\nfalse\u0000core.bare\nfalse\u0000core.logallrefupdates\ntrue\u0000core.symlinks\nfalse\u0000core.ignorecase\ntrue\u0000user.name\nFixture\u0000user.email\nfixture@example.invalid\u0000commit.gpgsign\nfalse\u0000http.sslcainfo\nD:\\ctf-ai\\dlp\\demo\\frida_git_guard\\tests\\.tmp-paths-iyp2qq4m\\cert.pem\u0000http.sslverify\ntrue\u0000http.schannelusesslcainfo\ntrue\u0000remote.origin.url\nhttps://localhost:21833/baseline.git\u0000remote.origin.fetch\n+refs/heads/*:refs/remotes/origin/*\u0000branch.main.remote\norigin\u0000branch.main.merge\nrefs/heads/main\u0000",
+      "stdout": "core.repositoryformatversion\n0\u0000core.filemode\nfalse\u0000core.bare\nfalse\u0000core.logallrefupdates\ntrue\u0000core.symlinks\nfalse\u0000core.ignorecase\ntrue\u0000user.name\nFixture\u0000user.email\nfixture@example.invalid\u0000commit.gpgsign\nfalse\u0000http.sslcainfo\nD:\\ctf-ai\\dlp\\demo\\frida_git_guard\\tests\\.tmp-paths-j66sb3q2\\cert.pem\u0000http.sslverify\ntrue\u0000http.schannelusesslcainfo\ntrue\u0000remote.origin.url\nhttps://localhost:10134/baseline.git\u0000remote.origin.fetch\n+refs/heads/*:refs/remotes/origin/*\u0000branch.main.remote\norigin\u0000branch.main.merge\nrefs/heads/main\u0000",
       "stderr": ""
     },
     {
       "argv": [
         "E:\\Git\\mingw64\\bin\\git.exe",
         "-C",
-        "D:\\ctf-ai\\dlp\\demo\\frida_git_guard\\tests\\.tmp-paths-iyp2qq4m\\baseline-repo",
+        "D:\\ctf-ai\\dlp\\demo\\frida_git_guard\\tests\\.tmp-paths-j66sb3q2\\baseline-repo",
         "add",
         "."
       ],
@@ -364,34 +364,34 @@
       "argv": [
         "E:\\Git\\mingw64\\bin\\git.exe",
         "-C",
-        "D:\\ctf-ai\\dlp\\demo\\frida_git_guard\\tests\\.tmp-paths-iyp2qq4m\\baseline-repo",
+        "D:\\ctf-ai\\dlp\\demo\\frida_git_guard\\tests\\.tmp-paths-j66sb3q2\\baseline-repo",
         "commit",
         "-m",
         "sensitive file"
       ],
       "cwd": "D:\\ctf-ai\\dlp\\demo\\frida_git_guard",
       "exit_code": 0,
-      "stdout": "[main 3158123] sensitive file\n 1 file changed, 1 insertion(+)\n create mode 100644 demo/frida_git_guard/flag\n",
+      "stdout": "[main d7c848e] sensitive file\n 1 file changed, 1 insertion(+)\n create mode 100644 demo/frida_git_guard/flag\n",
       "stderr": ""
     },
     {
       "argv": [
         "E:\\Git\\mingw64\\bin\\git.exe",
         "-C",
-        "D:\\ctf-ai\\dlp\\demo\\frida_git_guard\\tests\\.tmp-paths-iyp2qq4m\\baseline-repo",
+        "D:\\ctf-ai\\dlp\\demo\\frida_git_guard\\tests\\.tmp-paths-j66sb3q2\\baseline-repo",
         "rev-parse",
         "HEAD"
       ],
       "cwd": "D:\\ctf-ai\\dlp\\demo\\frida_git_guard",
       "exit_code": 0,
-      "stdout": "31581233825f09abf1ede8f602ec6aafff607039\n",
+      "stdout": "d7c848e865de23d7290ba2345076b25dad924f7e\n",
       "stderr": ""
     },
     {
       "argv": [
         "E:\\Git\\mingw64\\bin\\git.exe",
         "-C",
-        "D:\\ctf-ai\\dlp\\demo\\frida_git_guard\\tests\\.tmp-paths-iyp2qq4m\\baseline-repo",
+        "D:\\ctf-ai\\dlp\\demo\\frida_git_guard\\tests\\.tmp-paths-j66sb3q2\\baseline-repo",
         "rm",
         "-f",
         "demo/frida_git_guard/flag"
@@ -405,28 +405,28 @@
       "argv": [
         "E:\\Git\\mingw64\\bin\\git.exe",
         "-C",
-        "D:\\ctf-ai\\dlp\\demo\\frida_git_guard\\tests\\.tmp-paths-iyp2qq4m\\baseline-repo",
+        "D:\\ctf-ai\\dlp\\demo\\frida_git_guard\\tests\\.tmp-paths-j66sb3q2\\baseline-repo",
         "commit",
         "-m",
         "delete sensitive file"
       ],
       "cwd": "D:\\ctf-ai\\dlp\\demo\\frida_git_guard",
       "exit_code": 0,
-      "stdout": "[main 3c28035] delete sensitive file\n 1 file changed, 1 deletion(-)\n delete mode 100644 demo/frida_git_guard/flag\n",
+      "stdout": "[main 3b54a76] delete sensitive file\n 1 file changed, 1 deletion(-)\n delete mode 100644 demo/frida_git_guard/flag\n",
       "stderr": ""
     },
     {
       "argv": [
         "E:\\Git\\mingw64\\bin\\git.exe",
         "-C",
-        "D:\\ctf-ai\\dlp\\demo\\frida_git_guard\\tests\\.tmp-paths-iyp2qq4m\\baseline.git",
+        "D:\\ctf-ai\\dlp\\demo\\frida_git_guard\\tests\\.tmp-paths-j66sb3q2\\baseline.git",
         "rev-parse",
         "--verify",
         "refs/heads/main"
       ],
       "cwd": "D:\\ctf-ai\\dlp\\demo\\frida_git_guard",
       "exit_code": 0,
-      "stdout": "a3f3c17e570b1cd39ad646eb070556011fa93169\n",
+      "stdout": "2ad10a1e130e3f04aa5a002ab0e058c40a9dfc1a\n",
       "stderr": ""
     },
     {
@@ -437,33 +437,33 @@
         "origin",
         "main"
       ],
-      "cwd": "D:\\ctf-ai\\dlp\\demo\\frida_git_guard\\tests\\.tmp-paths-iyp2qq4m\\baseline-repo",
-      "output": "To https://localhost:21833/baseline.git\r\n   a3f3c17..3c28035  main -> main\r\nbranch 'main' set up to track 'origin/main'.\r\n",
+      "cwd": "D:\\ctf-ai\\dlp\\demo\\frida_git_guard\\tests\\.tmp-paths-j66sb3q2\\baseline-repo",
+      "exit_code": 0,
       "launch_error": false,
-      "exit_code": 0
+      "output": "To https://localhost:10134/baseline.git\r\n   2ad10a1..3b54a76  main -> main\r\nbranch 'main' set up to track 'origin/main'.\r\n"
     },
     {
       "argv": [
         "E:\\Git\\mingw64\\bin\\git.exe",
         "-C",
-        "D:\\ctf-ai\\dlp\\demo\\frida_git_guard\\tests\\.tmp-paths-iyp2qq4m\\baseline.git",
+        "D:\\ctf-ai\\dlp\\demo\\frida_git_guard\\tests\\.tmp-paths-j66sb3q2\\baseline.git",
         "rev-parse",
         "--verify",
         "refs/heads/main"
       ],
       "cwd": "D:\\ctf-ai\\dlp\\demo\\frida_git_guard",
       "exit_code": 0,
-      "stdout": "3c280354f88e14f72d943fc3b5d301dfca13b96d\n",
+      "stdout": "3b54a7637442da5151253a142d2cc673b725c576\n",
       "stderr": ""
     },
     {
       "argv": [
         "E:\\Git\\mingw64\\bin\\git.exe",
         "-C",
-        "D:\\ctf-ai\\dlp\\demo\\frida_git_guard\\tests\\.tmp-paths-iyp2qq4m\\baseline.git",
+        "D:\\ctf-ai\\dlp\\demo\\frida_git_guard\\tests\\.tmp-paths-j66sb3q2\\baseline.git",
         "cat-file",
         "-e",
-        "31581233825f09abf1ede8f602ec6aafff607039"
+        "d7c848e865de23d7290ba2345076b25dad924f7e"
       ],
       "cwd": "D:\\ctf-ai\\dlp\\demo\\frida_git_guard",
       "exit_code": 0,
@@ -476,7 +476,7 @@
         "-B",
         "-c",
         "import ctypes,sys,time\nk=ctypes.WinDLL('kernel32',use_last_error=True)\nk.FreeConsole()\nassert k.AttachConsole(int(sys.argv[1])),ctypes.get_last_error()\nassert k.SetConsoleCtrlHandler(None,True),ctypes.get_last_error()\nassert k.GenerateConsoleCtrlEvent(0,0),ctypes.get_last_error()\ntime.sleep(.2)\nk.FreeConsole()\nprint('CTRL_C_EVENT delivered to isolated backend console')\n",
-        "34708"
+        "79520"
       ],
       "cwd": "D:\\ctf-ai\\dlp\\demo\\frida_git_guard",
       "exit_code": 0,
@@ -487,34 +487,34 @@
       "argv": [
         "E:\\Git\\mingw64\\bin\\git.exe",
         "-C",
-        "D:\\ctf-ai\\dlp\\demo\\frida_git_guard\\tests\\.tmp-paths-iyp2qq4m\\modified-repo",
+        "D:\\ctf-ai\\dlp\\demo\\frida_git_guard\\tests\\.tmp-paths-j66sb3q2\\modified-repo",
         "init",
         "-b",
         "main"
       ],
       "cwd": "D:\\ctf-ai\\dlp\\demo\\frida_git_guard",
       "exit_code": 0,
-      "stdout": "Initialized empty Git repository in D:/ctf-ai/dlp/demo/frida_git_guard/tests/.tmp-paths-iyp2qq4m/modified-repo/.git/\n",
+      "stdout": "Initialized empty Git repository in D:/ctf-ai/dlp/demo/frida_git_guard/tests/.tmp-paths-j66sb3q2/modified-repo/.git/\n",
       "stderr": ""
     },
     {
       "argv": [
         "E:\\Git\\mingw64\\bin\\git.exe",
         "-C",
-        "D:\\ctf-ai\\dlp\\demo\\frida_git_guard\\tests\\.tmp-paths-iyp2qq4m\\modified.git",
+        "D:\\ctf-ai\\dlp\\demo\\frida_git_guard\\tests\\.tmp-paths-j66sb3q2\\modified.git",
         "init",
         "--bare"
       ],
       "cwd": "D:\\ctf-ai\\dlp\\demo\\frida_git_guard",
       "exit_code": 0,
-      "stdout": "Initialized empty Git repository in D:/ctf-ai/dlp/demo/frida_git_guard/tests/.tmp-paths-iyp2qq4m/modified.git/\n",
+      "stdout": "Initialized empty Git repository in D:/ctf-ai/dlp/demo/frida_git_guard/tests/.tmp-paths-j66sb3q2/modified.git/\n",
       "stderr": ""
     },
     {
       "argv": [
         "E:\\Git\\mingw64\\bin\\git.exe",
         "-C",
-        "D:\\ctf-ai\\dlp\\demo\\frida_git_guard\\tests\\.tmp-paths-iyp2qq4m\\modified.git",
+        "D:\\ctf-ai\\dlp\\demo\\frida_git_guard\\tests\\.tmp-paths-j66sb3q2\\modified.git",
         "config",
         "http.receivepack",
         "true"
@@ -528,7 +528,7 @@
       "argv": [
         "E:\\Git\\mingw64\\bin\\git.exe",
         "-C",
-        "D:\\ctf-ai\\dlp\\demo\\frida_git_guard\\tests\\.tmp-paths-iyp2qq4m\\modified-repo",
+        "D:\\ctf-ai\\dlp\\demo\\frida_git_guard\\tests\\.tmp-paths-j66sb3q2\\modified-repo",
         "config",
         "user.name",
         "Fixture"
@@ -542,7 +542,7 @@
       "argv": [
         "E:\\Git\\mingw64\\bin\\git.exe",
         "-C",
-        "D:\\ctf-ai\\dlp\\demo\\frida_git_guard\\tests\\.tmp-paths-iyp2qq4m\\modified-repo",
+        "D:\\ctf-ai\\dlp\\demo\\frida_git_guard\\tests\\.tmp-paths-j66sb3q2\\modified-repo",
         "config",
         "user.email",
         "fixture@example.invalid"
@@ -556,7 +556,7 @@
       "argv": [
         "E:\\Git\\mingw64\\bin\\git.exe",
         "-C",
-        "D:\\ctf-ai\\dlp\\demo\\frida_git_guard\\tests\\.tmp-paths-iyp2qq4m\\modified-repo",
+        "D:\\ctf-ai\\dlp\\demo\\frida_git_guard\\tests\\.tmp-paths-j66sb3q2\\modified-repo",
         "config",
         "commit.gpgsign",
         "false"
@@ -570,10 +570,10 @@
       "argv": [
         "E:\\Git\\mingw64\\bin\\git.exe",
         "-C",
-        "D:\\ctf-ai\\dlp\\demo\\frida_git_guard\\tests\\.tmp-paths-iyp2qq4m\\modified-repo",
+        "D:\\ctf-ai\\dlp\\demo\\frida_git_guard\\tests\\.tmp-paths-j66sb3q2\\modified-repo",
         "config",
         "http.sslCAInfo",
-        "D:\\ctf-ai\\dlp\\demo\\frida_git_guard\\tests\\.tmp-paths-iyp2qq4m\\cert.pem"
+        "D:\\ctf-ai\\dlp\\demo\\frida_git_guard\\tests\\.tmp-paths-j66sb3q2\\cert.pem"
       ],
       "cwd": "D:\\ctf-ai\\dlp\\demo\\frida_git_guard",
       "exit_code": 0,
@@ -584,7 +584,7 @@
       "argv": [
         "E:\\Git\\mingw64\\bin\\git.exe",
         "-C",
-        "D:\\ctf-ai\\dlp\\demo\\frida_git_guard\\tests\\.tmp-paths-iyp2qq4m\\modified-repo",
+        "D:\\ctf-ai\\dlp\\demo\\frida_git_guard\\tests\\.tmp-paths-j66sb3q2\\modified-repo",
         "config",
         "http.sslVerify",
         "true"
@@ -598,7 +598,7 @@
       "argv": [
         "E:\\Git\\mingw64\\bin\\git.exe",
         "-C",
-        "D:\\ctf-ai\\dlp\\demo\\frida_git_guard\\tests\\.tmp-paths-iyp2qq4m\\modified-repo",
+        "D:\\ctf-ai\\dlp\\demo\\frida_git_guard\\tests\\.tmp-paths-j66sb3q2\\modified-repo",
         "config",
         "http.schannelUseSSLCAInfo",
         "true"
@@ -612,11 +612,11 @@
       "argv": [
         "E:\\Git\\mingw64\\bin\\git.exe",
         "-C",
-        "D:\\ctf-ai\\dlp\\demo\\frida_git_guard\\tests\\.tmp-paths-iyp2qq4m\\modified-repo",
+        "D:\\ctf-ai\\dlp\\demo\\frida_git_guard\\tests\\.tmp-paths-j66sb3q2\\modified-repo",
         "remote",
         "add",
         "origin",
-        "https://localhost:21833/modified.git"
+        "https://localhost:10134/modified.git"
       ],
       "cwd": "D:\\ctf-ai\\dlp\\demo\\frida_git_guard",
       "exit_code": 0,
@@ -627,7 +627,7 @@
       "argv": [
         "E:\\Git\\mingw64\\bin\\git.exe",
         "-C",
-        "D:\\ctf-ai\\dlp\\demo\\frida_git_guard\\tests\\.tmp-paths-iyp2qq4m\\modified-repo",
+        "D:\\ctf-ai\\dlp\\demo\\frida_git_guard\\tests\\.tmp-paths-j66sb3q2\\modified-repo",
         "add",
         "."
       ],
@@ -640,21 +640,21 @@
       "argv": [
         "E:\\Git\\mingw64\\bin\\git.exe",
         "-C",
-        "D:\\ctf-ai\\dlp\\demo\\frida_git_guard\\tests\\.tmp-paths-iyp2qq4m\\modified-repo",
+        "D:\\ctf-ai\\dlp\\demo\\frida_git_guard\\tests\\.tmp-paths-j66sb3q2\\modified-repo",
         "commit",
         "-m",
         "clean"
       ],
       "cwd": "D:\\ctf-ai\\dlp\\demo\\frida_git_guard",
       "exit_code": 0,
-      "stdout": "[main (root-commit) 948a60c] clean\n 1 file changed, 1 insertion(+)\n create mode 100644 ordinary.txt\n",
+      "stdout": "[main (root-commit) 13b0200] clean\n 1 file changed, 1 insertion(+)\n create mode 100644 ordinary.txt\n",
       "stderr": ""
     },
     {
       "argv": [
         "E:\\Git\\mingw64\\bin\\git.exe",
         "-C",
-        "D:\\ctf-ai\\dlp\\demo\\frida_git_guard\\tests\\.tmp-paths-iyp2qq4m\\modified-repo",
+        "D:\\ctf-ai\\dlp\\demo\\frida_git_guard\\tests\\.tmp-paths-j66sb3q2\\modified-repo",
         "config",
         "--local",
         "--null",
@@ -662,14 +662,14 @@
       ],
       "cwd": "D:\\ctf-ai\\dlp\\demo\\frida_git_guard",
       "exit_code": 0,
-      "stdout": "core.repositoryformatversion\n0\u0000core.filemode\nfalse\u0000core.bare\nfalse\u0000core.logallrefupdates\ntrue\u0000core.symlinks\nfalse\u0000core.ignorecase\ntrue\u0000user.name\nFixture\u0000user.email\nfixture@example.invalid\u0000commit.gpgsign\nfalse\u0000http.sslcainfo\nD:\\ctf-ai\\dlp\\demo\\frida_git_guard\\tests\\.tmp-paths-iyp2qq4m\\cert.pem\u0000http.sslverify\ntrue\u0000http.schannelusesslcainfo\ntrue\u0000remote.origin.url\nhttps://localhost:21833/modified.git\u0000remote.origin.fetch\n+refs/heads/*:refs/remotes/origin/*\u0000",
+      "stdout": "core.repositoryformatversion\n0\u0000core.filemode\nfalse\u0000core.bare\nfalse\u0000core.logallrefupdates\ntrue\u0000core.symlinks\nfalse\u0000core.ignorecase\ntrue\u0000user.name\nFixture\u0000user.email\nfixture@example.invalid\u0000commit.gpgsign\nfalse\u0000http.sslcainfo\nD:\\ctf-ai\\dlp\\demo\\frida_git_guard\\tests\\.tmp-paths-j66sb3q2\\cert.pem\u0000http.sslverify\ntrue\u0000http.schannelusesslcainfo\ntrue\u0000remote.origin.url\nhttps://localhost:10134/modified.git\u0000remote.origin.fetch\n+refs/heads/*:refs/remotes/origin/*\u0000",
       "stderr": ""
     },
     {
       "argv": [
         "E:\\Git\\mingw64\\bin\\git.exe",
         "-C",
-        "D:\\ctf-ai\\dlp\\demo\\frida_git_guard\\tests\\.tmp-paths-iyp2qq4m\\modified.git",
+        "D:\\ctf-ai\\dlp\\demo\\frida_git_guard\\tests\\.tmp-paths-j66sb3q2\\modified.git",
         "rev-parse",
         "--verify",
         "refs/heads/main"
@@ -687,30 +687,30 @@
         "origin",
         "main"
       ],
-      "cwd": "D:\\ctf-ai\\dlp\\demo\\frida_git_guard\\tests\\.tmp-paths-iyp2qq4m\\modified-repo",
-      "exit_code": 0,
-      "output": "To https://localhost:21833/modified.git\r\n * [new branch]      main -> main\r\nbranch 'main' set up to track 'origin/main'.\r\n",
-      "launch_error": false
+      "cwd": "D:\\ctf-ai\\dlp\\demo\\frida_git_guard\\tests\\.tmp-paths-j66sb3q2\\modified-repo",
+      "output": "To https://localhost:10134/modified.git\r\n * [new branch]      main -> main\r\nbranch 'main' set up to track 'origin/main'.\r\n",
+      "launch_error": false,
+      "exit_code": 0
     },
     {
       "argv": [
         "E:\\Git\\mingw64\\bin\\git.exe",
         "-C",
-        "D:\\ctf-ai\\dlp\\demo\\frida_git_guard\\tests\\.tmp-paths-iyp2qq4m\\modified.git",
+        "D:\\ctf-ai\\dlp\\demo\\frida_git_guard\\tests\\.tmp-paths-j66sb3q2\\modified.git",
         "rev-parse",
         "--verify",
         "refs/heads/main"
       ],
       "cwd": "D:\\ctf-ai\\dlp\\demo\\frida_git_guard",
       "exit_code": 0,
-      "stdout": "948a60c56e96c6b195d738a33993913a2461ddcd\n",
+      "stdout": "13b0200408b8033b11078fd0b5388abf02cf8e96\n",
       "stderr": ""
     },
     {
       "argv": [
         "E:\\Git\\mingw64\\bin\\git.exe",
         "-C",
-        "D:\\ctf-ai\\dlp\\demo\\frida_git_guard\\tests\\.tmp-paths-iyp2qq4m\\modified-repo",
+        "D:\\ctf-ai\\dlp\\demo\\frida_git_guard\\tests\\.tmp-paths-j66sb3q2\\modified-repo",
         "config",
         "--local",
         "--null",
@@ -718,14 +718,14 @@
       ],
       "cwd": "D:\\ctf-ai\\dlp\\demo\\frida_git_guard",
       "exit_code": 0,
-      "stdout": "core.repositoryformatversion\n0\u0000core.filemode\nfalse\u0000core.bare\nfalse\u0000core.logallrefupdates\ntrue\u0000core.symlinks\nfalse\u0000core.ignorecase\ntrue\u0000user.name\nFixture\u0000user.email\nfixture@example.invalid\u0000commit.gpgsign\nfalse\u0000http.sslcainfo\nD:\\ctf-ai\\dlp\\demo\\frida_git_guard\\tests\\.tmp-paths-iyp2qq4m\\cert.pem\u0000http.sslverify\ntrue\u0000http.schannelusesslcainfo\ntrue\u0000remote.origin.url\nhttps://localhost:21833/modified.git\u0000remote.origin.fetch\n+refs/heads/*:refs/remotes/origin/*\u0000branch.main.remote\norigin\u0000branch.main.merge\nrefs/heads/main\u0000",
+      "stdout": "core.repositoryformatversion\n0\u0000core.filemode\nfalse\u0000core.bare\nfalse\u0000core.logallrefupdates\ntrue\u0000core.symlinks\nfalse\u0000core.ignorecase\ntrue\u0000user.name\nFixture\u0000user.email\nfixture@example.invalid\u0000commit.gpgsign\nfalse\u0000http.sslcainfo\nD:\\ctf-ai\\dlp\\demo\\frida_git_guard\\tests\\.tmp-paths-j66sb3q2\\cert.pem\u0000http.sslverify\ntrue\u0000http.schannelusesslcainfo\ntrue\u0000remote.origin.url\nhttps://localhost:10134/modified.git\u0000remote.origin.fetch\n+refs/heads/*:refs/remotes/origin/*\u0000branch.main.remote\norigin\u0000branch.main.merge\nrefs/heads/main\u0000",
       "stderr": ""
     },
     {
       "argv": [
         "E:\\Git\\mingw64\\bin\\git.exe",
         "-C",
-        "D:\\ctf-ai\\dlp\\demo\\frida_git_guard\\tests\\.tmp-paths-iyp2qq4m\\modified-repo",
+        "D:\\ctf-ai\\dlp\\demo\\frida_git_guard\\tests\\.tmp-paths-j66sb3q2\\modified-repo",
         "add",
         "."
       ],
@@ -738,41 +738,41 @@
       "argv": [
         "E:\\Git\\mingw64\\bin\\git.exe",
         "-C",
-        "D:\\ctf-ai\\dlp\\demo\\frida_git_guard\\tests\\.tmp-paths-iyp2qq4m\\modified-repo",
+        "D:\\ctf-ai\\dlp\\demo\\frida_git_guard\\tests\\.tmp-paths-j66sb3q2\\modified-repo",
         "commit",
         "-m",
         "sensitive file"
       ],
       "cwd": "D:\\ctf-ai\\dlp\\demo\\frida_git_guard",
       "exit_code": 0,
-      "stdout": "[main 89ce1c8] sensitive file\n 1 file changed, 1 insertion(+)\n create mode 100644 demo/frida_git_guard/flag\n",
+      "stdout": "[main 6a3a316] sensitive file\n 1 file changed, 1 insertion(+)\n create mode 100644 demo/frida_git_guard/flag\n",
       "stderr": ""
     },
     {
       "argv": [
         "E:\\Git\\mingw64\\bin\\git.exe",
         "-C",
-        "D:\\ctf-ai\\dlp\\demo\\frida_git_guard\\tests\\.tmp-paths-iyp2qq4m\\modified-repo",
+        "D:\\ctf-ai\\dlp\\demo\\frida_git_guard\\tests\\.tmp-paths-j66sb3q2\\modified-repo",
         "rev-parse",
         "HEAD"
       ],
       "cwd": "D:\\ctf-ai\\dlp\\demo\\frida_git_guard",
       "exit_code": 0,
-      "stdout": "89ce1c8b9807349dbd1656e24ad3ec5c9e6bd440\n",
+      "stdout": "6a3a3162cc394f99183430993741d235136790c6\n",
       "stderr": ""
     },
     {
       "argv": [
         "E:\\Git\\mingw64\\bin\\git.exe",
         "-C",
-        "D:\\ctf-ai\\dlp\\demo\\frida_git_guard\\tests\\.tmp-paths-iyp2qq4m\\modified.git",
+        "D:\\ctf-ai\\dlp\\demo\\frida_git_guard\\tests\\.tmp-paths-j66sb3q2\\modified.git",
         "rev-parse",
         "--verify",
         "refs/heads/main"
       ],
       "cwd": "D:\\ctf-ai\\dlp\\demo\\frida_git_guard",
       "exit_code": 0,
-      "stdout": "948a60c56e96c6b195d738a33993913a2461ddcd\n",
+      "stdout": "13b0200408b8033b11078fd0b5388abf02cf8e96\n",
       "stderr": ""
     },
     {
@@ -783,46 +783,46 @@
         "origin",
         "main"
       ],
-      "cwd": "D:\\ctf-ai\\dlp\\demo\\frida_git_guard\\tests\\.tmp-paths-iyp2qq4m\\modified-repo",
-      "exit_code": 1,
+      "cwd": "D:\\ctf-ai\\dlp\\demo\\frida_git_guard\\tests\\.tmp-paths-j66sb3q2\\modified-repo",
       "output": "git: 'E:\\Git\\cmd\\git.exe' is not a git command. See 'git --help'.\r\n",
-      "launch_error": false
+      "launch_error": false,
+      "exit_code": 1
     },
     {
       "argv": [
         "E:\\Git\\mingw64\\bin\\git.exe",
         "-C",
-        "D:\\ctf-ai\\dlp\\demo\\frida_git_guard\\tests\\.tmp-paths-iyp2qq4m\\modified.git",
+        "D:\\ctf-ai\\dlp\\demo\\frida_git_guard\\tests\\.tmp-paths-j66sb3q2\\modified.git",
         "rev-parse",
         "--verify",
         "refs/heads/main"
       ],
       "cwd": "D:\\ctf-ai\\dlp\\demo\\frida_git_guard",
       "exit_code": 0,
-      "stdout": "948a60c56e96c6b195d738a33993913a2461ddcd\n",
+      "stdout": "13b0200408b8033b11078fd0b5388abf02cf8e96\n",
       "stderr": ""
     },
     {
       "argv": [
         "E:\\Git\\mingw64\\bin\\git.exe",
         "-C",
-        "D:\\ctf-ai\\dlp\\demo\\frida_git_guard\\tests\\.tmp-paths-iyp2qq4m\\modified-repo",
+        "D:\\ctf-ai\\dlp\\demo\\frida_git_guard\\tests\\.tmp-paths-j66sb3q2\\modified-repo",
         "rev-parse",
         "HEAD"
       ],
       "cwd": "D:\\ctf-ai\\dlp\\demo\\frida_git_guard",
       "exit_code": 0,
-      "stdout": "89ce1c8b9807349dbd1656e24ad3ec5c9e6bd440\n",
+      "stdout": "6a3a3162cc394f99183430993741d235136790c6\n",
       "stderr": ""
     },
     {
       "argv": [
         "E:\\Git\\mingw64\\bin\\git.exe",
         "-C",
-        "D:\\ctf-ai\\dlp\\demo\\frida_git_guard\\tests\\.tmp-paths-iyp2qq4m\\modified.git",
+        "D:\\ctf-ai\\dlp\\demo\\frida_git_guard\\tests\\.tmp-paths-j66sb3q2\\modified.git",
         "cat-file",
         "-e",
-        "89ce1c8b9807349dbd1656e24ad3ec5c9e6bd440"
+        "6a3a3162cc394f99183430993741d235136790c6"
       ],
       "cwd": "D:\\ctf-ai\\dlp\\demo\\frida_git_guard",
       "exit_code": 1,
@@ -835,7 +835,7 @@
         "-B",
         "-c",
         "import ctypes,sys,time\nk=ctypes.WinDLL('kernel32',use_last_error=True)\nk.FreeConsole()\nassert k.AttachConsole(int(sys.argv[1])),ctypes.get_last_error()\nassert k.SetConsoleCtrlHandler(None,True),ctypes.get_last_error()\nassert k.GenerateConsoleCtrlEvent(0,0),ctypes.get_last_error()\ntime.sleep(.2)\nk.FreeConsole()\nprint('CTRL_C_EVENT delivered to isolated backend console')\n",
-        "72428"
+        "68416"
       ],
       "cwd": "D:\\ctf-ai\\dlp\\demo\\frida_git_guard",
       "exit_code": 0,
@@ -846,7 +846,7 @@
       "argv": [
         "E:\\Git\\mingw64\\bin\\git.exe",
         "-C",
-        "D:\\ctf-ai\\dlp\\demo\\frida_git_guard\\tests\\.tmp-paths-iyp2qq4m\\modified-repo",
+        "D:\\ctf-ai\\dlp\\demo\\frida_git_guard\\tests\\.tmp-paths-j66sb3q2\\modified-repo",
         "rm",
         "-f",
         "demo/frida_git_guard/flag"
@@ -860,28 +860,28 @@
       "argv": [
         "E:\\Git\\mingw64\\bin\\git.exe",
         "-C",
-        "D:\\ctf-ai\\dlp\\demo\\frida_git_guard\\tests\\.tmp-paths-iyp2qq4m\\modified-repo",
+        "D:\\ctf-ai\\dlp\\demo\\frida_git_guard\\tests\\.tmp-paths-j66sb3q2\\modified-repo",
         "commit",
         "-m",
         "delete sensitive file"
       ],
       "cwd": "D:\\ctf-ai\\dlp\\demo\\frida_git_guard",
       "exit_code": 0,
-      "stdout": "[main cd92e19] delete sensitive file\n 1 file changed, 1 deletion(-)\n delete mode 100644 demo/frida_git_guard/flag\n",
+      "stdout": "[main 536c82d] delete sensitive file\n 1 file changed, 1 deletion(-)\n delete mode 100644 demo/frida_git_guard/flag\n",
       "stderr": ""
     },
     {
       "argv": [
         "E:\\Git\\mingw64\\bin\\git.exe",
         "-C",
-        "D:\\ctf-ai\\dlp\\demo\\frida_git_guard\\tests\\.tmp-paths-iyp2qq4m\\modified.git",
+        "D:\\ctf-ai\\dlp\\demo\\frida_git_guard\\tests\\.tmp-paths-j66sb3q2\\modified.git",
         "rev-parse",
         "--verify",
         "refs/heads/main"
       ],
       "cwd": "D:\\ctf-ai\\dlp\\demo\\frida_git_guard",
       "exit_code": 0,
-      "stdout": "948a60c56e96c6b195d738a33993913a2461ddcd\n",
+      "stdout": "13b0200408b8033b11078fd0b5388abf02cf8e96\n",
       "stderr": ""
     },
     {
@@ -892,46 +892,46 @@
         "origin",
         "main"
       ],
-      "cwd": "D:\\ctf-ai\\dlp\\demo\\frida_git_guard\\tests\\.tmp-paths-iyp2qq4m\\modified-repo",
-      "exit_code": 1,
+      "cwd": "D:\\ctf-ai\\dlp\\demo\\frida_git_guard\\tests\\.tmp-paths-j66sb3q2\\modified-repo",
       "output": "git: 'E:\\Git\\cmd\\git.exe' is not a git command. See 'git --help'.\r\n",
-      "launch_error": false
+      "launch_error": false,
+      "exit_code": 1
     },
     {
       "argv": [
         "E:\\Git\\mingw64\\bin\\git.exe",
         "-C",
-        "D:\\ctf-ai\\dlp\\demo\\frida_git_guard\\tests\\.tmp-paths-iyp2qq4m\\modified.git",
+        "D:\\ctf-ai\\dlp\\demo\\frida_git_guard\\tests\\.tmp-paths-j66sb3q2\\modified.git",
         "rev-parse",
         "--verify",
         "refs/heads/main"
       ],
       "cwd": "D:\\ctf-ai\\dlp\\demo\\frida_git_guard",
       "exit_code": 0,
-      "stdout": "948a60c56e96c6b195d738a33993913a2461ddcd\n",
+      "stdout": "13b0200408b8033b11078fd0b5388abf02cf8e96\n",
       "stderr": ""
     },
     {
       "argv": [
         "E:\\Git\\mingw64\\bin\\git.exe",
         "-C",
-        "D:\\ctf-ai\\dlp\\demo\\frida_git_guard\\tests\\.tmp-paths-iyp2qq4m\\modified-repo",
+        "D:\\ctf-ai\\dlp\\demo\\frida_git_guard\\tests\\.tmp-paths-j66sb3q2\\modified-repo",
         "rev-parse",
         "HEAD"
       ],
       "cwd": "D:\\ctf-ai\\dlp\\demo\\frida_git_guard",
       "exit_code": 0,
-      "stdout": "cd92e1904c9a5718b33b58e3c40ba9692d5abc9f\n",
+      "stdout": "536c82d0340982837a408273ac73cfce01e1e96a\n",
       "stderr": ""
     },
     {
       "argv": [
         "E:\\Git\\mingw64\\bin\\git.exe",
         "-C",
-        "D:\\ctf-ai\\dlp\\demo\\frida_git_guard\\tests\\.tmp-paths-iyp2qq4m\\modified.git",
+        "D:\\ctf-ai\\dlp\\demo\\frida_git_guard\\tests\\.tmp-paths-j66sb3q2\\modified.git",
         "cat-file",
         "-e",
-        "cd92e1904c9a5718b33b58e3c40ba9692d5abc9f"
+        "536c82d0340982837a408273ac73cfce01e1e96a"
       ],
       "cwd": "D:\\ctf-ai\\dlp\\demo\\frida_git_guard",
       "exit_code": 1,
@@ -944,7 +944,7 @@
         "-B",
         "-c",
         "import ctypes,sys,time\nk=ctypes.WinDLL('kernel32',use_last_error=True)\nk.FreeConsole()\nassert k.AttachConsole(int(sys.argv[1])),ctypes.get_last_error()\nassert k.SetConsoleCtrlHandler(None,True),ctypes.get_last_error()\nassert k.GenerateConsoleCtrlEvent(0,0),ctypes.get_last_error()\ntime.sleep(.2)\nk.FreeConsole()\nprint('CTRL_C_EVENT delivered to isolated backend console')\n",
-        "78632"
+        "56604"
       ],
       "cwd": "D:\\ctf-ai\\dlp\\demo\\frida_git_guard",
       "exit_code": 0,
@@ -955,14 +955,14 @@
       "argv": [
         "E:\\Git\\mingw64\\bin\\git.exe",
         "-C",
-        "D:\\ctf-ai\\dlp\\demo\\frida_git_guard\\tests\\.tmp-paths-iyp2qq4m\\modified.git",
+        "D:\\ctf-ai\\dlp\\demo\\frida_git_guard\\tests\\.tmp-paths-j66sb3q2\\modified.git",
         "rev-parse",
         "--verify",
         "refs/heads/main"
       ],
       "cwd": "D:\\ctf-ai\\dlp\\demo\\frida_git_guard",
       "exit_code": 0,
-      "stdout": "948a60c56e96c6b195d738a33993913a2461ddcd\n",
+      "stdout": "13b0200408b8033b11078fd0b5388abf02cf8e96\n",
       "stderr": ""
     },
     {
@@ -973,23 +973,23 @@
         "origin",
         "main"
       ],
-      "cwd": "D:\\ctf-ai\\dlp\\demo\\frida_git_guard\\tests\\.tmp-paths-iyp2qq4m\\modified-repo",
-      "exit_code": 0,
-      "output": "To https://localhost:21833/modified.git\r\n   948a60c..cd92e19  main -> main\r\nbranch 'main' set up to track 'origin/main'.\r\n",
-      "launch_error": false
+      "cwd": "D:\\ctf-ai\\dlp\\demo\\frida_git_guard\\tests\\.tmp-paths-j66sb3q2\\modified-repo",
+      "output": "To https://localhost:10134/modified.git\r\n   13b0200..536c82d  main -> main\r\nbranch 'main' set up to track 'origin/main'.\r\n",
+      "launch_error": false,
+      "exit_code": 0
     },
     {
       "argv": [
         "E:\\Git\\mingw64\\bin\\git.exe",
         "-C",
-        "D:\\ctf-ai\\dlp\\demo\\frida_git_guard\\tests\\.tmp-paths-iyp2qq4m\\modified.git",
+        "D:\\ctf-ai\\dlp\\demo\\frida_git_guard\\tests\\.tmp-paths-j66sb3q2\\modified.git",
         "rev-parse",
         "--verify",
         "refs/heads/main"
       ],
       "cwd": "D:\\ctf-ai\\dlp\\demo\\frida_git_guard",
       "exit_code": 0,
-      "stdout": "cd92e1904c9a5718b33b58e3c40ba9692d5abc9f\n",
+      "stdout": "536c82d0340982837a408273ac73cfce01e1e96a\n",
       "stderr": ""
     }
   ],
@@ -1030,10 +1030,10 @@
   "tls_verification": true,
   "git_binary_sha256_unchanged": "1a0043555d254618f2d56c936c3d9a1fbfb878bc878416a133c346bc7835eda9",
   "source_sha256": {
-    "D:\\ctf-ai\\dlp\\demo\\frida_git_guard\\backend.py": "83fa73dd4c32a4c3e9bdd2bbb55c8905b9979ef50cd568f2d7259e91bad9ef83",
+    "D:\\ctf-ai\\dlp\\demo\\frida_git_guard\\backend.py": "77c5d269c3e6f77658833890e83cedb444b7bfea0c4ad29e7087b08779f662f2",
     "D:\\ctf-ai\\dlp\\demo\\frida_git_guard\\guard.py": "64fde9d41048e322d5f31c527f3bf68225a87d10a0660604a19d854c15a88625",
     "D:\\ctf-ai\\dlp\\demo\\frida_git_guard\\watch_agent.js": "f1686d0127567e7935e91fe68e5bc86cff401af3b3a70d56d86362e04d5b5f90",
     "D:\\ctf-ai\\dlp\\demo\\frida_git_guard\\launcher_agent.js": "6389448fb2ad3e1e6835b4c22fc247802a82b208f58ecff0d4f1261fa2952f6d",
-    "D:\\ctf-ai\\dlp\\demo\\frida_git_guard\\README.md": "ed66f4f64b57c714311d56693b384ae8774f15f79b54e2438dc2190d5f9fe715"
+    "D:\\ctf-ai\\dlp\\demo\\frida_git_guard\\README.md": "2100814aa95c1561605fecd5115272cbd8c0bbb1023fa5be44d735d3b55861e2"
   }
 }

@@ -1,0 +1,127 @@
+{
+  "passed": true,
+  "command": [
+    "E:\\Programs\\Anaconda\\python.exe",
+    "-B",
+    "D:\\ctf-ai\\dlp\\demo\\frida_git_guard\\backend.py",
+    "--config",
+    "D:\\ctf-ai\\dlp\\demo\\frida_git_guard\\tests\\.tmp-shutdown-gl9baqvb\\config.json",
+    "--pid",
+    "79780",
+    "--pid",
+    "69300",
+    "--pid",
+    "55824",
+    "--pid",
+    "69072",
+    "--pid",
+    "78912",
+    "--pid",
+    "47944",
+    "--pid",
+    "68964",
+    "--pid",
+    "78996",
+    "--pid",
+    "8656",
+    "--pid",
+    "33276",
+    "--pid",
+    "6436",
+    "--pid",
+    "32996"
+  ],
+  "signal": "CTRL_BREAK_EVENT (same Win32 console path as Ctrl+C handler)",
+  "monitors": 12,
+  "exit_code": 0,
+  "elapsed_ms": 974.253399996087,
+  "events": [
+    {
+      "event": "MONITOR",
+      "pid": 79780,
+      "process": "pwsh.exe"
+    },
+    {
+      "event": "MONITOR",
+      "pid": 69300,
+      "process": "pwsh.exe"
+    },
+    {
+      "event": "MONITOR",
+      "pid": 55824,
+      "process": "pwsh.exe"
+    },
+    {
+      "event": "MONITOR",
+      "pid": 69072,
+      "process": "pwsh.exe"
+    },
+    {
+      "event": "MONITOR",
+      "pid": 78912,
+      "process": "pwsh.exe"
+    },
+    {
+      "event": "MONITOR",
+      "pid": 47944,
+      "process": "pwsh.exe"
+    },
+    {
+      "event": "MONITOR",
+      "pid": 68964,
+      "process": "pwsh.exe"
+    },
+    {
+      "event": "MONITOR",
+      "pid": 78996,
+      "process": "pwsh.exe"
+    },
+    {
+      "event": "MONITOR",
+      "pid": 8656,
+      "process": "pwsh.exe"
+    },
+    {
+      "event": "MONITOR",
+      "pid": 33276,
+      "process": "pwsh.exe"
+    },
+    {
+      "event": "MONITOR",
+      "pid": 6436,
+      "process": "pwsh.exe"
+    },
+    {
+      "event": "MONITOR",
+      "pid": 32996,
+      "process": "pwsh.exe"
+    },
+    {
+      "event": "READY",
+      "monitors": 12,
+      "config": "D:\\ctf-ai\\dlp\\demo\\frida_git_guard\\tests\\.tmp-shutdown-gl9baqvb\\config.json",
+      "coverage": "monitored terminals and descendants only",
+      "unprotected_pids": []
+    },
+    {
+      "event": "STOP_REQUESTED",
+      "sessions": 12,
+      "pending_children": 0
+    },
+    {
+      "event": "STOPPING",
+      "stage": "resume-children",
+      "pending_children": 0,
+      "sessions": 12
+    },
+    {
+      "event": "STOPPING",
+      "stage": "detach-sessions",
+      "sessions": 12
+    },
+    {
+      "event": "STOPPED",
+      "unfinished_sessions": 0
+    }
+  ]
+}

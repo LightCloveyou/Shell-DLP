@@ -74,7 +74,7 @@
      return {'deny': bool(findings), 'repo': str(repo), 'findings': findings,
              'policy_scope': 'all local refs + HEAD + explicit push sources (conservative)'}
  
-@@ -146,7 +173,12 @@
+@@ -146,7 +173,15 @@
          self.stopping = threading.Event()
          self.excluded = {os.getpid()}
          self.failed = {}
@@ -84,11 +84,14 @@
 +        self.attach_locks = {}
 +        self.fast_resumes = queue.Queue()
 +        self.workers = []
++        self.inflight_decisions = {}
++        self.decision_lock = threading.Lock()
++        self.shutdown_complete = threading.Event()
 +        git_builtins()  # Resolve Git installation/builtins once, before gating launches.
          self.device.on('child-added', self.child_added)
  
      def log(self, kind, **fields):
-@@ -154,30 +186,45 @@
+@@ -154,30 +189,67 @@
  
      def child_added(self, child):
          self.pending.add(child.pid)
@@ -113,6 +116,28 @@
 +            cancels = list(self.active_cancels)
 +        for cancel in cancels:
              cancel.cancel()
++        # Release CreateProcess callbacks that are synchronously waiting for a
++        # decision.  Otherwise script unloading can wait forever during Ctrl+C.
++        with self.decision_lock:
++            decisions = list(self.inflight_decisions.values())
++            self.inflight_decisions.clear()
++        for script, response_type in decisions:
++            try:
++                script.post({'type': response_type, 'payload': {'deny': True}})
++            except frida.InvalidOperationError:
++                pass
++
++    def queue_message(self, pid, script, message):
++        if message.get('type') == 'send':
++            data = message.get('payload', {})
++            if data.get('type') == 'launch-check':
++                response_type = 'decision-' + data['id']
++                with self.decision_lock:
++                    self.inflight_decisions[(pid, response_type)] = (script, response_type)
++            elif data.get('type') == 'check':
++                with self.decision_lock:
++                    self.inflight_decisions[(pid, 'decision')] = (script, 'decision')
++        self.events.put(('message', (pid, message)))
  
      def attach(self, pid, name):
 -        if pid in self.sessions or pid in self.excluded or self.stopping.is_set():
@@ -152,11 +177,12 @@
  
      def _attach(self, pid, name):
          if pid in self.sessions or pid in self.excluded:
-@@ -188,12 +235,22 @@
+@@ -188,12 +260,22 @@
              session.on('detached', lambda *args: self.events.put(('detached', pid)))
              script, info, prefix, push_args = None, None, [], None
              if name.lower() == 'git.exe':
 -                script = session.create_script((ROOT / 'watch_agent.js').read_text(encoding='utf-8'))
+-                script.on('message', lambda message, data: self.events.put(('message', (pid, message))))
 +                probe = session.create_script(INFO_AGENT)
 +                probe.load()
 +                try:
@@ -166,12 +192,12 @@
 +                prefix, push_args = git_command(info)
 +                if push_args is not None:
 +                    script = session.create_script((ROOT / 'watch_agent.js').read_text(encoding='utf-8'))
-+                    script.on('message', lambda message, data: self.events.put(('message', (pid, message))))
++                    script.on('message', lambda message, data: self.queue_message(pid, script, message))
 +                    script.load()
 +                    script.exports_sync.configure(True)
 +            else:
 +                script = session.create_script((ROOT / 'launcher_agent.js').read_text(encoding='utf-8'))
-                 script.on('message', lambda message, data: self.events.put(('message', (pid, message))))
++                script.on('message', lambda message, data: self.queue_message(pid, script, message))
                  script.load()
 -                info = script.exports_sync.info()
 -                prefix, push_args = git_command(info)
@@ -179,7 +205,7 @@
              session.enable_child_gating()
              self.sessions[pid] = Watched(session, script, info, prefix, push_args)
              self.failed.pop(pid, None)
-@@ -210,38 +267,62 @@
+@@ -210,38 +292,62 @@
                          session.detach()
                  except (frida.InvalidOperationError, frida.ProcessNotFoundError):
                      pass
@@ -259,7 +285,7 @@
  
      def handle_message(self, pid, message):
          watched = self.sessions.get(pid)
-@@ -251,26 +332,49 @@
+@@ -251,26 +357,53 @@
              self.log('AGENT_ERROR', pid=pid, error=message.get('description', message['type']))
              return
          data = message['payload']
@@ -276,6 +302,8 @@
 +                    if push_args is None:
 +                        watched.script.post({'type': 'decision-' + data['id'],
 +                                             'payload': {'deny': False}})
++                        with self.decision_lock:
++                            self.inflight_decisions.pop((pid, 'decision-' + data['id']), None)
 +                        return
 +                    self.policy.refresh()
 +                    self.log('GIT_PUSH', pid=pid, cwd=info['cwd'], argv=info['argv'], stage='launcher-before-create')
@@ -289,6 +317,8 @@
 -            self.log('DENY' if policy['deny'] else 'ALLOW', pid=pid, **policy)
 +            response_type = 'decision-' + data['id'] if data['type'] == 'launch-check' else 'decision'
 +            watched.script.post({'type': response_type, 'payload': {'deny': policy['deny']}})
++            with self.decision_lock:
++                self.inflight_decisions.pop((pid, response_type), None)
 +            self.log('DENY' if policy['deny'] else 'ALLOW', pid=pid, scan_ms=round((time.perf_counter()-started)*1000,1), **policy)
 +        elif data['type'] == 'launcher-error':
 +            self.log('AGENT_ERROR', **data)
@@ -317,7 +347,7 @@
              while not self.stopping.is_set():
                  try:
                      kind, item = self.events.get(timeout=0.2)
-@@ -282,14 +386,14 @@
+@@ -282,34 +415,51 @@
                      self.handle_message(*item)
                  elif kind == 'detached':
                      self.sessions.pop(item, None)
@@ -330,12 +360,115 @@
  
      def stop(self):
 -        self.stopping.set()
+-        for pid, watched in list(self.sessions.items()):
+-            try:
+-                if watched.script:
+-                    # Release an in-flight decision before unloading its script.
+-                    watched.script.post({'type': 'decision', 'payload': {'deny': True}})
 +        self.request_stop()
-+        for worker in self.workers:
-+            worker.join(timeout=6)
-         for pid, watched in list(self.sessions.items()):
-             try:
++        self.log('STOPPING', stage='resume-children', pending_children=len(self.pending),
++                 sessions=len(self.sessions))
++        # Resume suspended children before potentially slow Frida teardown.
++        for pid in list(self.pending):
++            try:
++                self.device.resume(pid)
++            except (frida.ProcessNotFoundError, frida.InvalidOperationError):
++                pass
++        self.pending.clear()
++
++        # Session teardown is independent.  Run it concurrently so many stale
++        # terminals or GUI processes do not make Ctrl+C wait once per session.
++        def close_session(watched):
++            try:
+                 watched.session.disable_child_gating()
                  if watched.script:
+                     watched.script.unload()
+                 watched.session.detach()
+-            except (frida.ProcessNotFoundError, frida.InvalidOperationError):
++            except Exception:
+                 pass
++
++        closers = [threading.Thread(target=close_session, args=(watched,), daemon=True)
++                   for watched in list(self.sessions.values())]
++        self.log('STOPPING', stage='detach-sessions', sessions=len(closers))
++        for closer in closers:
++            closer.start()
++        deadline = time.monotonic() + 3
++        for closer in closers:
++            closer.join(max(0, deadline - time.monotonic()))
+         self.sessions.clear()
+-        for pid in list(self.pending):
+-            try:
+-                self.device.resume(pid)
+-            except (frida.ProcessNotFoundError, frida.InvalidOperationError):
+-                pass
+-        self.pending.clear()
+-        self.device.off('child-added', self.child_added)
+-        self.log('STOPPED')
++        for worker in self.workers:
++            worker.join(timeout=max(0, deadline - time.monotonic()))
++        try:
++            self.device.off('child-added', self.child_added)
++        except Exception:
++            pass
++        unfinished = sum(closer.is_alive() for closer in closers)
++        self.log('STOPPED', unfinished_sessions=unfinished)
++        self.shutdown_complete.set()
+ 
+ 
+ def main():
+@@ -323,10 +473,39 @@
+     except Exception as exc:
+         print(f'[CONFIG_ERROR] {exc}', flush=True)
+         return 2
+-    signal.signal(signal.SIGINT, lambda *args: backend.request_stop())
+-    signal.signal(signal.SIGTERM, lambda *args: backend.request_stop())
++    watchdog_lock = threading.Lock()
++    watchdog_started = False
++
++    def begin_stop(*_):
++        nonlocal watchdog_started
++        backend.request_stop()
++        with watchdog_lock:
++            if watchdog_started:
++                return
++            watchdog_started = True
++        backend.log('STOP_REQUESTED', sessions=len(backend.sessions),
++                    pending_children=len(backend.pending))
++
++        def force_exit():
++            for elapsed in range(1, 16):
++                if backend.shutdown_complete.wait(1):
++                    return
++                with backend.cancellation_lock:
++                    active_attaches = len(backend.active_cancels)
++                with backend.decision_lock:
++                    inflight_decisions = len(backend.inflight_decisions)
++                backend.log('STOPPING', stage='waiting', elapsed_seconds=elapsed,
++                            sessions=len(backend.sessions), pending_children=len(backend.pending),
++                            active_attaches=active_attaches,
++                            inflight_decisions=inflight_decisions)
++            backend.log('FORCE_STOP', timeout_seconds=15)
++            os._exit(0)
++        threading.Thread(target=force_exit, daemon=True, name='stop-watchdog').start()
++
++    signal.signal(signal.SIGINT, begin_stop)
++    signal.signal(signal.SIGTERM, begin_stop)
+     if hasattr(signal, 'SIGBREAK'):
+-        signal.signal(signal.SIGBREAK, lambda *args: backend.request_stop())
++        signal.signal(signal.SIGBREAK, begin_stop)
+     # Win32 console callbacks run on a separate thread: cancel a blocked native
+     # attach immediately instead of waiting for Python's main-thread SIGINT.
+     console_handler = None
+@@ -335,7 +514,7 @@
+         callback_type = ctypes.WINFUNCTYPE(ctypes.c_int, ctypes.c_uint32)
+         def on_console_event(event):
+             if event in (0, 1):
+-                backend.request_stop()
++                begin_stop()
+                 return 1
+             return 0
+         console_handler = callback_type(on_console_event)
 --- a/guard.py
 +++ b/guard.py
 @@ -5,6 +5,8 @@
@@ -483,7 +616,7 @@
 +            'blobs_scanned': len(paths_by_blob), 'bytes_scanned': total_bytes, 'tree_entries': entries}
 --- a/README.md
 +++ b/README.md
-@@ -30,14 +30,16 @@
+@@ -30,15 +30,19 @@
  python .\demo\frida_git_guard\backend.py
  ```
  
@@ -502,6 +635,9 @@
  
  ## 停止
  
+ 按 `Ctrl+C` 或结束后台脚本即可解除拦截，不安装服务、不写 Git hook、不改 Git 配置。
++
++按键后会立即输出 `STOP_REQUESTED`，清理期间输出带阶段和等待秒数的 `STOPPING`，完成时输出 `STOPPED`；连续 15 秒仍未完成时输出 `FORCE_STOP` 并结束后台进程。
 --- a/tests/test_backend.py
 +++ b/tests/test_backend.py
 @@ -128,8 +128,12 @@
@@ -719,6 +855,109 @@
 +
 +if __name__=='__main__':main()
 --- /dev/null
++++ b/tests/test_shutdown.py
+@@ -0,0 +1,100 @@
++"""Verify Ctrl+Break/Ctrl+C shutdown with many monitored terminals."""
++import json
++from pathlib import Path
++import signal
++import subprocess
++import sys
++import tempfile
++import time
++
++
++ROOT = Path(__file__).resolve().parents[1]
++REPORT = Path(__file__).with_name('shutdown-verification.json')
++POWERSHELL = Path(r'C:\Program Files\PowerShell\7\pwsh.exe')
++
++
++def main():
++    work = Path(tempfile.mkdtemp(prefix='.tmp-shutdown-', dir=ROOT / 'tests'))
++    clients = []
++    backend = None
++    log_stream = None
++    try:
++        config = work / 'config.json'
++        config.write_text(json.dumps({
++            'sensitive_directories': [],
++            'sensitive_files': ['__shutdown_fixture__'],
++            'scan_content': False,
++        }), encoding='utf-8')
++        client_script = '[Console]::WriteLine("READY");[Console]::ReadLine() | Out-Null'
++        for _ in range(12):
++            client = subprocess.Popen(
++                [POWERSHELL, '-NoLogo', '-NoProfile', '-Command', client_script],
++                stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
++                text=True,
++            )
++            assert client.stdout.readline().strip() == 'READY'
++            clients.append(client)
++
++        log_path = work / 'backend.jsonl'
++        log_stream = log_path.open('w', encoding='utf-8')
++        argv = [sys.executable, '-B', ROOT / 'backend.py', '--config', config]
++        for client in clients:
++            argv.extend(['--pid', str(client.pid)])
++        backend = subprocess.Popen(
++            [str(item) for item in argv], stdout=log_stream, stderr=log_stream,
++            creationflags=subprocess.CREATE_NEW_PROCESS_GROUP,
++        )
++        deadline = time.monotonic() + 45
++        while '"event": "READY"' not in log_path.read_text(encoding='utf-8'):
++            assert backend.poll() is None, log_path.read_text(encoding='utf-8')
++            assert time.monotonic() < deadline, log_path.read_text(encoding='utf-8')
++            time.sleep(0.1)
++
++        started = time.perf_counter()
++        backend.send_signal(signal.CTRL_BREAK_EVENT)
++        exit_code = backend.wait(8)
++        elapsed_ms = (time.perf_counter() - started) * 1000
++        log_stream.close()
++        log_stream = None
++        lines = [json.loads(line) for line in log_path.read_text(encoding='utf-8').splitlines() if line]
++        events = [line.get('event') for line in lines]
++        assert exit_code == 0, (exit_code, lines)
++        assert elapsed_ms < 6000, elapsed_ms
++        assert 'STOP_REQUESTED' in events, events
++        assert 'STOPPED' in events or 'FORCE_STOP' in events, events
++        report = {
++            'passed': True,
++            'command': [str(item) for item in argv],
++            'signal': 'CTRL_BREAK_EVENT (same Win32 console path as Ctrl+C handler)',
++            'monitors': len(clients),
++            'exit_code': exit_code,
++            'elapsed_ms': elapsed_ms,
++            'events': lines,
++        }
++        REPORT.write_text(json.dumps(report, ensure_ascii=False, indent=2), encoding='utf-8')
++        print(f'[VERIFIED] {len(clients)} sessions stopped in {elapsed_ms:.1f} ms, exit={exit_code}')
++    finally:
++        if backend is not None and backend.poll() is None:
++            backend.kill()
++            backend.wait()
++        if log_stream is not None:
++            log_stream.close()
++        for client in clients:
++            if client.poll() is None:
++                try:
++                    client.stdin.write('EXIT\n')
++                    client.stdin.flush()
++                    client.wait(5)
++                except Exception:
++                    client.kill()
++                    client.wait()
++        for path in sorted(work.rglob('*'), reverse=True):
++            if path.is_file():
++                path.unlink()
++            elif path.is_dir():
++                path.rmdir()
++        work.rmdir()
++
++
++if __name__ == '__main__':
++    main()
+--- /dev/null
 +++ b/tests/rollback_performance.py
 @@ -0,0 +1,26 @@
 +"""Restore the working version before performance changes, inside this demo only."""
@@ -740,7 +979,7 @@
 +   if hashlib.sha256(data).hexdigest()!=expected:raise ValueError('Baseline hash mismatch')
 +   dest.parent.mkdir(parents=True,exist_ok=True);dest.write_bytes(data)
 +   if hashlib.sha256(dest.read_bytes()).hexdigest()!=expected:raise ValueError('Restored hash mismatch')
-+ for name in ['launcher_agent.js','tests/test_performance.py']:
++ for name in ['launcher_agent.js','tests/test_performance.py','tests/test_shutdown.py']:
 +  dest=(target/name).resolve()
 +  if not dest.is_relative_to(target):raise ValueError('Added file leaves target')
 +  if dest.exists():dest.unlink()

@@ -44,3 +44,5 @@ git push origin main
 ## 停止
 
 按 `Ctrl+C` 或结束后台脚本即可解除拦截，不安装服务、不写 Git hook、不改 Git 配置。
+
+按键后会立即输出 `STOP_REQUESTED`，清理期间输出带阶段和等待秒数的 `STOPPING`，完成时输出 `STOPPED`；连续 15 秒仍未完成时输出 `FORCE_STOP` 并结束后台进程。
