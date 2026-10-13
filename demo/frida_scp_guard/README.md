@@ -1,6 +1,6 @@
 # Frida SCP Guard Demo
 
-> 状态：正在从 Linux eBPF 迁移到 Frida，等待手动验证。
+> 状态：正在从 Linux eBPF 迁移到 Frida。
 
 独立的 SCP 上传拦截示例，结构与 `frida_git_guard` 类似。后台接入已有 PowerShell、pwsh、cmd、bash、sh，在父进程的 `CreateProcessW/A` 返回前检查 `scp` 上传源文件。
 
