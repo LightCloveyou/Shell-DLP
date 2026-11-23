@@ -76,7 +76,8 @@ namespace PowerShell7Guard
                 foreach (var (entry, problem) in EnumerateFiles(source, recurse: true, providerOrder: false))
                 {
                     if (entry == null) { yield return Missing(problem ?? role + "-unavailable"); continue; }
-                    if (!FileCountAvailable) { yield return Missing("file-count-budget"); yield break; }
+                    // Enumeration and content reads have independent bounds. A yielded file
+                    // may still match a configured path even when its bytes cannot be inspected.
                     yield return File(entry.Path, false, out _).Via(role);
                 }
             }

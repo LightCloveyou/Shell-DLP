@@ -346,6 +346,8 @@ namespace PowerShell7Guard
             IEnumerable<Payload> FormValues(Payload form)
             {
                 if (form.Map == null) { yield return UnknownValue("http-form-shape", form); yield break; }
+                if (form.InspectionPartial || !form.Complete)
+                    yield return new Payload { Tags = form.Tags, InspectionPartial = true, Issue = "http-form-incomplete" };
                 foreach (var field in form.Map.Take(Limits.MaxCollection))
                 {
                     yield return Text(field.Key, "http-form-field");
@@ -374,6 +376,8 @@ namespace PowerShell7Guard
                         foreach (var part in MultipartFiles(new[] { rest })) yield return part;
                     }
                 }
+                if (form.Map.Count > Limits.MaxCollection)
+                    yield return ContentSummary("http-form-field-limit", form.Map.Skip(Limits.MaxCollection).Select(p => p.Value));
             }
 
             Payload ConvertJson(object command, Payload? pipe)

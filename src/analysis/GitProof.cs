@@ -261,9 +261,15 @@ namespace PowerShell7Guard
                     for (int i = 0; i < sources.Length; i++)
                         if (ReadRef(dot, effective[i + 1].Split(':')[0].TrimStart('+'), packed) != sources[i]) return null;
                     var endpoint = receipt.Get("endpoint");
-                    var marks = doc.Sections.Where(s => s.Name == "[[marks" && policy.Rules.Any(r => r.Id == s.Get("rule_id")))
+                    bool network = NetworkTarget(endpoint);
+                    if (receipt.Get("complete") is not ("yes" or "no") || !network && Disk.Bind(endpoint, repo) == null ||
+                        NetworkTarget(effective[0]) && effective[0] != endpoint) return null;
+                    var markSections = doc.Sections.Where(s => s.Name == "[[marks").ToArray();
+                    if (markSections.Any(s => !policy.Rules.Any(r => r.Id == s.Get("rule_id")) ||
+                        string.IsNullOrEmpty(s.Get("origin")))) return null;
+                    var marks = markSections
                         .Select(s => new Mark(s.Get("rule_id"), s.Get("origin"), s.Get("route"))).ToArray();
-                    return new GitProof { Endpoint = endpoint, Network = NetworkTarget(endpoint), Loopback = LoopbackSsh(endpoint),
+                    return new GitProof { Endpoint = endpoint, Network = network, Loopback = LoopbackSsh(endpoint),
                         Parts = new[] { new Payload
                     { Complete = receipt.Get("complete") == "yes", Issue = "git-object-content", Tags = marks } } };
                 }
@@ -493,16 +499,21 @@ namespace PowerShell7Guard
                 long remainingBlobBytes = policy.MaxTotalFileBytes == 0 ? long.MaxValue : policy.MaxTotalFileBytes;
                 int cachedBytes = 0;
                 bool complete = true;
-                bool textRules = policy.Rules.Any(r => r.Texts.Length > 0);
-                void Match(string name, string? text, bool path, bool streamChecked = false)
+                bool NeedsText() => policy.Rules.Any(r => r.Texts.Length != 0 && !marks.ContainsKey(r.Id));
+                void MatchPath(string name)
                 {
-                    if (text == null && textRules && !streamChecked) complete = false;
+                    foreach (var r in policy.Rules)
+                        if (!marks.ContainsKey(r.Id) && (r.Files.Any(f => PathEq(f, name)) ||
+                            r.Folders.Any(f => name.StartsWith(f.TrimEnd('\\') + "\\", StringComparison.OrdinalIgnoreCase))))
+                            marks[r.Id] = new Mark(r.Id, name, name);
+                }
+                void MatchText(string name, string? text, bool streamChecked = false)
+                {
+                    if (text == null) { if (!streamChecked && NeedsText()) complete = false; return; }
                     foreach (var r in policy.Rules)
                     {
                         if (marks.ContainsKey(r.Id)) continue;
-                        if ((path && (r.Files.Any(f => PathEq(f, name)) || r.Folders.Any(f => name.StartsWith(
-                                f.TrimEnd('\\') + "\\", StringComparison.OrdinalIgnoreCase)))) ||
-                            (text != null && r.Texts.Any(t => text.IndexOf(t, StringComparison.Ordinal) >= 0)))
+                        if (r.Texts.Any(t => text.IndexOf(t, StringComparison.Ordinal) >= 0))
                             marks[r.Id] = new Mark(r.Id, name, name);
                     }
                 }
@@ -518,12 +529,12 @@ namespace PowerShell7Guard
                         if (kind == "commit") break;
                         if (kind != "tag")
                         {
-                            if (kind == "blob") Match("git-blob:" + oid, Disk.Decode(Git(executable, repo, MaxContent, "cat-file", "blob", oid)), false);
+                            if (kind == "blob" && NeedsText()) MatchText("git-blob:" + oid, Disk.Decode(Git(executable, repo, MaxContent, "cat-file", "blob", oid)));
                             complete = false;
                             break;
                         }
                         var tag = Disk.Decode(Git(executable, repo, MaxContent, "cat-file", "tag", oid));
-                        Match("git-tag:" + source, tag, false);
+                        MatchText("git-tag:" + source, tag);
                         var first = tag == null ? null : Lines(tag).FirstOrDefault();
                         if (first == null || !first.StartsWith("object ") || !ObjectId(first.Substring(7))) { complete = false; break; }
                         oid = first.Substring(7);
@@ -532,10 +543,10 @@ namespace PowerShell7Guard
                 foreach (var commit in commits)
                 {
                     if (deadline.ElapsedMilliseconds > Limits.MaxGitTime) throw new IOException("preflight time limit");
-                    if (textRules)
+                    if (NeedsText())
                     {
                         var content = Disk.Decode(Git(executable, repo, MaxContent, "cat-file", "commit", commit));
-                        Match("commit:" + commit, content, false);
+                        MatchText("commit:" + commit, content);
                     }
                     var treeData = StrictUtf8.GetString(Git(executable, repo, policy.MaxGitMetadataBytes, "ls-tree", "-r", "-z", commit));
                     foreach (var row in treeData.Split(new[] { '\0' }, StringSplitOptions.RemoveEmptyEntries))
@@ -550,7 +561,9 @@ namespace PowerShell7Guard
                         { complete = false; continue; }
                         if (!inspected.Add(head[2] + "\0" + target)) continue;
                         if (inspected.Count > policy.GitMaxPathBindings) throw new IOException("git_max_path_bindings exceeded");
-                        var copies = policy.Rules.SelectMany(r => r.Copies.Where(entry =>
+                        MatchPath(target); // Verified tree binding: a path rule needs no blob read.
+                        bool textRules = NeedsText();
+                        var copies = policy.Rules.Where(r => !marks.ContainsKey(r.Id)).SelectMany(r => r.Copies.Where(entry =>
                             PathEq(ConfigPath(entry.Get("path"), Path.GetDirectoryName(Store.Config)!), target))
                             .Select(entry => (rule: r, entry))).ToArray();
                         string oid = head[2];
@@ -580,7 +593,7 @@ namespace PowerShell7Guard
                                 if (!marks.ContainsKey(id)) marks.Add(id, new Mark(id, target, target).Via("git-blob:" + oid));
                             checkedStream = streamed.Complete;
                         }
-                        Match(target, raw == null ? null : Disk.Decode(raw), true, checkedStream);
+                        if (textRules) MatchText(target, raw == null ? null : Disk.Decode(raw), checkedStream);
                         if (copies.Length != 0)
                         {
                             var current = Disk.TrySample(target, true);

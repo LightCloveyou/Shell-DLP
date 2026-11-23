@@ -283,12 +283,30 @@ namespace PowerShell7Guard
                 ? arg.Value == null ? Missing(role + "-value") : UnknownValue(role + "-value", arg.Value)
                 : arg.Value?.Text == arg.Text ? arg.Value.Via(role) : Text(arg.Text, role, arg.Value?.Tags).Via(role);
 
+            Payload NativeWireRecords(Payload input)
+            {
+                if (input.Elements == null || input.Bytes != null) return input;
+                // Pipeline output records, not the contents of arbitrary object properties.
+                // Preserve string evidence without inventing bytes for the native encoding.
+                IEnumerable<Payload> records = input.Elements;
+                if (input.RecordRemainder != null) records = records.Append(input.RecordRemainder);
+                var result = input.Copy();
+                result.Tags = Merge(input.Tags.Concat(records.Where(p => p.IsString).SelectMany(p => p.Tags)));
+                if (input.RecordRemainder != null || input.Elements.Any(p => !p.IsString || !p.Complete || p.InspectionPartial))
+                {
+                    result.InspectionPartial = true;
+                    if (string.IsNullOrEmpty(result.Issue)) result.Issue = "stdin-record-format";
+                }
+                return result;
+            }
+
             Payload NativeFile(string? path, string role, Payload? pipe = null, bool stdin = false)
             {
                 if (string.IsNullOrWhiteSpace(path)) return Missing(role + "-path");
                 if (stdin && path == "-") return pipe?.Bytes != null
                     ? new Payload { Tags = pipe.Bytes.Length == 0 ? Array.Empty<Mark>() : FileRecordMarks(pipe),
-                        InspectionPartial = true, Issue = "stdin-byte-serialization" } : pipe ?? Missing("stdin-unresolved");
+                        InspectionPartial = true, Issue = "stdin-byte-serialization" } :
+                    pipe == null ? Missing("stdin-unresolved") : NativeWireRecords(pipe);
                 if (path == "-") return Missing(role + "-path");
                 return File(path, false, out _).Via(role);
             }

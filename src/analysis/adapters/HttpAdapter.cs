@@ -333,21 +333,47 @@ namespace PowerShell7Guard
                 }
                 catch { return null; }
             }
-            IEnumerable<Payload> TransmittedValues(Payload p, int depth = 0)
+            Payload ContentSummary(string issue, IEnumerable<Payload?> parts, HashSet<Payload>? visited = null) =>
+                new Payload { Issue = issue, InspectionPartial = true, Tags = Merge(KnownMarks(parts, visited)) };
+
+            IEnumerable<Payload> TransmittedValues(Payload root)
             {
-                if ((p.Elements != null || p.Map != null && (p.LocalRecord != null || p.Issue == "environment-map")) &&
-                    (p.Tags.Length != 0 || p.InspectionPartial)) yield return p;
-                if (!StackAvailable || depth >= MaxExpressionDepth) { yield return Missing("content-depth"); yield break; }
-                if (p.Map != null)
-                    foreach (var pair in p.Map.Take(Limits.MaxCollection))
+                var active = new HashSet<Payload>();
+                var visitedDepth = new Dictionary<Payload, int>();
+                var summarized = new HashSet<Payload>();
+                IEnumerable<Payload> Walk(Payload p, int depth)
+                {
+                    if (active.Contains(p)) { yield return Missing("http-content-cycle"); yield break; }
+                    if (visitedDepth.TryGetValue(p, out var previous) && previous <= depth) yield break;
+                    visitedDepth[p] = depth;
+                    if (!StackAvailable || depth >= MaxExpressionDepth)
+                    { yield return ContentSummary("content-depth", new[] {p}, summarized); yield break; }
+                    if (p.Map == null && p.Elements == null) { yield return p; yield break; }
+                    if (p.Tags.Length != 0 || p.InspectionPartial || !p.Complete)
+                        yield return new Payload { Tags = p.Tags, Complete = p.Complete, InspectionPartial = p.InspectionPartial, Issue = p.Issue };
+                    active.Add(p);
+                    if (p.Map != null)
                     {
-                        yield return Text(pair.Key, "http-field-name");
-                        foreach (var item in TransmittedValues(pair.Value, depth + 1)) yield return item;
+                        foreach (var pair in p.Map.Take(Limits.MaxCollection))
+                        {
+                            yield return Text(pair.Key, "http-field-name");
+                            foreach (var item in Walk(pair.Value, depth + 1)) yield return item;
+                        }
+                        if (p.Map.Count > Limits.MaxCollection)
+                            yield return ContentSummary("http-field-limit", p.Map.Skip(Limits.MaxCollection).Select(kv => kv.Value), summarized);
                     }
-                else if (p.Elements != null)
-                    foreach (var value in p.Elements.Take(Limits.MaxCollection))
-                        foreach (var item in TransmittedValues(value, depth + 1)) yield return item;
-                else yield return p;
+                    else if (p.Elements != null)
+                    {
+                        foreach (var value in p.Elements.Take(Limits.MaxCollection))
+                            foreach (var item in Walk(value, depth + 1)) yield return item;
+                        if (p.Elements.Length > Limits.MaxCollection)
+                            yield return ContentSummary("http-item-limit", p.Elements.Skip(Limits.MaxCollection), summarized);
+                    }
+                    if (p.RecordRemainder != null)
+                        yield return ContentSummary("http-record-remainder", new[] { p.RecordRemainder }, summarized);
+                    active.Remove(p);
+                }
+                return Walk(root, 0);
             }
         }
     }

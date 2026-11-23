@@ -62,7 +62,6 @@ namespace PowerShell7Guard
                         if (path == null || barrier) { yield return Missing("copy-source-directory"); continue; }
                         foreach (var (entry, problem) in EnumerateFiles(path, true, includeHidden: args.Has("Force"), providerOrder: false))
                         {
-                            if (!FileCountAvailable) { yield return Missing("file-count-budget"); yield break; }
                             yield return entry == null ? Missing(problem ?? "copy-source-entry") : File(entry.Path, false, out _);
                         }
                     }
@@ -188,7 +187,6 @@ namespace PowerShell7Guard
                     foreach (var (entry, error) in EnumerateFiles(source, tree, includeHidden: hidden, matchesName: Match,
                         matchesAttributes: a => hidden || !a.HasFlag(FileAttributes.System), providerOrder: false))
                     {
-                        if (!FileCountAvailable) { yield return Missing("file-count-budget"); yield break; }
                         yield return entry == null ? Missing(error ?? "copy-tool-entry") : File(entry.Path, false, out _);
                     }
                     if (masks.Count != 0) yield return Missing("copy-tool-name-selection");

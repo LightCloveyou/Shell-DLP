@@ -52,7 +52,7 @@ namespace PowerShell7Guard
                 if (!call.Has("receive") && !call.Has("zero-io"))
                 {
                     if (pipe == null && !listen) Send("ncat", endpoint, Array.Empty<Payload>(), "ncat-stdin");
-                    else if (pipe != null) NativeSend("ncat", endpoint, new List<Payload> { pipe }, call.Error);
+                    else if (pipe != null) NativeSend("ncat", endpoint, new List<Payload> { NativeWireRecords(pipe) }, call.Error);
                 }
                 foreach (var option in new[] { "output", "hex-dump" })
                     if (call.Options.LastOrDefault(o => o.Name == option).Arg is { } output)

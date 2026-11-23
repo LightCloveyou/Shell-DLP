@@ -2183,15 +2183,19 @@ namespace PowerShell7Guard
                     p.FileObject == null && p.PathAlternatives == null && p.FileTaskResult == null &&
                     p.DeferredDirectory == null && p.DeferredRead == null && p.RecordRemainder == null;
 
-                static bool SameScalar(Payload a, Payload b) => ReferenceEquals(a, b) ||
-                    (a.HttpObject is HttpObject ha && IsReadHandle(ha) && ReferenceEquals(ha.Identity, b.HttpObject?.Identity)) ||
+                static bool SameScalarValue(Payload a, Payload b) =>
                     (PlainScalar(a) && PlainScalar(b) && a.Complete && b.Complete && a.Text != null && a.Text == b.Text && a.IsString == b.IsString &&
                      a.MayReadOriginal == b.MayReadOriginal && a.ReadType == b.ReadType &&
                      a.MemberDisplayType == b.MemberDisplayType && a.TimeValue == b.TimeValue &&
                      a.RecordCount == b.RecordCount && a.FirstUncertainIndex == b.FirstUncertainIndex &&
                      a.UnmaterializedFileRecords == b.UnmaterializedFileRecords && a.LocalRecord == b.LocalRecord &&
                      a.PredictedAttributes == b.PredictedAttributes && a.NumericType == b.NumericType && a.ScalarTruth == b.ScalarTruth && a.PipeText == b.PipeText &&
-                     !a.InspectionPartial && !b.InspectionPartial &&
+                     !a.InspectionPartial && !b.InspectionPartial);
+
+                static bool SameScalar(Payload a, Payload b) => ReferenceEquals(a, b) ||
+                    ((SameScalarValue(a, b) || a.HttpObject is HttpObject ha && IsReadHandle(ha) &&
+                      ReferenceEquals(ha.Identity, b.HttpObject?.Identity) && a.Complete == b.Complete &&
+                      a.InspectionPartial == b.InspectionPartial && a.Issue == b.Issue) &&
                      (ReferenceEquals(a.TagPositions, b.TagPositions) || a.TagPositions != null && b.TagPositions != null &&
                       a.TagPositions.Select(t => (t.Start,t.Tag.Id,t.Tag.Origin)).SequenceEqual(b.TagPositions.Select(t => (t.Start,t.Tag.Id,t.Tag.Origin)))) &&
                      a.Tags.Select(t => (t.Id, t.Origin)).SequenceEqual(b.Tags.Select(t => (t.Id, t.Origin))));
@@ -2199,6 +2203,16 @@ namespace PowerShell7Guard
                 static Payload MergeValue(Payload? left, Payload? right, int depth = 0)
                 {
                     if (left != null && right != null && SameScalar(left, right)) return left;
+                    if (left != null && right != null && SameScalarValue(left, right))
+                    {
+                        // Equal values can have different origins. Keep the exact value (e.g.
+                        // a file argument) as well as both branches' evidence.
+                        var result = left.Copy();
+                        result.Tags = left.Tags.Concat(right.Tags).GroupBy(t => (t.Id, t.Origin)).Select(g => g.First()).ToArray();
+                        result.TagPositions = Positions(left, 0, "conditional value").Concat(Positions(right, 0, "conditional value"))
+                            .GroupBy(t => (t.Start, t.Tag.Id, t.Tag.Origin)).Select(g => g.First()).Take(Limits.MaxPositions).ToArray();
+                        return result;
+                    }
                     if (StackAvailable && depth < MaxExpressionDepth && left?.Map is { } a && right?.Map is { } b &&
                         a.Count == b.Count && a.Keys.All(b.ContainsKey))
                     {
