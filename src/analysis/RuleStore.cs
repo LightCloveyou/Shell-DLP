@@ -55,7 +55,7 @@ namespace PowerShell7Guard
                         bool array = i + 1 < Text.Length && Text[i + 1] == '[';
                         if (array && (end + 1 >= Text.Length || Text[end + 1] != ']')) throw Bad();
                         var name = Text.Substring(i + (array ? 2 : 1), end - i - (array ? 2 : 1)).Trim();
-                        if (!Regex.IsMatch(name, @"^[a-z][a-z_.]*$")) throw Bad();
+                        if (!Regex.IsMatch(name, @"^[a-z][a-z_.-]*$")) throw Bad();
                         current.End = start;
                         current = new Section { Name = (array ? "[[" : "[") + name, Begin = start };
                         Sections.Add(current);
@@ -336,6 +336,8 @@ namespace PowerShell7Guard
         {
             internal readonly Toml Document;
             internal readonly bool TrustLoopback;
+            internal readonly HashSet<string> GitRemoteAllowlist = new HashSet<string>(StringComparer.Ordinal);
+            internal readonly bool InvalidGitRemoteAllowlist;
             internal readonly (string Id, string[] Needles)[] FileTextRules;
             internal readonly int LongestFileNeedle;
             internal readonly List<Rule> Rules = new List<Rule>();
@@ -344,6 +346,7 @@ namespace PowerShell7Guard
             {
                 Document = document;
                 Rule? rule = null;
+                int gitUrls = 0;
                 bool seenPolicy = false;
                 foreach (var s in Document.Sections)
                 {
@@ -357,6 +360,12 @@ namespace PowerShell7Guard
                     {
                         ConfigPath(s.Get("path"), directory);
                         rule.Copies.Add(s);
+                    }
+                    else if (s.Name == "[[allow-git-url")
+                    {
+                        if (++gitUrls <= 256 && s.Fields.Count == 1 && GitProof.RemoteAddressKey(s.Get("url")) is string key)
+                            GitRemoteAllowlist.Add(key);
+                        else InvalidGitRemoteAllowlist = true; // keep content rules active; grant no exceptions
                     }
                     else if (s.Name == "[policy")
                     {

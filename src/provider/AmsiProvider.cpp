@@ -185,6 +185,7 @@ const char* Reason(IAmsiStream* stream, AMSI_RESULT& result, bool sizeKnown,
             case 3: decision = guard::Decision::InformationMissing; break;
             case 4: decision = guard::Decision::InformationMissing; reason = "missing:ast-syntax"; break;
             case 5: decision = guard::Decision::InformationMissing; reason = "warn:sensitive-rule"; break;
+            case 6: decision = guard::Decision::NoMatch; reason = "allow:git-remote-allowlist"; break;
             default: if (decision == guard::Decision::InformationMissing) reason = "missing:rule-engine"; break;
         }
     }
@@ -194,7 +195,7 @@ const char* Reason(IAmsiStream* stream, AMSI_RESULT& result, bool sizeKnown,
         reason = "block:configured-rule";
         break;
     case guard::Decision::NoMatch:
-        reason = "no-match:configured-rules";
+        if (!reason) reason = "no-match:configured-rules";
         break;
     case guard::Decision::InformationMissing:
         if (!reason) reason = "missing:rule-input";

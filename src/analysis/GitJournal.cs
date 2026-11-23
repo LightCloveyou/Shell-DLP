@@ -44,7 +44,7 @@ namespace PowerShell7Guard
                     }
                     return null;
                 }
-                internal static JournalConfig? Load(string repo)
+                internal static JournalConfig? Load(string repo, bool forAllowlist = false)
                 {
                     var c=new JournalConfig();
                     var home=Environment.GetEnvironmentVariable("HOME");
@@ -84,6 +84,9 @@ namespace PowerShell7Guard
                             var key=group+"."+(eq<0?line:line.Substring(0,eq)).Trim().ToLowerInvariant();
                             if(key.EndsWith(".mirror",StringComparison.Ordinal) || key is "extensions.worktreeconfig" or "push.followtags" ||
                                 key.EndsWith(".vcs",StringComparison.Ordinal))return null;
+                            if(forAllowlist && (key is "push.recursesubmodules" or "submodule.recurse" or "core.gitproxy" or "core.sshcommand" ||
+                                key.StartsWith("remotes.",StringComparison.Ordinal) ||
+                                key=="core.worktree" || key=="extensions.partialclone"))return null;
                             if(!key.StartsWith("remote.",StringComparison.Ordinal) && !key.StartsWith("branch.",StringComparison.Ordinal) &&
                                 !key.StartsWith("push.",StringComparison.Ordinal))continue;
                             var v=eq<0?"true":line.Substring(eq+1).Trim();
@@ -97,10 +100,15 @@ namespace PowerShell7Guard
                 }
                 internal string? Target(string remote)
                 {
-                    if(NetworkTarget(remote))return SafeTarget(remote);
+                    var url=RawTarget(remote);
+                    return url==null?null:SafeTarget(url);
+                }
+                internal string? RawTarget(string remote)
+                {
+                    if(NetworkTarget(remote))return remote;
                     if(!RemoteName(remote) || !(Values.TryGetValue("remote."+remote+".pushurl",out var urls) ||
                         Values.TryGetValue("remote."+remote+".url",out urls)) || urls.Count!=1)return null;
-                    return SafeTarget(urls[0]);
+                    return urls[0];
                 }
                 static string? SafeTarget(string value)
                 {

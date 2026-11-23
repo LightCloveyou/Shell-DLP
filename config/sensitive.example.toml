@@ -68,6 +68,10 @@ max_report_parse_errors = 64
 max_using_directive_tokens = 128
 max_report_bytes = 196608
 
+# No Git repository is exempt by default. Repeat the table for each trusted push URL.
+# [[allow-git-url]]
+# url = "https://git.example.com/team/project.git"
+
 # Replace the synthetic rule with your own files, folders and literal text.
 # Guard writes confirmed derived files into [[rules.copy]] under their source rule.
 [[rules]]

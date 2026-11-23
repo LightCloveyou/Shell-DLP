@@ -1524,7 +1524,7 @@ namespace PowerShell7Guard
             }
 
             void Send(string name, string? target, IEnumerable<Payload> payloads, string? uncertain = null,
-                Dictionary<Payload, Payload>? inspected = null, int? targetOrdinal = null)
+                Dictionary<Payload, Payload>? inspected = null, int? targetOrdinal = null, Func<bool>? permitGitRemote = null)
             {
                 var parts = new List<Payload>();
                 var overflowVisited = new HashSet<Payload>();
@@ -1561,6 +1561,8 @@ namespace PowerShell7Guard
                 string reason = "no-match";
                 if (badPolicy)
                 { decision = 3; reason = "missing:" + (issue ?? "send-input"); }
+                else if (labels.Length != 0 && permitGitRemote?.Invoke() == true)
+                { decision = 6; reason = "allow:git-remote-allowlist"; }
                 else if (labels.Any(m => Find(m.Id)?.Action == "block"))
                 { decision = 1; reason = "block:" + labels.First(m => Find(m.Id)?.Action == "block").Id; }
                 else if (target == null)
@@ -1574,6 +1576,8 @@ namespace PowerShell7Guard
                     "inspection", issue == null ? "configured-matchers" : "partial", "missingInput", issue,
                     "stage", currentStage, "chain", currentChain);
                 if (targetOrdinal.HasValue) evidence["targetOrdinal"] = targetOrdinal.Value;
+                if (name == "git push" && policy?.InvalidGitRemoteAllowlist == true)
+                    evidence["gitRemoteAllowlist"] = "invalid; no exception applied";
                 plan.Result(decision, reason, evidence);
             }
             void SkipLoopback(string name, string? target, int? targetOrdinal = null)
@@ -1664,7 +1668,14 @@ namespace PowerShell7Guard
                 }
                 if (proof == null) Send("git push", GitProof.RemoteOperand(pushArgs), Array.Empty<Payload>(), "git-baseline-or-preflight");
                 else if (TrustLoopback && !barrier && proof.Loopback) SkipLoopback("git push", proof.Endpoint);
-                else if (proof.Network) Send("git push", proof.Endpoint, proof.Parts);
+                else if (proof.Network)
+                {
+                    Func<bool>? permit = null;
+                    if (policy is Policy p && p.GitRemoteAllowlist.Count != 0 && !p.InvalidGitRemoteAllowlist &&
+                        namedGit && !barrier && !uncertainProcessContext && StandaloneGitCommand(command))
+                        permit = () => GitProof.PermitsSensitivePush(directory, pushArgs, proof.Endpoint, p, Budget);
+                    Send("git push", proof.Endpoint, proof.Parts, permitGitRemote: permit);
+                }
             }
 
             Payload? Pipeline(object? node, int depth = 0, bool backgroundScope = false)

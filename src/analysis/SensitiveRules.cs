@@ -582,7 +582,7 @@ namespace PowerShell7Guard
             internal string Configuration = "";
             internal void Result(int result, string reason, object evidence)
             {
-                int Order(int n) => n == 1 ? 4 : n == 3 ? 3 : n == 5 ? 2 : n == 2 ? 1 : 0;
+                int Order(int n) => n == 1 ? 5 : n == 3 ? 4 : n == 5 ? 3 : n == 6 ? 2 : n == 2 ? 1 : 0;
                 bool primary = Order(result) > Order(Decision);
                 if (Evidence.Count < MaxEffects) Evidence.Add(evidence);
                 else
