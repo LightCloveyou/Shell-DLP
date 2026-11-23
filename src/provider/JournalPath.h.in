@@ -1,0 +1,5 @@
+#pragma once
+
+namespace guard {
+inline constexpr wchar_t JournalDirectory[] = L"@GUARD_JOURNAL_DIR@";
+}

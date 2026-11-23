@@ -1,0 +1,78 @@
+version = 1
+
+[policy]
+on_missing = "warn"
+# Enable only if local services may receive policy-protected data.
+trust_loopback = false
+# Set max_files, max_file_bytes or max_total_file_bytes to 0 to disable that particular cap.
+max_files = 512
+max_total_file_bytes = 67108864
+max_amsi_content_bytes = 65536
+max_script_bytes = 65536
+max_ast_statements = 256
+max_expression_depth = 16
+max_materialized_bytes = 131072
+max_loop_iterations = 16
+max_foreach_iterations = 16
+max_outvariable_records = 32
+max_json_elements = 128
+max_file_bytes = 16777216
+max_analysis_time_ms = 350
+# Git preflight runs separately from the synchronous file scanner.
+git_max_commits = 128
+max_git_objects = 2048
+git_max_path_bindings = 4096
+
+# Additional adapter and reporting limits.
+max_effects = 32
+max_tracked_variables = 64
+max_report_nodes = 512
+max_ast_nodes = 4096
+max_command_arguments = 128
+max_payload_parts = 64
+max_destinations = 16
+max_collection_elements = 512
+max_content_records = 4096
+max_tag_positions = 256
+max_archive_entries = 64
+max_archive_depth = 2
+max_expanded_archive_bytes = 262144
+max_git_preflight_time_ms = 25000
+max_git_command_time_ms = 8000
+max_git_cache_bytes = 16777216
+max_git_proof_bytes = 262144
+max_archive_visits = 96
+max_witnesses = 128
+max_sensitive_rules = 128
+max_git_local_refs = 511
+max_git_config_files = 20
+max_git_baseline_refs = 128
+max_state_file_bytes = 524288
+max_git_metadata_bytes = 524288
+git_proof_lifetime_seconds = 60
+max_runtime_value_chars = 4096
+max_variable_name_chars = 128
+max_rule_text_chars = 4096
+max_file_path_depth = 64
+max_wildcard_chars = 128
+max_filesystem_filter_chars = 260
+max_git_search_depth = 12
+max_archive_path_chars = 512
+max_encoded_fields = 18
+max_encoded_field_name_chars = 64
+max_json_name_table_chars = 8192
+max_curl_form_components = 8
+max_report_field_chars = 2048
+max_report_flow_marks = 8
+max_report_parse_errors = 64
+max_using_directive_tokens = 128
+max_report_bytes = 196608
+
+# Replace the synthetic rule with your own files, folders and literal text.
+# Guard writes confirmed derived files into [[rules.copy]] under their source rule.
+[[rules]]
+id = "PS7-HTTP-CANARY-001"
+action = "block"
+files = ['D:\ctf-ai\powershell7guard\config\sensitive.toml']
+folders = ['D:\ctf-ai\powershell7guard\logs']
+texts = ["PS7GUARD_TEST_SECRET"]

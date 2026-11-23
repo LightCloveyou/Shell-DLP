@@ -1,0 +1,70 @@
+diff --git a/src/AmsiProvider.cpp b/src/AmsiProvider.cpp
+index 66782ac..b14d00d 100644
+--- a/src/AmsiProvider.cpp
++++ b/src/AmsiProvider.cpp
+@@ -55,18 +55,6 @@ public:
+ };
+ 
+ namespace {
+-bool InScope(IAmsiStream* stream) noexcept
+-{
+-    wchar_t app[1024];
+-    ULONG size = 0;
+-    return SUCCEEDED(stream->GetAttribute(AMSI_ATTRIBUTE_APP_NAME, sizeof(app),
+-                         reinterpret_cast<PBYTE>(app), &size)) &&
+-        size >= sizeof(wchar_t) && size <= sizeof(app) &&
+-        size % sizeof(wchar_t) == 0 &&
+-        app[size / sizeof(wchar_t) - 1] == L'\0' &&
+-        guard::IsPowerShell7({app, size / sizeof(wchar_t) - 1});
+-}
+-
+ struct ScanBuffer
+ {
+     explicit ScanBuffer(ULONG length) noexcept : size(length),
+@@ -84,6 +72,33 @@ struct ScanBuffer
+     wchar_t* const text;
+ };
+ 
++enum class Scope { PowerShell7, Other, Unavailable };
++
++Scope InScope(IAmsiStream* stream) noexcept
++{
++    // Fits an extended-length Windows path plus the PowerShell app ID metadata.
++    // Bound the allocation independently of the scan content limit.
++    constexpr ULONG MaxAppNameBytes = 128 * 1024;
++    ULONG required = 0;
++    if (stream->GetAttribute(AMSI_ATTRIBUTE_APP_NAME, 0, nullptr, &required) != E_NOT_SUFFICIENT_BUFFER ||
++        required < sizeof(wchar_t) || required > MaxAppNameBytes || required % sizeof(wchar_t) != 0)
++        return Scope::Unavailable;
++
++    ScanBuffer app(required);
++    if (!app.text) return Scope::Unavailable;
++    ULONG actual = 0;
++    if (FAILED(stream->GetAttribute(AMSI_ATTRIBUTE_APP_NAME, app.size,
++                   reinterpret_cast<PBYTE>(app.text), &actual)) ||
++        actual < sizeof(wchar_t) || actual > app.size || actual % sizeof(wchar_t) != 0)
++        return Scope::Unavailable;
++
++    const auto length = actual / sizeof(wchar_t) - 1;
++    const std::wstring_view name{app.text, length};
++    if (app.text[length] != L'\0' || name.find(L'\0') != std::wstring_view::npos)
++        return Scope::Unavailable;
++    return guard::IsPowerShell7(name) ? Scope::PowerShell7 : Scope::Other;
++}
++
+ const char* Reason(IAmsiStream* stream, AMSI_RESULT& result) noexcept
+ {
+     ULONGLONG size = 0;
+@@ -131,9 +146,10 @@ HRESULT PowerShell7Guard::Scan(IAmsiStream* stream, AMSI_RESULT* result)
+     if (!result) return E_POINTER;
+     *result = AMSI_RESULT_NOT_DETECTED;
+     if (!stream) return E_INVALIDARG;
+-    if (!InScope(stream)) return S_OK;
++    const auto scope = InScope(stream);
++    if (scope == Scope::Other) return S_OK;
+ 
+-    const auto reason = Reason(stream, *result);
++    const auto reason = scope == Scope::Unavailable ? "uncovered:app-name" : Reason(stream, *result);
+     TraceLoggingWrite(g_traceLoggingProvider, "Decision",
+         TraceLoggingString(reason, "Reason"), TraceLoggingUInt32(*result, "Result"));
+     return S_OK;

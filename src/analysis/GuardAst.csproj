@@ -1,0 +1,12 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>netstandard2.1</TargetFramework>
+    <AssemblyName>PowerShell7Guard.Ast</AssemblyName>
+    <Nullable>enable</Nullable>
+    <LangVersion>9.0</LangVersion>
+    <Deterministic>true</Deterministic>
+  </PropertyGroup>
+  <ItemGroup>
+    <AssemblyMetadata Include="GuardPolicyRoot" Value="$(GuardPolicyRoot)" />
+  </ItemGroup>
+</Project>
