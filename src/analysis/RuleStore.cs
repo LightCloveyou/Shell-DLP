@@ -336,6 +336,11 @@ namespace PowerShell7Guard
         {
             internal readonly Toml Document;
             internal readonly bool TrustLoopback;
+            // Only the installation directory is configurable, not a command line or binary name.
+            internal readonly bool PythonOpenGrep;
+            internal readonly string? PythonOpenGrepDir = Disk.Bind("OpenGrep",
+                Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles));
+            internal readonly int PythonOpenGrepTimeoutMs = 5000;
             internal readonly HashSet<string> GitRemoteAllowlist = new HashSet<string>(StringComparer.Ordinal);
             internal readonly bool InvalidGitRemoteAllowlist;
             internal readonly (string Id, string[] Needles)[] FileTextRules;
@@ -374,6 +379,14 @@ namespace PowerShell7Guard
                         if (s.Get("on_missing") != "warn") throw new FormatException("on_missing must be warn");
                         if (s.Fields.TryGetValue("trust_loopback", out var trust))
                             TrustLoopback = trust is bool enabled ? enabled : throw new FormatException("trust_loopback must be boolean");
+                        if (s.Fields.TryGetValue("python_engine", out var engine))
+                            PythonOpenGrep = engine is "opengrep" ? true : engine is "builtin" ? false :
+                                throw new FormatException("invalid python_engine");
+                        if (s.Fields.TryGetValue("python_opengrep_dir", out var install))
+                            PythonOpenGrepDir = install is string path ? Disk.Bind(path, directory) : null;
+                        if (s.Fields.TryGetValue("python_opengrep_timeout_ms", out var ms))
+                            PythonOpenGrepTimeoutMs = ms is long t && t >= 100 && t <= 15000 ? (int)t :
+                                throw new FormatException("invalid python_opengrep_timeout_ms");
                     }
                     else if (s.Name != "") throw new FormatException("unsupported policy section");
                 }

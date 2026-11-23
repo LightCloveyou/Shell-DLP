@@ -22,6 +22,8 @@ list(APPEND GUARD_AST_SOURCES src/analysis/adapters/CompressionReads.cs src/anal
 list(APPEND GUARD_AST_SOURCES src/analysis/adapters/ExtendedStreamReads.cs)
 list(APPEND GUARD_AST_SOURCES src/analysis/adapters/StreamTransfers.cs)
 list(APPEND GUARD_AST_SOURCES src/analysis/GitJournal.cs src/analysis/GitRemotePolicy.cs)
+list(APPEND GUARD_AST_SOURCES src/analysis/adapters/PythonScript.cs src/analysis/adapters/PythonSyntax.cs)
+list(APPEND GUARD_AST_SOURCES src/analysis/OpenGrepRules.cs src/analysis/OpenGrepScan.cs)
 list(APPEND GUARD_AST_SOURCES src/analysis/adapters/FsMetadataReads.cs src/analysis/adapters/DirectoryTools.cs src/analysis/adapters/MemberGroupReads.cs)
 list(APPEND GUARD_AST_SOURCES src/analysis/adapters/SystemReads.cs)
 list(APPEND GUARD_AST_SOURCES src/analysis/adapters/SftpAdapter.cs src/analysis/adapters/WindowsTransfers.cs)

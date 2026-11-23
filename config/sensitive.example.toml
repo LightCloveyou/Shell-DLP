@@ -4,6 +4,10 @@ version = 1
 on_missing = "warn"
 # Enable only if local services may receive policy-protected data.
 trust_loopback = false
+python_engine = "opengrep"
+# Directory containing opengrep.exe and its DLLs, not the executable itself.
+python_opengrep_dir = 'C:\Program Files\OpenGrep'
+python_opengrep_timeout_ms = 5000
 # Optional limits use the built-in defaults; see sensitive.example.toml for overrides.
 
 # No Git repository is exempt by default. Repeat the table for each trusted push URL.

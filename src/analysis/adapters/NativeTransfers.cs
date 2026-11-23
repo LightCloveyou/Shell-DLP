@@ -149,7 +149,7 @@ namespace PowerShell7Guard
                 var fileNode = args.Get("FilePath") ?? args.Plain.FirstOrDefault();
                 var executable = Value(fileNode);
                 var tool = Tool(executable.Text?.ToLowerInvariant() ?? "");
-                if (tool != "git" && !NativeTransfers.ContainsKey(tool))
+                if (tool != "git" && !IsPythonTool(tool) && !NativeTransfers.ContainsKey(tool))
                 {
                     return args.Has("PassThru") ? Missing("process-output") : null;
                 }
@@ -195,7 +195,8 @@ namespace PowerShell7Guard
                     uncertainProcessContext |= changedContext;
                     if (changedContext) ReportMissing("start-process-child-context");
                     if (args.Has("WorkingDirectory")) cwd = Disk.Bind(Value(args.Get("WorkingDirectory")).Text, parentDirectory);
-                    if (tool == "git" && changedContext) ReportMissing("git-child-environment");
+                    if (IsPythonTool(tool)) InspectPython(tool, argv.ToArray());
+                    else if (tool == "git" && changedContext) ReportMissing("git-child-environment");
                     else if (tool == "git") Git(argv.ToArray());
                     else NativeTransfers[tool](this, argv.ToArray(), stdin);
                 }

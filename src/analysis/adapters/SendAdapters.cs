@@ -546,7 +546,7 @@ namespace PowerShell7Guard
                 {
                     var program = Tool(raw);
                     if (NativeReaders.Contains(program)) return "native-read:" + program;
-                    return NativeTransfers.ContainsKey(program) || program == "git" ? program : raw;
+                    return NativeTransfers.ContainsKey(program) || IsPythonTool(program) || program == "git" ? program : raw;
                 }
                 if (raw == "microsoft.powershell.core\\foreach-object" ||
                     (raw is "%" or "foreach") && flow.StockAlias(raw, "ForEach-Object", "Microsoft.PowerShell.Core"))
@@ -580,12 +580,12 @@ namespace PowerShell7Guard
                 if (raw.StartsWith(utility, StringComparison.Ordinal))
                 {
                     var cmdlet = raw.Substring(utility.Length);
-                    if (!NativeTransfers.ContainsKey(cmdlet) && cmdlet != "git") return cmdlet;
+                    if (!NativeTransfers.ContainsKey(cmdlet) && !IsPythonTool(cmdlet) && cmdlet != "git") return cmdlet;
                 }
                 return NativeReaders.Contains(raw) ? "native-read:" + raw : raw;
             }
             static bool Network(string cmd) => cmd == "invoke-webrequest" || cmd == "invoke-restmethod" ||
-                NativeTransfers.ContainsKey(cmd) || cmd == "git" || cmd == "start-bitstransfer";
+                NativeTransfers.ContainsKey(cmd) || IsPythonTool(cmd) || cmd == "git" || cmd == "start-bitstransfer";
 
             bool ShadowedInScript(string raw, string resolved) => !raw.Contains("\\") && !raw.Contains("/") &&
                 (scriptDefinitions.Contains(raw) ||
@@ -1796,7 +1796,7 @@ namespace PowerShell7Guard
                         if (command.Complete && command.IsString && command.Text != null)
                         {
                             var candidate = command.Text.ToLowerInvariant();
-                            if (NativeTransfers.ContainsKey(Tool(candidate)) || NativeReaders.Contains(Tool(candidate)) || functions.ContainsKey(candidate) ||
+                            if (NativeTransfers.ContainsKey(Tool(candidate)) || IsPythonTool(Tool(candidate)) || NativeReaders.Contains(Tool(candidate)) || functions.ContainsKey(candidate) ||
                                 (!candidate.EndsWith(".exe", StringComparison.Ordinal) &&
                                  LocalName(candidate) is ("invoke-webrequest" or "invoke-restmethod"))) raw = candidate;
                         }
@@ -1852,6 +1852,7 @@ namespace PowerShell7Guard
                     HttpCmd(element, name, input);
                     return Missing("http-response-not-observed");
                 }
+                if (IsPythonTool(name)) return InspectPython(name, element);
                 if (NativeTransfers.TryGetValue(name, out var transfer))
                 {
                     transfer(this, element, NativeInput(input));
