@@ -12,7 +12,7 @@ namespace PowerShell7Guard
 {
     public static partial class AstBridge
     {
-        sealed class GitProof
+        sealed partial class GitProof
         {
             internal string Endpoint = "";
             internal bool Network, Loopback;

@@ -401,6 +401,17 @@ namespace PowerShell7Guard
                     .SelectMany(v => v.Tags))
             };
 
+            Payload ComposedText(string value, string step, IEnumerable<Mark> inherited, IEnumerable<(int Start, Mark Tag)> positions)
+            {
+                var result = Text(value, step);
+                result.Tags = Merge(result.Tags.Concat(inherited.Select(m => m.Via(step))));
+                // Include matches that first appear across a boundary, not just the offsets
+                // copied from the inputs. Do not give every inherited mark offset zero.
+                result.TagPositions = (result.TagPositions ?? Array.Empty<(int Start, Mark Tag)>()).Concat(positions)
+                    .GroupBy(p => (p.Start, p.Tag.Id, p.Tag.Origin)).Select(g => g.First()).Take(Limits.MaxPositions).ToArray();
+                return result;
+            }
+
             Payload? JoinArray(Payload input, Payload separator)
             {
                 if (input.Elements == null) return null;
@@ -427,12 +438,21 @@ namespace PowerShell7Guard
                     !oldValue.Complete || !oldValue.IsString || string.IsNullOrEmpty(oldValue.Text) ||
                     !newValue.Complete || !newValue.IsString || newValue.Text == null)
                     return Missing("string-replace-input");
-                if (input.Text.IndexOf(oldValue.Text, StringComparison.Ordinal) < 0) return input;
-                if ((long)(input.Text.Length / oldValue.Text.Length) * newValue.Text.Length + input.Text.Length > MaxContent)
-                    return Missing("string-replace-limit");
+                int index = input.Text.IndexOf(oldValue.Text, StringComparison.Ordinal);
+                if (index < 0) return input;
+                var retained = Merge(FileRecordMarks(input).Concat(newValue.Tags));
+                long length = input.Text.Length;
+                if (newValue.Text.Length > oldValue.Text.Length)
+                {
+                    for (; index >= 0; index = input.Text.IndexOf(oldValue.Text, index + oldValue.Text.Length, StringComparison.Ordinal))
+                    {
+                        length += newValue.Text.Length - oldValue.Text.Length;
+                        if (length * sizeof(char) > MaxContent || !Budget())
+                            return new Payload { IsString = true, InspectionPartial = true, Tags = retained, Issue = "string-replace-limit" };
+                    }
+                }
                 var output = input.Text.Replace(oldValue.Text, newValue.Text);
                 // Content-based matches are recomputed; preserve sensitive origins such as configured files.
-                var retained = input.Tags.Where(m => System.IO.Path.IsPathRooted(m.Origin)).Concat(newValue.Tags);
                 return Text(output, "string replace", Merge(retained.Select(m => m.Via("string replace"))));
             }
             Payload EvaluateSubExpression(object? node, int depth)
@@ -471,8 +491,43 @@ namespace PowerShell7Guard
                 var positions = new List<(int Start, Mark Tag)>();
                 var values = new Payload[expansions.Length];
                 for (int i = 0; i < expansions.Length; i++) values[i] = Value(expansions[i], depth + 1);
+                Payload IncompleteExpansion(string why)
+                {
+                    var partial = PartialString(why, values);
+                    var known = new StringBuilder();
+                    var confirmed = new List<Mark>();
+                    void Flush()
+                    {
+                        if (known.Length == 0) return;
+                        confirmed.AddRange(Text(known.ToString(), "string expansion").Tags);
+                        known.Clear();
+                    }
+                    // Known runs are independent of substitutions on either side. Never
+                    // construct a new literal match across an unknown substitution.
+                    for (int i = 0; i < template.Length && Budget(); i++)
+                    {
+                        char c = template[i];
+                        if (c != '{' && c != '}') known.Append(c);
+                        else if (i + 1 < template.Length && template[i+1] == c) { known.Append(c); i++; }
+                        else
+                        {
+                            int end = c == '{' ? template.IndexOf('}', i+1) : -1;
+                            if (end < 0 || end - i > 11 || !int.TryParse(template.Substring(i+1, end-i-1),
+                                NumberStyles.None, CultureInfo.InvariantCulture, out var index) || index >= values.Length) break;
+                            var p = values[index];
+                            if (!p.Complete || p.InspectionPartial || p.Text == null) Flush();
+                            else if ((long)known.Length + p.Text.Length <= MaxContent / sizeof(char)) known.Append(p.Text);
+                            else { Flush(); if (p.Text.Length <= MaxContent / sizeof(char)) known.Append(p.Text); }
+                            i = end;
+                        }
+                        if (known.Length >= MaxContent / sizeof(char)) Flush();
+                    }
+                    Flush();
+                    partial.Tags = Merge(partial.Tags.Concat(confirmed));
+                    return partial;
+                }
                 if (values.Any(p => !p.Complete || p.InspectionPartial || p.Text == null))
-                    return PartialString("string-expansion-value", values);
+                    return IncompleteExpansion("string-expansion-value");
                 for (int o = 0; o < template.Length; o++)
                 {
                     char c = template[o];
@@ -482,22 +537,20 @@ namespace PowerShell7Guard
                     else if (c == '{')
                     {
                         int end = template.IndexOf('}', o + 1);
-                        if (end < 0 || end - o > 3 ||
+                        if (end < 0 || end - o > 11 ||
                             !int.TryParse(template.Substring(o + 1, end - o - 1), NumberStyles.None, CultureInfo.InvariantCulture, out int i) ||
                             i < 0 || i >= values.Length) return Missing("string-expansion-template");
                         var p = values[i];
-                        if (chars.Length + (long)p.Text!.Length > MaxContent) return PartialString("string-expansion-limit", values);
+                        if (chars.Length + (long)p.Text!.Length > MaxContent) return IncompleteExpansion("string-expansion-limit");
                         positions.AddRange(Positions(p, chars.Length, "string expansion"));
                         chars.Append(p.Text);
                         marks.AddRange(p.Tags);
                         o = end;
                     }
                     else return Missing("string-expansion-template");
-                    if (chars.Length > MaxContent || marks.Count > Limits.MaxPositions) return PartialString("string-expansion-limit", values);
+                    if (chars.Length > MaxContent || marks.Count > Limits.MaxPositions) return IncompleteExpansion("string-expansion-limit");
                 }
-                var result = Text(chars.ToString(), "string expansion", Merge(marks.Select(m => m.Via("string expansion"))));
-                result.TagPositions = positions.Take(Limits.MaxPositions).ToArray();
-                return result;
+                return ComposedText(chars.ToString(), "string expansion", marks, positions);
             }
             Payload SnapshotPayload(object value, string origin, int depth = 0)
             {

@@ -386,6 +386,41 @@ namespace PowerShell7Guard
             internal static string Config => Path.Combine(Root, "config", "sensitive.toml");
             internal static string Durable => Path.Combine(Root, "state", "persistent-variables.toml");
             internal static string GitDir => Path.Combine(Root, "state", "git-preflight");
+            static string JournalFile(string key) => Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+                "PowerShell7Guard", "git-journal", key + ".toml");
+            internal static string? ReadJournal(string key)
+            {
+                try { var path = JournalFile(key); return Disk.ClearAncestors(path) ? ReadBounded(path, Limits.MaxGitProofBytes) : null; }
+                catch { return null; }
+            }
+            internal static bool AppendJournal(string key, string entry)
+            {
+                var path=JournalFile(key);
+                var parent=Path.GetDirectoryName(path)!;
+                var app=Path.GetDirectoryName(parent)!;
+                if (!Disk.ClearAncestors(Path.GetDirectoryName(app)!)) return false;
+                foreach (var dir in new[] { app, parent })
+                {
+                    Directory.CreateDirectory(dir);
+                    if (!Disk.ClearAncestors(dir)) return false;
+                }
+                return Change(path, true, old =>
+                {
+                    const string header = "version = 1\n";
+                    var cap = Limits.MaxGitProofBytes;
+                    int left = cap - StrictUtf8.GetByteCount(header) - StrictUtf8.GetByteCount(entry);
+                    if (left < 0) throw new IOException("git journal entry limit");
+                    var keep = new Stack<string>();
+                    foreach (var section in new Toml(old).Sections.Where(s => s.Name == "[[observation").Reverse().Take(255))
+                    {
+                        var block = old.Substring(section.Begin, section.End - section.Begin);
+                        left -= StrictUtf8.GetByteCount(block);
+                        if (left < 0) break;
+                        keep.Push(block);
+                    }
+                    return header + string.Concat(keep) + entry;
+                }, Limits.MaxGitProofBytes);
+            }
             static readonly object ReloadGate = new object();
             sealed class Snapshot
             {

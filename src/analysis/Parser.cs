@@ -242,8 +242,8 @@ namespace PowerShell7Guard
                     "dynamicExecution", dynamic, "externalCommands", external, "encodingCalls", encoding, "parseErrors", errors,
                     "dataFlow", flow.Report(), "policy", Data("decision", plan.Reason, "configuration", plan.Configuration,
                         "evidence", plan.Evidence, "sensitiveSources", plan.Sources,
-                        "omittedEvidence", plan.OmittedEvidence, "omittedSources", plan.OmittedSources, "pending", plan.Work.Select(w => Data("kind", w.File ? "copy" : "persistent-variable",
-                            "target", w.File ? w.Target : w.Name, "scope", w.Scope)).ToArray()));
+                        "omittedEvidence", plan.OmittedEvidence, "omittedSources", plan.OmittedSources, "pending", plan.Work.Select(w => Data("kind", w.Journal != null ? "git-observation" : w.File ? "copy" : "persistent-variable",
+                            "target", w.File || w.Journal != null ? w.Target : w.Name, "scope", w.Scope)).ToArray()));
                 var serializer = Type.GetType("System.Text.Json.JsonSerializer, System.Text.Json", true)!;
                 var serialize = serializer.GetMethods().First(m => m.Name == "Serialize" && m.IsGenericMethodDefinition &&
                     m.ReturnType == typeof(string) && m.GetParameters().Length == 2 && m.GetParameters()[1].ParameterType.Name == "JsonSerializerOptions");

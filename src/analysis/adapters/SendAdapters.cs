@@ -140,7 +140,8 @@ namespace PowerShell7Guard
                     }
                 }
                 return new Payload { Text = materialized ? content : null, Complete = materialized, IsString = content != null,
-                    Tags = Merge(tags), TagPositions = positions.Take(Limits.MaxPositions).ToArray(), SourceRef = origin, Issue = content == null ? "payload-value" : "content-budget" };
+                    Tags = Merge(tags), TagPositions = positions.Take(Limits.MaxPositions).ToArray(), SourceRef = origin,
+                    Issue = materialized ? "" : content == null ? "payload-value" : "content-budget" };
             }
 
             static bool InFolder(string path, string root) => path.StartsWith(
@@ -520,11 +521,8 @@ namespace PowerShell7Guard
                     if (left.IsString && right.IsString && left.Text != null && right.Text != null &&
                         left.Complete && right.Complete && (long)left.Text.Length + right.Text.Length <= MaxContent)
                     {
-                        var joined = Text(left.Text + right.Text, "concatenation",
-                            Merge(left.Tags.Concat(right.Tags)).Select(t => t.Via("concatenation")).ToArray());
-                        joined.TagPositions = Positions(left, 0, "concatenation")
-                            .Concat(Positions(right, left.Text.Length, "concatenation")).Take(Limits.MaxPositions).ToArray();
-                        return joined;
+                        return ComposedText(left.Text + right.Text, "concatenation", left.Tags.Concat(right.Tags),
+                            Positions(left, 0, "concatenation").Concat(Positions(right, left.Text.Length, "concatenation")));
                     }
                     return UnknownValue("concatenation-input", left, right);
                 }
@@ -1622,11 +1620,20 @@ namespace PowerShell7Guard
             void Git(object command)
             {
                 var arguments = FlattenNative(command, out _);
+                bool namedGit = command is not Payload[] && Name(command) is ("git" or "git.exe");
                 string? directory = cwd;
                 int index = 0;
                 while (index < arguments.Length && arguments[index] != "push")
                 {
                     var option = arguments[index++];
+                    if (option is "commit" or "remote")
+                    {
+                        if (namedGit && !barrier && !uncertainProcessContext && plan.Work.Count < MaxEffects && Budget() &&
+                            (option == "commit" || arguments.ElementAtOrDefault(index) is ("add" or "remove" or "rename" or "set-url")) &&
+                            GitProof.Observe(directory, option == "commit" ? option : "remote."+arguments[index]) is GitProof.JournalUpdate update)
+                            plan.Work.Add(new PolicyWork { Journal = update, Target = update.RepoPath });
+                        return;
+                    }
                     if (option == "-C" && index < arguments.Length)
                     {
                         var path = arguments[index++];
@@ -1644,8 +1651,18 @@ namespace PowerShell7Guard
                 { Send("git push", null, Array.Empty<Payload>(), "git-argument-limit"); return; }
                 if (TrustLoopback && !barrier && arguments.Length > 1 && LoopbackSsh(arguments[1]))
                 { SkipLoopback("git push", arguments[1]); return; }
-                var proof = GitProof.TryRead(directory, arguments.Skip(1).ToArray(), policy);
-                if (proof == null) Send("git push", arguments.ElementAtOrDefault(1), Array.Empty<Payload>(), "git-baseline-or-preflight");
+                var pushArgs = arguments.Skip(1).ToArray();
+                if (plan.Work.Any(w => w.Journal != null && (directory == null || PathEq(directory, w.Target) || InFolder(directory, w.Target))))
+                { Send("git push", null, Array.Empty<Payload>(), "git-mutation-not-yet-observed"); return; }
+                var proof = GitProof.TryRead(directory, pushArgs, policy);
+                if (namedGit && !barrier && !uncertainProcessContext && policy != null && policyProblem.Length == 0 &&
+                    (proof == null || proof.Network && !proof.Loopback && proof.Parts.Any(p => !p.Complete || p.InspectionPartial)))
+                {
+                    var local = GitProof.LocalPush(directory, pushArgs, policy, Budget);
+                    if (proof == null) proof = local;
+                    else if (local != null) proof.Parts = proof.Parts.Concat(local.Parts).ToArray();
+                }
+                if (proof == null) Send("git push", GitProof.RemoteOperand(pushArgs), Array.Empty<Payload>(), "git-baseline-or-preflight");
                 else if (TrustLoopback && !barrier && proof.Loopback) SkipLoopback("git push", proof.Endpoint);
                 else if (proof.Network) Send("git push", proof.Endpoint, proof.Parts);
             }

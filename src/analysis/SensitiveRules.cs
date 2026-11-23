@@ -459,6 +459,7 @@ namespace PowerShell7Guard
 
         sealed class PolicyWork
         {
+            internal GitProof.JournalUpdate? Journal;
             internal string Target = "", Before = "", Name = "", Scope = "", From = "";
             internal byte[]? Bytes;
             internal Dictionary<string, byte[]>? Archive;
@@ -466,11 +467,12 @@ namespace PowerShell7Guard
             internal bool ExactText;
             internal FileContentProof? Proof;
             internal Mark[] Tags = Array.Empty<Mark>();
-            internal bool File => Scope.Length == 0;
+            internal bool File => Journal == null && Scope.Length == 0;
             string Key => File ? Target : EnvKey(Scope, Name);
             int registered;
             internal void Register()
             {
+                if (Journal != null) return;
                 PendingFiles.AddOrUpdate(Key, 1, (_, n) => n + 1);
                 Interlocked.Exchange(ref registered, 1);
             }
@@ -488,6 +490,19 @@ namespace PowerShell7Guard
             }
             internal void Commit(bool success, State state)
             {
+                if (Journal != null)
+                {
+                    if (success)
+                    {
+                        var status = Journal.Finish();
+                        lock (state.Gate)
+                        {
+                            if (state.PolicyReports.Count >= MaxEffects) state.PolicyReports.RemoveAt(0);
+                            state.PolicyReports.Add(Data("kind", "git-observation", "target", Target, "status", status));
+                        }
+                    }
+                    return;
+                }
                 if (!success) { Release(); return; }
                 Disk.Sample? after = null;
                 string? owner = null, envStamp = null;
