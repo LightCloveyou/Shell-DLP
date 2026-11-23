@@ -73,6 +73,6 @@ max_report_bytes = 196608
 [[rules]]
 id = "PS7-HTTP-CANARY-001"
 action = "block"
-files = ['D:\ctf-ai\powershell7guard\config\sensitive.toml']
+files = ['D:\ctf-ai\powershell7guard\config\sensitive.toml', 'D:\ctf-ai\powershell7guard\config\test.txt']
 folders = ['D:\ctf-ai\powershell7guard\logs']
 texts = ["PS7GUARD_TEST_SECRET"]
