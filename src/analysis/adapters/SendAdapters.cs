@@ -2200,9 +2200,10 @@ namespace PowerShell7Guard
                       a.TagPositions.Select(t => (t.Start,t.Tag.Id,t.Tag.Origin)).SequenceEqual(b.TagPositions.Select(t => (t.Start,t.Tag.Id,t.Tag.Origin)))) &&
                      a.Tags.Select(t => (t.Id, t.Origin)).SequenceEqual(b.Tags.Select(t => (t.Id, t.Origin))));
 
-                static Payload MergeValue(Payload? left, Payload? right, int depth = 0)
+                static Payload MergeValue(Payload? left, Payload? right, Dictionary<(Payload, Payload), Payload> mergedMaps, int depth = 0)
                 {
                     if (left != null && right != null && SameScalar(left, right)) return left;
+                    if (left != null && right != null && mergedMaps.TryGetValue((left, right), out var prior)) return prior;
                     if (left != null && right != null && SameScalarValue(left, right))
                     {
                         // Equal values can have different origins. Keep the exact value (e.g.
@@ -2223,7 +2224,8 @@ namespace PowerShell7Guard
                             ReadType = left.ReadType == right.ReadType ? left.ReadType : null,
                             LocalRecord = left.LocalRecord == right.LocalRecord ? left.LocalRecord : null,
                             Tags = left.Tags.Concat(right.Tags).GroupBy(t => (t.Id, t.Origin)).Select(g => g.First()).ToArray() };
-                        result.Map = a.ToDictionary(pair => pair.Key, pair => MergeValue(pair.Value, b[pair.Key], depth + 1), a.Comparer);
+                        mergedMaps.Add((left, right), result);
+                        result.Map = a.ToDictionary(pair => pair.Key, pair => MergeValue(pair.Value, b[pair.Key], mergedMaps, depth + 1), a.Comparer);
                         return result;
                     }
                     return UnknownValue("conditional-value", left, right);
@@ -2234,6 +2236,7 @@ namespace PowerShell7Guard
 
                     void JoinValues(Dictionary<string, Payload> target, Dictionary<string, Payload> branch)
                     {
+                        var mergedMaps = new Dictionary<(Payload, Payload), Payload>();
                         foreach (var key in target.Keys.Concat(branch.Keys).Distinct(StringComparer.OrdinalIgnoreCase).ToArray())
                         {
                             target.TryGetValue(key, out var left);
@@ -2245,10 +2248,13 @@ namespace PowerShell7Guard
                             }
                             if (left == null || right == null || !SameScalar(left, right))
                             {
-                                var merged = MergeValue(left, right);
+                                var merged = MergeValue(left, right, mergedMaps);
                                 if (ReferenceEquals(target, Predictions))
+                                {
+                                    merged = merged.Copy();
                                     merged.MayReadOriginal = left?.MayReadOriginal == true || right?.MayReadOriginal == true ||
                                         left == null && !Files.Contains(key) || right == null && !other.Files.Contains(key);
+                                }
                                 target[key] = merged;
                             }
                         }
